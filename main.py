@@ -272,7 +272,7 @@ class CartolaApp:
         
         console.print(f"\n[dim]Analisando {len(atletas)} atletas prováveis...[/dim]\n")
         
-        # Analisar cada atleta
+        # Analisar cada atleta (v7: com rodada_atual)
         analisados = []
         for atleta in atletas:
             clube_id = atleta.get("clube_id")
@@ -285,13 +285,14 @@ class CartolaApp:
             analise = self.mpv_calc.analisar_jogador(
                 atleta,
                 clube_abrev=clube_abrev,
-                posicao_abrev=pos_abrev
+                posicao_abrev=pos_abrev,
+                rodada_atual=rodada
             )
             analisados.append(analise)
         
-        # Gerar times
+        # Gerar times (v7: com rodada_atual)
         time_valor, time_pontos = self.team_selector.gerar_times_rodada(
-            analisados, esquema
+            analisados, esquema, rodada_atual=rodada
         )
         
         # Exibir time de valorização

@@ -252,14 +252,15 @@ class CartolaScheduler:
                 pos_abrev = pos_map.get(pos_id, "MEI")
                 
                 analise = self.mpv_calculator.analisar_jogador(
-                    atleta, clube_abrev=clube_abrev, posicao_abrev=pos_abrev
+                    atleta, clube_abrev=clube_abrev, posicao_abrev=pos_abrev,
+                    rodada_atual=rodada
                 )
                 atletas_analisados.append(analise)
             
-            # Gerar times
+            # Gerar times (v7: com rodada_atual)
             logger.info("⚽ Gerando time de valorização...")
             time_val, time_pontos = self.team_selector.gerar_times_rodada(
-                atletas_analisados, esquema="4-4-2"
+                atletas_analisados, esquema="4-4-2", rodada_atual=rodada
             )
             
             if time_val:

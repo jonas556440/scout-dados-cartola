@@ -141,6 +141,7 @@ class TeamSelector:
     def __init__(self, orcamento: float = None):
         self.orcamento = orcamento or self.ORCAMENTO_PADRAO
         self.mpv_calc = MPVCalculator()
+        self.rodada_atual: int = 1  # v7: rodada global (não per-jogador)
         
         # NOVO v3: Analisador de confrontos
         self.match_analyzer = MatchAnalyzer()
@@ -238,19 +239,28 @@ class TeamSelector:
         """
         score = 0.0
         
-        # Detectar se é rodada 1 (sem médias)
-        is_rodada_1 = atleta.media == 0
+        # v7: Detectar rodada usando rodada GLOBAL (não per-jogador)
+        is_rodada_1 = self.rodada_atual <= 1
+        jogador_sem_dados = atleta.media == 0 and atleta.jogos_num == 0
         
         # === FATOR 1: QUALIDADE DO JOGADOR (30 pontos máx) ===
         if is_rodada_1:
             # Na rodada 1, usar preço como proxy de qualidade
             # Jogadores mais caros tendem a ser melhores
-            # C$1 = 2pts, C$25 = 30pts
             score += min(30, atleta.preco * 1.2)
+        elif jogador_sem_dados:
+            # v7: R2+ mas jogador NUNCA jogou = PENALIDADE FORTE
+            # Não é "rodada 1", é jogador sem histórico — risco altíssimo
+            score += max(0, atleta.preco * 0.4 - 5)  # Máx ~5pts para caros, ~0 para baratos
         else:
             # Com histórico: usar média real
             # Média 10 = 30 pontos
             score += min(30, atleta.media * 3)
+        
+        # v7: PENALIDADE por poucos jogos na R2+ (suplentes/reservas)
+        if not is_rodada_1 and atleta.jogos_num >= 1 and atleta.jogos_num < 3:
+            if atleta.media < 3.0:
+                score -= 15  # Jogou pouco E mal
         
         # === FATOR 2: ANÁLISE DO CONFRONTO (35 pontos máx) === NOVO v3!
         if self.confrontos_rodada:
@@ -365,71 +375,86 @@ class TeamSelector:
         """
         Calcula score de potencial para TIME DE VALORIZAÇÃO
         
-        VERSÃO v5 - BASEADO NAS ESTRATÉGIAS DO GATO MESTRE (ge.globo.com)
+        VERSÃO v7 - PESOS ADAPTATIVOS POR RODADA + CORREÇÕES CRÍTICAS
         
-        REGRAS OFICIAIS DE VALORIZAÇÃO:
-        1. Preferência a jogadores < C$10 (quanto mais barato, menos pontos precisa)
-        2. Bons e Baratos têm tendência maior a valorizar
-        3. Técnicos baratos tendem a valorizar mais na 1ª rodada
-        4. Não mais de 2 defensores do mesmo time (SG arriscado)
-        5. Dá pra gastar mais no ataque buscando gol/assistência
-        
-        FÓRMULA VALORIZAÇÃO: pontuação > (preço * fator)
-        - Quanto menor o preço, mais fácil valorizar!
+        Mudanças v7:
+        - Sweet spot C$3-6 perde peso gradualmente (R1=35%, R2=25%, R3+=15%)
+        - Constância/média real ganha peso (R1=12pts neutro, R2=20%, R3+=30%)
+        - Bônus desvalorização condicionado: só se media >= 4.0 E jogos >= 2
+        - Penalização forte para jogadores sem jogos (suplentes/reservas)
+        - Detecção rodada GLOBAL em vez de per-jogador
         """
         score = 0.0
+        is_rodada_1 = self.rodada_atual <= 1
+        jogador_sem_dados = atleta.media == 0 and atleta.jogos_num == 0
         
-        # 1. PREÇO IDEAL (35%) - CRITÉRIO PRINCIPAL!
-        # Dados REAIS rodada 1: Jogadores C$2-7 valorizaram MUITO MAIS!
-        # Gabriel Menino C$6→C$10.77 (+79%), Léo Derik C$2→C$5.14 (+157%)
-        # vs Danilo C$10→C$14.21 (+42%), Breno Bidon C$10→C$13.34 (+33%)
+        # === PESOS ADAPTATIVOS POR RODADA ===
+        # Preço perde importância conforme dados reais aparecem
+        if is_rodada_1:
+            peso_preco = 35
+            peso_constancia = 12  # Neutro, sem dados
+        elif self.rodada_atual == 2:
+            peso_preco = 25
+            peso_constancia = 20
+        else:  # R3+
+            peso_preco = 15
+            peso_constancia = 30
+        
+        # 1. PREÇO IDEAL (peso adaptável)
         if 3.0 <= atleta.preco <= 6.0:
-            score += 35  # MELHOR: sweet spot - bons e baratos valorizam MUITO
+            score += peso_preco  # Sweet spot
         elif 2.0 <= atleta.preco < 3.0:
-            score += 32  # ÓTIMO: muito baratos, alta % mas precisam jogar
+            score += int(peso_preco * 0.9)  # Muito baratos
         elif 6.0 < atleta.preco <= 8.0:
-            score += 28  # BOM: ainda valorizam bem
+            score += int(peso_preco * 0.8)  # Bom
         elif 8.0 < atleta.preco <= 10.0:
-            score += 18  # RAZOÁVEL: valorização moderada (reduzido de 22)
+            score += int(peso_preco * 0.5)  # Razoável
         elif atleta.preco < 2.0:
-            score += 15  # ARRISCADO: podem não jogar/pontuar
+            score += int(peso_preco * 0.4)  # Arriscado
         elif 10.0 < atleta.preco <= 12.0:
-            score -= 10  # CARO: PENALIDADE! Difícil valorizar (era +15)
+            score -= 10  # CARO: penalidade
         else:
-            score -= 20  # MUITO CARO: GRANDE PENALIDADE (era +8)
+            score -= 20  # MUITO CARO: grande penalidade
         
-        # 2. POSIÇÃO (20%) - Técnicos baratos valorizam mais na R1
+        # 2. POSIÇÃO (20%)
         if atleta.posicao_abrev == "TEC":
-            if atleta.preco <= 5.0:
+            if atleta.preco <= 5.0 and is_rodada_1:
                 score += 25  # Técnico barato = OURO na R1!
+            elif atleta.preco <= 5.0:
+                score += 18  # Técnico barato R2+
             else:
-                score += 15  # Técnico caro ainda é bom
+                score += 15
         elif atleta.posicao_abrev in ["ATA", "MEI"]:
-            # Gol/assistência = valorização garantida
-            score += 20  # Atacantes e meias ofensivos
+            score += 20
         elif atleta.posicao_abrev == "LAT":
-            score += 18  # Laterais têm bom potencial (assistências)
+            score += 18
         elif atleta.posicao_abrev == "ZAG":
-            score += 15  # Zagueiros dependem de SG
+            score += 15
         else:  # GOL
-            score += 12  # Goleiros dependem muito de SG
+            score += 12
         
-        # 3. CONSTÂNCIA (20%) - Média de pontos histórica
-        # Na rodada 1, usa preço como proxy
+        # 3. CONSTÂNCIA (peso adaptável) - v7 CORRIGIDO
         media_pontos = atleta.media
-        if media_pontos >= 5.0:
-            score += 20  # Jogador muito constante
+        if is_rodada_1:
+            # R1: sem histórico, neutro
+            score += peso_constancia
+        elif jogador_sem_dados:
+            # v7: R2+ sem dados = PENALIDADE (não neutro!)
+            score -= 10  # Jogador que nunca jogou na R2+ = risco
+        elif media_pontos >= 7.0:
+            score += peso_constancia  # Jogador excelente
+        elif media_pontos >= 5.0:
+            score += int(peso_constancia * 0.85)
         elif media_pontos >= 3.0:
-            score += 15  # Boa constância
+            score += int(peso_constancia * 0.65)
         elif media_pontos > 0:
-            score += 10  # Alguma constância
+            score += int(peso_constancia * 0.4)  # Média baixa
         else:
-            # R1: sem histórico, usar preço como proxy
-            score += 12  # Neutro na R1
+            score += 0  # Média 0 com jogos = jogou mas não pontuou
         
         # 4. Tendência de valorizar (5%)
         if atleta.tendencia_valorizar > 0.7:
-            score += 5  # Bônus para alta tendência
+            score += 5
         
         # 5. Confronto favorável (20% - aumentado!)
         if self.confrontos_rodada:
@@ -527,24 +552,38 @@ class TeamSelector:
         else:
             score -= 5   # Penalidade maior
         
-        # 7. BÔNUS/PENALIDADE POR VARIAÇÃO (CRÍTICO para R2+!)
-        # Desvalorizados = OPORTUNIDADE, Valorizados = JÁ SUBIRAM
-        if hasattr(atleta, 'variacao'):
+        # 7. BÔNUS/PENALIDADE POR VARIAÇÃO (v7: CORRIGIDO!)
+        # v7: Bônus desvalorização SÓ para jogadores BOM em má fase
+        # Jogadores ruins que desvalorizaram NÃO são oportunidade
+        if hasattr(atleta, 'variacao') and not is_rodada_1:
             if atleta.variacao < 0:
-                # BÔNUS FORTE para desvalorizados - são as melhores oportunidades!
-                # Quanto mais desvalorizou, maior o bônus (max +40 pts)
-                bonus_desval = min(40, abs(atleta.variacao) * 12)
-                score += bonus_desval
+                if atleta.media >= 4.0 and atleta.jogos_num >= 2:
+                    # Jogador BOM que desvalorizou = OPORTUNIDADE REAL
+                    bonus_desval = min(30, abs(atleta.variacao) * 10)
+                    score += bonus_desval
+                elif atleta.media >= 2.5 and atleta.jogos_num >= 1:
+                    # Jogador mediano que desvalorizou = oportunidade moderada
+                    bonus_desval = min(15, abs(atleta.variacao) * 5)
+                    score += bonus_desval
+                else:
+                    # Jogador RUIM que desvalorizou = jogador ruim, NÃO oportunidade
+                    # v7: PENALIDADE (era bônus +40!!)
+                    score -= min(15, abs(atleta.variacao) * 5)
             elif atleta.variacao > 1.0:
-                # PENALIDADE para quem já valorizou muito - potencial futuro menor
-                # Quanto mais valorizou, maior a penalidade (max -25 pts)
+                # PENALIDADE para quem já valorizou muito
                 penalidade_val = min(25, atleta.variacao * 8)
                 score -= penalidade_val
         
         # 8. PENALIDADE EXTRA PARA CAROS COM ALTA CONSTÂNCIA
-        # Evita que constância compense preço alto
         if atleta.preco > 10.0 and atleta.media >= 5.0:
-            score -= 15  # Penalidade adicional - já valorizou demais
+            score -= 15
+        
+        # 9. v7: PENALIDADE por poucos jogos na R2+ (suplentes/banco)
+        if not is_rodada_1:
+            if atleta.jogos_num == 0:
+                score -= 25  # Nunca jogou na R2+ = muito arriscado
+            elif atleta.jogos_num == 1 and atleta.media < 2.0:
+                score -= 15  # Jogou 1x e foi mal
         
         return max(0, score)
     
@@ -579,19 +618,38 @@ class TeamSelector:
         necessidades["TEC"] = 1
         
         # Filtrar jogadores elegíveis
-        # Na rodada 1, todos têm média 0, então ajustamos os filtros
-        elegiveis = [
-            a for a in atletas_analisados
-            if a.preco <= preco_maximo_jogador
-            and (a.tendencia_valorizar >= 0.4 or a.media == 0)  # Aceita todos na R1
-            and a.risco != "alto"
-        ]
+        # v7: Filtros adaptativos por rodada
+        is_rodada_1 = self.rodada_atual <= 1
         
-        # Se não houver suficientes, relaxar filtro
-        if len(elegiveis) < 12:
+        elegiveis = []
+        for a in atletas_analisados:
+            if a.preco > preco_maximo_jogador:
+                continue
+            
+            # v7: Na R2+, filtrar jogadores de times muito fracos
+            if not is_rodada_1 and self.confrontos_rodada:
+                stats = self.match_analyzer.estatisticas_times.get(a.clube_id)
+                if stats and stats.forca_geral < 45:
+                    continue  # Time muito fraco não valoriza
+            
+            # v7: Na R2+, filtrar jogadores que nunca jogaram E são baratos (suplentes)
+            if not is_rodada_1 and a.jogos_num == 0 and a.preco < 3.0:
+                continue  # Suplente barato = não vai jogar
+            
+            # v7: Risco alto = excluir (mais rigoroso agora com jogos_num)
+            if a.risco == "alto":
+                continue
+            
+            # Aceitar se tendência OK ou R1
+            if a.tendencia_valorizar >= 0.4 or is_rodada_1:
+                elegiveis.append(a)
+        
+        # Se não houver suficientes, relaxar filtro (manter filtro de time fraco)
+        if len(elegiveis) < 15:
             elegiveis = [
                 a for a in atletas_analisados
                 if a.preco <= preco_maximo_jogador
+                and a.risco != "alto"
             ]
         
         # Ordenar por critérios de valorização usando SCORE calculado!
@@ -636,8 +694,19 @@ class TeamSelector:
         necessidades["TEC"] = 1
         
         # FILTRO INICIAL: Remover jogadores de perfil ruim para pontuação
+        is_rodada_1 = self.rodada_atual <= 1
         atletas_filtrados = []
         for a in atletas_analisados:
+            # v7.1: Na R2+, filtrar jogadores que NUNCA jogaram
+            # Se nunca entrou em campo, não tem como prever pontuação
+            if not is_rodada_1 and a.jogos_num == 0:
+                continue
+            
+            # v7.1: Na R2+, filtrar jogadores com média negativa ou muito baixa
+            # Não faz sentido escalar alguém que pontua negativo
+            if not is_rodada_1 and a.media < 0.5 and a.jogos_num >= 1:
+                continue
+            
             # Buscar força do time
             stats = self.match_analyzer.estatisticas_times.get(a.clube_id)
             if stats:
@@ -858,7 +927,16 @@ class TeamSelector:
                         break
         
         # Capitão: jogador com maior SCORE (não maior preço!)
+        # v7: Validar capitão com critérios mínimos na R2+
         capitao = max(titulares, key=lambda x: self._calcular_score_pontuacao(x))
+        
+        if self.rodada_atual >= 2:
+            candidatos_capitao = [
+                t for t in titulares
+                if t.media >= 3.0 and t.jogos_num >= 1
+            ]
+            if candidatos_capitao:
+                capitao = max(candidatos_capitao, key=lambda x: self._calcular_score_pontuacao(x))
         
         # Pontuação prevista
         pontuacao_prevista = sum(
@@ -974,8 +1052,26 @@ class TeamSelector:
                 reservas.append(atleta)
                 posicoes_reserva_preenchidas.add(pos)
         
-        # Escolher capitão (maior pontuação esperada)
-        capitao = max(titulares, key=lambda x: x.pontuacao_esperada)
+        # v7: Escolher capitão CORRETAMENTE
+        # Usar _calcular_score_valorizacao ao invés de pontuacao_esperada
+        # (pontuacao_esperada pode ser 0 para jogadores sem dados → seleção aleatória)
+        if tipo == "valorizacao":
+            capitao = max(titulares, key=lambda x: self._calcular_score_valorizacao(x))
+        else:
+            capitao = max(titulares, key=lambda x: self._calcular_score_pontuacao(x))
+        
+        # v7: Validar capitão mínimo (R2+: deve ter média >= 3.0 ou jogos >= 2)
+        if self.rodada_atual >= 2:
+            candidatos_capitao = [
+                t for t in titulares
+                if t.media >= 3.0 and t.jogos_num >= 1
+            ]
+            if candidatos_capitao:
+                if tipo == "valorizacao":
+                    capitao = max(candidatos_capitao, key=lambda x: self._calcular_score_valorizacao(x))
+                else:
+                    capitao = max(candidatos_capitao, key=lambda x: self._calcular_score_pontuacao(x))
+            # Se nenhum atende critérios, fica com o melhor por score (fallback)
         
         # Calcular métricas
         pontuacao_prevista = sum(
@@ -1067,18 +1163,25 @@ class TeamSelector:
     def gerar_times_rodada(
         self,
         atletas_analisados: List[AnaliseJogador],
-        esquema: str = "4-4-2"
+        esquema: str = "4-4-2",
+        rodada_atual: int = 1
     ) -> Tuple[Optional[TimeEscalado], Optional[TimeEscalado]]:
         """
         Gera os dois times para a rodada
         
+        VERSÃO v7 - Recebe rodada_atual para ajustar algoritmos
+        
         Args:
             atletas_analisados: Lista de atletas analisados
             esquema: Esquema tático preferido
+            rodada_atual: Número da rodada atual (afeta pesos e filtros)
             
         Returns:
             Tupla (time_valorizacao, time_pontuacao)
         """
+        # v7: Definir rodada global
+        self.rodada_atual = rodada_atual
+        
         # Salvar orçamento original
         orcamento_original = self.orcamento
         

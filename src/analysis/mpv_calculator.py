@@ -37,6 +37,8 @@ class AnaliseJogador:
     risco: str  # "baixo", "medio", "alto"
     variacao: float = 0.0  # NOVO: variação de preço (negativo = desvalorizou)
     pontos_rodada: float = 0.0  # NOVO: pontuação da rodada atual (ao vivo)
+    jogos_num: int = 0  # NOVO v7: número de jogos disputados
+    status_id: int = 7  # NOVO v7: status do jogador (7=Provável, 6=Nulo, etc)
     scouts_historicos: List[Dict] = field(default_factory=list)
     
     @property
@@ -234,14 +236,17 @@ class MPVCalculator:
         preco: float,
         media: float,
         jogos_num: int,
-        variacao_recente: float = 0
+        variacao_recente: float = 0,
+        rodada_atual: int = 1
     ) -> str:
         """
         Determina o nível de risco de escalar o jogador
         
+        VERSÃO v7 - Penaliza mais jogadores sem jogos na R2+
+        
         Fatores:
         - Consistência (desvio padrão)
-        - Número de jogos
+        - Número de jogos (MUITO mais importante na R2+)
         - Variação de preço recente
         
         Returns:
@@ -249,15 +254,33 @@ class MPVCalculator:
         """
         risco_score = 0
         
-        # Poucos jogos = mais risco
-        if jogos_num < 3:
-            risco_score += 2
-        elif jogos_num < 5:
+        # v7.1: Calcular participação relativa ao máximo possível
+        # Na R3 o max de jogos é 2 (rodadas 1 e 2 disputadas)
+        rodadas_disputadas = max(rodada_atual - 1, 0)
+        
+        # Poucos jogos = mais risco (relativo às rodadas disputadas)
+        if jogos_num == 0:
+            if rodadas_disputadas >= 2:
+                risco_score += 4  # Nunca jogou em 2+ rodadas = muito arriscado
+            elif rodadas_disputadas == 1:
+                risco_score += 3  # Não jogou na única rodada que teve
+            else:
+                risco_score += 1  # R1: normal, ninguém jogou ainda
+        elif rodadas_disputadas > 0:
+            # Calcular taxa de participação
+            taxa_participacao = jogos_num / rodadas_disputadas
+            if taxa_participacao < 0.5:
+                risco_score += 2  # Jogou menos da metade das rodadas
+            elif taxa_participacao < 0.75:
+                risco_score += 1  # Jogou a maioria mas não todas
+        
+        # Média baixa com preço alto = risco (v7: skip na R1 onde todos têm media=0)
+        if preco > 0 and media / preco < 0.5 and (rodada_atual >= 2 or media > 0):
             risco_score += 1
         
-        # Média baixa com preço alto = risco
-        if preco > 0 and media / preco < 0.5:
-            risco_score += 1
+        # v7: Média muito baixa na R2+ = risco alto (jogou e foi mal)
+        if rodada_atual >= 2 and jogos_num >= 1 and media < 1.5:
+            risco_score += 2
         
         # Desvalorização recente = risco
         if variacao_recente < -1:
@@ -277,10 +300,13 @@ class MPVCalculator:
         posicao_abrev: str = "???",
         scouts_historicos: List[Dict] = None,
         mandante: bool = True,
-        dificuldade_adversario: str = "medio"
+        dificuldade_adversario: str = "medio",
+        rodada_atual: int = 1
     ) -> AnaliseJogador:
         """
         Análise completa de um jogador para escalação
+        
+        VERSÃO v7 - Recebe rodada_atual para ajustar riscos
         
         Args:
             atleta_data: Dados do atleta da API
@@ -289,6 +315,7 @@ class MPVCalculator:
             scouts_historicos: Lista de scouts anteriores
             mandante: Se joga em casa
             dificuldade_adversario: Nível de dificuldade
+            rodada_atual: Número da rodada atual (1+)
             
         Returns:
             AnaliseJogador com todos os dados calculados
@@ -316,14 +343,14 @@ class MPVCalculator:
         # Calcular tendência
         tendencia = self.calcular_tendencia_valorizar(pontuacao_esperada, mpv)
         
-        # Determinar risco
-        risco = self.determinar_risco(preco, media, jogos_num, variacao)
+        # Determinar risco (v7: com rodada_atual)
+        risco = self.determinar_risco(preco, media, jogos_num, variacao, rodada_atual)
         
         return AnaliseJogador(
             atleta_id=atleta_id,
             nome=nome,
             apelido=apelido,
-            clube_id=clube_id,  # NOVO v3
+            clube_id=clube_id,
             clube_abrev=clube_abrev,
             posicao_abrev=posicao_abrev,
             preco=preco,
@@ -332,7 +359,9 @@ class MPVCalculator:
             tendencia_valorizar=tendencia,
             pontuacao_esperada=pontuacao_esperada,
             risco=risco,
-            variacao=variacao,  # NOVO: passar variação
+            variacao=variacao,
+            jogos_num=jogos_num,  # v7: guardar jogos disputados
+            status_id=atleta_data.get("status_id", 7),  # v7: guardar status
             scouts_historicos=scouts_historicos or []
         )
     

@@ -729,13 +729,44 @@ def gerar_escalacao(
         
         # Configurar confrontos no seletor
         team_selector.orcamento = orcamento_uso
+        team_selector.rodada_atual = rodada  # v7: propagar rodada
         if partidas:
             team_selector.configurar_confrontos(partidas, clubes)
+        
+        # v7: Construir mapa de mando de campo e dificuldade por clube
+        mando_por_clube = {}  # clube_id -> bool (True=mandante)
+        dificuldade_por_clube = {}  # clube_id -> "facil"/"medio"/"dificil"
+        
+        if partidas:
+            for p in partidas:
+                casa_id = p.get("clube_casa_id")
+                visit_id = p.get("clube_visitante_id")
+                if casa_id:
+                    mando_por_clube[casa_id] = True
+                if visit_id:
+                    mando_por_clube[visit_id] = False
+            
+            # Calcular dificuldade usando match_analyzer
+            for clube_id_key in mando_por_clube:
+                resumo = team_selector.match_analyzer.get_resumo_confronto(
+                    clube_id_key, team_selector.confrontos_rodada
+                ) if team_selector.confrontos_rodada else None
+                
+                if resumo and "erro" not in resumo:
+                    dif = resumo.get("dificuldade", "MÉDIO")
+                    if dif == "FÁCIL":
+                        dificuldade_por_clube[clube_id_key] = "facil"
+                    elif dif in ["DIFÍCIL", "MUITO DIFÍCIL"]:
+                        dificuldade_por_clube[clube_id_key] = "dificil"
+                    else:
+                        dificuldade_por_clube[clube_id_key] = "medio"
+                else:
+                    dificuldade_por_clube[clube_id_key] = "medio"
         
         # Filtrar prováveis
         atletas = [a for a in atletas if a.get("status_id") == 7]
         
-        # Analisar cada atleta
+        # Analisar cada atleta (v7: com contexto real de mando e dificuldade)
         analisados = []
         for atleta in atletas:
             clube_id = atleta.get("clube_id")
@@ -746,19 +777,26 @@ def gerar_escalacao(
             pos_map = {1: "GOL", 2: "LAT", 3: "ZAG", 4: "MEI", 5: "ATA", 6: "TEC"}
             pos_abrev = pos_map.get(pos_id, "MEI")
             
+            # v7: Determinar contexto real do jogo
+            is_mandante = mando_por_clube.get(clube_id, True)
+            dificuldade = dificuldade_por_clube.get(clube_id, "medio")
+            
             analise = mpv_calc.analisar_jogador(
                 atleta,
                 clube_abrev=clube_abrev,
-                posicao_abrev=pos_abrev
+                posicao_abrev=pos_abrev,
+                mandante=is_mandante,
+                dificuldade_adversario=dificuldade,
+                rodada_atual=rodada
             )
             
-            # NOVO: Adicionar pontuação da rodada atual (se houver)
+            # Adicionar pontuação da rodada atual (se houver)
             analise.pontos_rodada = atleta.get("pontos_num", 0) or 0
             
             analisados.append(analise)
         
-        # Gerar times
-        time_valor, time_pontos = team_selector.gerar_times_rodada(analisados, esquema)
+        # v7: Gerar times com rodada_atual
+        time_valor, time_pontos = team_selector.gerar_times_rodada(analisados, esquema, rodada_atual=rodada)
         
         def time_para_response(time: TimeEscalado, tipo: str) -> dict:
             if not time:
@@ -788,7 +826,7 @@ def gerar_escalacao(
                     "preco": j.preco,
                     "media": j.media,
                     "pontuacao": j.pontos_rodada if hasattr(j, 'pontos_rodada') else 0,  # Pontuação da rodada atual
-                    "jogos": 0,
+                    "jogos": j.jogos_num,
                     "status": "provavel",
                     "tendencia": valorizacao_pct,  # Agora é percentual
                     "valorizacao": valorizacao_pct,  # Mesmo valor
