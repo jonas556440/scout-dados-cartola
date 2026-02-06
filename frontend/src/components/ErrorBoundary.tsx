@@ -1,7 +1,6 @@
 import React from 'react';
 import { AlertCircle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 
 interface Props {
   children: React.ReactNode;
@@ -71,10 +70,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 className="w-full gap-2"
                 asChild
               >
-                <Link to="/">
+                <a href="/">
                   <Home className="w-4 h-4" />
                   Voltar para Home
-                </Link>
+                </a>
               </Button>
             </div>
 
