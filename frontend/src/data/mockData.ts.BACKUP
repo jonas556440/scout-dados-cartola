@@ -1,0 +1,190 @@
+import type { Player, Club, Match, Team, Patrimony, DashboardStats } from '@/types/cartola';
+
+// Mock de jogadores baseados nos dados reais da API
+export const mockPlayers: Player[] = [
+  // Atacantes
+  { id: 1, nome: 'Arrascaeta', apelido: 'Arrascaeta', posicao: 'MEI', posicaoId: 4, clubeId: 262, clubeAbrev: 'FLA', clubeNome: 'Flamengo', preco: 23.0, media: 8.5, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 95, tendencia: 5 },
+  { id: 2, nome: 'Yuri Alberto', apelido: 'Yuri Alberto', posicao: 'ATA', posicaoId: 5, clubeId: 264, clubeAbrev: 'COR', clubeNome: 'Corinthians', preco: 19.0, media: 7.2, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 88, tendencia: 3 },
+  { id: 3, nome: 'Kaio Jorge', apelido: 'Kaio Jorge', posicao: 'ATA', posicaoId: 5, clubeId: 264, clubeAbrev: 'COR', clubeNome: 'Corinthians', preco: 17.0, media: 6.8, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 85, tendencia: 4 },
+  { id: 4, nome: 'Matheus Pereira', apelido: 'M. Pereira', posicao: 'MEI', posicaoId: 4, clubeId: 283, clubeAbrev: 'CRU', clubeNome: 'Cruzeiro', preco: 20.0, media: 7.8, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 90, tendencia: 2 },
+  { id: 5, nome: 'Andreas Pereira', apelido: 'Andreas', posicao: 'MEI', posicaoId: 4, clubeId: 262, clubeAbrev: 'FLA', clubeNome: 'Flamengo', preco: 15.0, media: 6.5, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 82, tendencia: 1 },
+  
+  // Meias
+  { id: 6, nome: 'Alan Patrick', apelido: 'Alan Patrick', posicao: 'MEI', posicaoId: 4, clubeId: 285, clubeAbrev: 'INT', clubeNome: 'Internacional', preco: 8.0, media: 5.5, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 78, tendencia: 6 },
+  { id: 7, nome: 'Baralhas', apelido: 'Baralhas', posicao: 'MEI', posicaoId: 4, clubeId: 287, clubeAbrev: 'VIT', clubeNome: 'Vitória', preco: 6.0, media: 4.2, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 72, tendencia: 4 },
+  { id: 8, nome: 'Bruno Gomes', apelido: 'Bruno Gomes', posicao: 'MEI', posicaoId: 4, clubeId: 285, clubeAbrev: 'INT', clubeNome: 'Internacional', preco: 6.0, media: 4.0, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 70, tendencia: 5 },
+  { id: 9, nome: 'Sebastián Gómez', apelido: 'S. Gómez', posicao: 'MEI', posicaoId: 4, clubeId: 292, clubeAbrev: 'CFC', clubeNome: 'Coritiba', preco: 4.0, media: 3.5, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 65, tendencia: 3 },
+  
+  // Defensores
+  { id: 10, nome: 'Gabriel', apelido: 'Gabriel', posicao: 'GOL', posicaoId: 1, clubeId: 287, clubeAbrev: 'VIT', clubeNome: 'Vitória', preco: 6.0, media: 3.8, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 68, tendencia: 2 },
+  { id: 11, nome: 'Mercado', apelido: 'Mercado', posicao: 'ZAG', posicaoId: 3, clubeId: 285, clubeAbrev: 'INT', clubeNome: 'Internacional', preco: 5.0, media: 3.2, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 65, tendencia: 3 },
+  { id: 12, nome: 'Maicon', apelido: 'Maicon', posicao: 'ZAG', posicaoId: 3, clubeId: 292, clubeAbrev: 'CFC', clubeNome: 'Coritiba', preco: 5.0, media: 3.0, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 62, tendencia: 2 },
+  { id: 13, nome: 'Mateus Silva', apelido: 'Mateus Silva', posicao: 'LAT', posicaoId: 2, clubeId: 287, clubeAbrev: 'VIT', clubeNome: 'Vitória', preco: 3.0, media: 2.5, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 58, tendencia: 4 },
+  { id: 14, nome: 'Ramon', apelido: 'Ramon', posicao: 'LAT', posicaoId: 2, clubeId: 287, clubeAbrev: 'VIT', clubeNome: 'Vitória', preco: 5.0, media: 3.2, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 65, tendencia: 3 },
+  
+  // Atacantes baratos (valorização)
+  { id: 15, nome: 'Renato Kayzer', apelido: 'R. Kayzer', posicao: 'ATA', posicaoId: 5, clubeId: 287, clubeAbrev: 'VIT', clubeNome: 'Vitória', preco: 6.0, media: 3.5, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 60, tendencia: 5 },
+  { id: 16, nome: 'Pedro Rocha', apelido: 'Pedro Rocha', posicao: 'ATA', posicaoId: 5, clubeId: 292, clubeAbrev: 'CFC', clubeNome: 'Coritiba', preco: 7.0, media: 4.0, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 66, tendencia: 4 },
+  { id: 17, nome: 'Borré', apelido: 'Borré', posicao: 'ATA', posicaoId: 5, clubeId: 285, clubeAbrev: 'INT', clubeNome: 'Internacional', preco: 8.0, media: 4.5, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 72, tendencia: 3 },
+  
+  // Técnico
+  { id: 18, nome: 'Jair Ventura', apelido: 'Jair Ventura', posicao: 'TEC', posicaoId: 6, clubeId: 287, clubeAbrev: 'VIT', clubeNome: 'Vitória', preco: 5.0, media: 3.0, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 55, tendencia: 2 },
+  
+  // Mais jogadores baratos para reservas
+  { id: 19, nome: 'Walter', apelido: 'Walter', posicao: 'GOL', posicaoId: 1, clubeId: 290, clubeAbrev: 'MIR', clubeNome: 'Mirassol', preco: 5.0, media: 2.8, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 52, tendencia: 2 },
+  { id: 20, nome: 'Léo Vieira', apelido: 'Léo Vieira', posicao: 'GOL', posicaoId: 1, clubeId: 293, clubeAbrev: 'CHA', clubeNome: 'Chapecoense', preco: 2.0, media: 1.5, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 40, tendencia: 3 },
+  { id: 21, nome: 'Kayky Almeida', apelido: 'Kayky', posicao: 'ZAG', posicaoId: 3, clubeId: 294, clubeAbrev: 'REM', clubeNome: 'Remo', preco: 2.0, media: 1.2, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 38, tendencia: 4 },
+  { id: 22, nome: 'Zé Ricardo', apelido: 'Zé Ricardo', posicao: 'MEI', posicaoId: 4, clubeId: 294, clubeAbrev: 'REM', clubeNome: 'Remo', preco: 3.0, media: 2.0, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 45, tendencia: 3 },
+  { id: 23, nome: 'João Pedro', apelido: 'João Pedro', posicao: 'ATA', posicaoId: 5, clubeId: 294, clubeAbrev: 'REM', clubeNome: 'Remo', preco: 3.0, media: 2.2, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 48, tendencia: 5 },
+  { id: 24, nome: 'Vinicius Lira', apelido: 'V. Lira', posicao: 'LAT', posicaoId: 2, clubeId: 277, clubeAbrev: 'SAN', clubeNome: 'Santos', preco: 3.0, media: 2.0, pontuacao: 0, jogos: 0, status: 'provavel', potencial: 46, tendencia: 4 },
+];
+
+export const mockClubs: Club[] = [
+  { id: 262, nome: 'Flamengo', abrev: 'FLA', posicao: 1, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 85, forcaFora: 78 },
+  { id: 264, nome: 'Corinthians', abrev: 'COR', posicao: 2, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 80, forcaFora: 72 },
+  { id: 285, nome: 'Internacional', abrev: 'INT', posicao: 3, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 82, forcaFora: 75 },
+  { id: 283, nome: 'Cruzeiro', abrev: 'CRU', posicao: 4, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 78, forcaFora: 70 },
+  { id: 287, nome: 'Vitória', abrev: 'VIT', posicao: 5, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 72, forcaFora: 62 },
+  { id: 292, nome: 'Coritiba', abrev: 'CFC', posicao: 6, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 70, forcaFora: 60 },
+  { id: 277, nome: 'Santos', abrev: 'SAN', posicao: 7, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 76, forcaFora: 68 },
+  { id: 294, nome: 'Remo', abrev: 'REM', posicao: 15, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 55, forcaFora: 45 },
+  { id: 293, nome: 'Red Bull Bragantino', abrev: 'RBB', posicao: 8, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 74, forcaFora: 70 },
+  { id: 295, nome: 'Athletico-PR', abrev: 'CAP', posicao: 9, pontos: 0, jogos: 0, vitorias: 0, empates: 0, derrotas: 0, golsPro: 0, golsContra: 0, forcaCasa: 75, forcaFora: 68 },
+];
+
+export const mockMatches: Match[] = [
+  {
+    id: 1,
+    rodada: 1,
+    mandanteId: 287,
+    mandante: mockClubs.find(c => c.id === 287)!,
+    visitanteId: 294,
+    visitante: mockClubs.find(c => c.id === 294)!,
+    local: 'Barradão',
+    data: '2026-01-29',
+    hora: '20:00',
+    aproveitamentoMandante: 72,
+    aproveitamentoVisitante: 45,
+    probabilidadeMandante: 68,
+    probabilidadeEmpate: 22,
+    probabilidadeVisitante: 10,
+  },
+  {
+    id: 2,
+    rodada: 1,
+    mandanteId: 292,
+    mandante: mockClubs.find(c => c.id === 292)!,
+    visitanteId: 293,
+    visitante: mockClubs.find(c => c.id === 293)!,
+    local: 'Couto Pereira',
+    data: '2026-01-29',
+    hora: '21:30',
+    aproveitamentoMandante: 58,
+    aproveitamentoVisitante: 65,
+    probabilidadeMandante: 35,
+    probabilidadeEmpate: 30,
+    probabilidadeVisitante: 35,
+  },
+  {
+    id: 3,
+    rodada: 1,
+    mandanteId: 285,
+    mandante: mockClubs.find(c => c.id === 285)!,
+    visitanteId: 295,
+    visitante: mockClubs.find(c => c.id === 295)!,
+    local: 'Beira-Rio',
+    data: '2026-01-30',
+    hora: '19:00',
+    aproveitamentoMandante: 75,
+    aproveitamentoVisitante: 62,
+    probabilidadeMandante: 55,
+    probabilidadeEmpate: 25,
+    probabilidadeVisitante: 20,
+  },
+];
+
+export const mockTeamValorizacao: Team = {
+  nome: 'Time Valorização',
+  tipo: 'valorizacao',
+  esquema: '4-4-2',
+  rodada: 1,
+  titulares: [
+    mockPlayers.find(p => p.apelido === 'Gabriel')!,
+    mockPlayers.find(p => p.apelido === 'Mateus Silva')!,
+    mockPlayers.find(p => p.apelido === 'Ramon')!,
+    mockPlayers.find(p => p.apelido === 'Mercado')!,
+    mockPlayers.find(p => p.apelido === 'Maicon')!,
+    mockPlayers.find(p => p.apelido === 'Alan Patrick')!,
+    mockPlayers.find(p => p.apelido === 'Bruno Gomes')!,
+    mockPlayers.find(p => p.apelido === 'Baralhas')!,
+    mockPlayers.find(p => p.apelido === 'S. Gómez')!,
+    mockPlayers.find(p => p.apelido === 'Borré')!,
+    mockPlayers.find(p => p.apelido === 'Pedro Rocha')!,
+  ],
+  reservas: [
+    mockPlayers.find(p => p.apelido === 'Léo Vieira')!,
+    mockPlayers.find(p => p.apelido === 'V. Lira')!,
+    mockPlayers.find(p => p.apelido === 'Kayky')!,
+    mockPlayers.find(p => p.apelido === 'Zé Ricardo')!,
+    mockPlayers.find(p => p.apelido === 'João Pedro')!,
+  ],
+  capitao: mockPlayers.find(p => p.apelido === 'Alan Patrick')!,
+  custoTotal: 68,
+  cartoletas: 32,
+  pontuacaoEsperada: 48,
+};
+
+export const mockTeamPontuacao: Team = {
+  nome: 'Time Pontuação',
+  tipo: 'pontuacao',
+  esquema: '4-4-2',
+  rodada: 1,
+  titulares: [
+    mockPlayers.find(p => p.apelido === 'Gabriel')!,
+    mockPlayers.find(p => p.apelido === 'Mateus Silva')!,
+    mockPlayers.find(p => p.apelido === 'Ramon')!,
+    mockPlayers.find(p => p.apelido === 'Mercado')!,
+    mockPlayers.find(p => p.apelido === 'Maicon')!,
+    mockPlayers.find(p => p.apelido === 'Arrascaeta')!,
+    mockPlayers.find(p => p.apelido === 'M. Pereira')!,
+    mockPlayers.find(p => p.apelido === 'Andreas')!,
+    mockPlayers.find(p => p.apelido === 'Alan Patrick')!,
+    mockPlayers.find(p => p.apelido === 'Yuri Alberto')!,
+    mockPlayers.find(p => p.apelido === 'Kaio Jorge')!,
+  ],
+  reservas: [
+    mockPlayers.find(p => p.apelido === 'Walter')!,
+    mockPlayers.find(p => p.apelido === 'V. Lira')!,
+    mockPlayers.find(p => p.apelido === 'Kayky')!,
+    mockPlayers.find(p => p.apelido === 'Zé Ricardo')!,
+    mockPlayers.find(p => p.apelido === 'João Pedro')!,
+  ],
+  capitao: mockPlayers.find(p => p.apelido === 'Arrascaeta')!,
+  custoTotal: 100,
+  cartoletas: 0,
+  pontuacaoEsperada: 75,
+};
+
+export const mockPatrimony: Patrimony[] = [
+  { rodada: 1, cartoletas: 100, valorTime: 0, pontuacaoTotal: 0, variacao: 0, data: '2026-01-28' },
+];
+
+export const mockDashboardStats: DashboardStats = {
+  mercado: {
+    rodadaAtual: 1,
+    status: 'aberto',
+    fechamento: '2026-01-29T18:59:00',
+    totalAtletas: 650,
+    provaveis: 420,
+    duvidas: 85,
+  },
+  patrimonio: {
+    cartoletas: 100,
+    valorTime: 0,
+    pontuacaoTotal: 0,
+    variacao: 0,
+  },
+  topValorizadores: mockPlayers.filter(p => p.tendencia && p.tendencia >= 4).slice(0, 5),
+  topPontuadores: mockPlayers.sort((a, b) => (b.potencial || 0) - (a.potencial || 0)).slice(0, 5),
+  confrontos: mockMatches,
+};

@@ -1,0 +1,20 @@
+# Bloquear arquivos sensíveis
+<FilesMatch "\.(py|pyc|db|sqlite|sql|md|service|sh|json|log)$">
+    Require all denied
+</FilesMatch>
+
+# Bloquear pastas sensíveis
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(config|src|data|logs|frontend|cartolafc2026|__pycache__|\.git)/ - [F,L]
+</IfModule>
+
+# SPA - Todas rotas vão para index.html
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.html [L]
+</IfModule>

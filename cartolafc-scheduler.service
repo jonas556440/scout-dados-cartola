@@ -1,0 +1,30 @@
+[Unit]
+Description=Cartola FC 2026 - Scheduler Service (Background Monitoring)
+After=network.target
+
+[Service]
+Type=simple
+# Usuário dedicado para segurança
+User=www
+Group=www
+WorkingDirectory=/www/wwwroot/scoutdados.com.br
+Environment="PYTHONUNBUFFERED=1"
+Environment="ENV=production"
+ExecStart=/usr/bin/python3 /www/wwwroot/scoutdados.com.br/scheduler_service.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/www/wwwroot/scoutdados.com.br/logs/scheduler.log
+StandardError=append:/www/wwwroot/scoutdados.com.br/logs/scheduler_error.log
+
+# Limites de recursos
+MemoryMax=512M
+CPUQuota=50%
+
+# Segurança adicional
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/www/wwwroot/scoutdados.com.br/data /www/wwwroot/scoutdados.com.br/logs
+
+[Install]
+WantedBy=multi-user.target

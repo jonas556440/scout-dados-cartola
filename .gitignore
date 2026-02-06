@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+env/
+venv/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+data/*.db
+
+# Logs
+*.log
+logs/
+nohup.out
+scheduler.log
+uvicorn.log
+
+# Frontend
+node_modules/
+dist/
+.cache/
+*.local
+.vite/
+frontend/dist/
+frontend/node_modules/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+*.tmp
+*.bak
+*.old
+time_*.json
+diagnostico.html
+
+# Production configs (keep templates, ignore copies with real data)
+*.conf.local
+*.env.production
+
+# Apache/Nginx configs with real paths
+apache_production.conf
+
+# Duplicate folder
+cartolafc2026/

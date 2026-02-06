@@ -1,0 +1,218 @@
+/* Cartola FC 2026 Design System - Sports Tech Fusion */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Core Colors - Dark Sports Theme */
+    --background: 220 20% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 220 18% 10%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 220 18% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Brand Colors - Cartola Green/Gold */
+    --primary: 142 76% 45%;
+    --primary-foreground: 220 20% 6%;
+
+    --secondary: 45 93% 58%;
+    --secondary-foreground: 220 20% 6%;
+
+    --muted: 220 14% 16%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 142 50% 20%;
+    --accent-foreground: 142 76% 70%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Status Colors */
+    --success: 142 76% 45%;
+    --success-foreground: 220 20% 6%;
+    --warning: 45 93% 58%;
+    --warning-foreground: 220 20% 6%;
+    --info: 200 80% 55%;
+    --info-foreground: 220 20% 6%;
+
+    /* Position Colors */
+    --pos-gol: 200 80% 55%;
+    --pos-zag: 280 70% 55%;
+    --pos-lat: 320 70% 55%;
+    --pos-mei: 45 93% 58%;
+    --pos-ata: 0 70% 55%;
+    --pos-tec: 160 60% 45%;
+
+    --border: 220 14% 18%;
+    --input: 220 14% 18%;
+    --ring: 142 76% 45%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(142, 76%, 45%) 0%, hsl(160, 60%, 35%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(45, 93%, 58%) 0%, hsl(35, 90%, 50%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(220, 20%, 8%) 0%, hsl(220, 20%, 4%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220, 18%, 12%) 0%, hsl(220, 18%, 8%) 100%);
+
+    /* Shadows */
+    --shadow-glow: 0 0 30px -5px hsl(142 76% 45% / 0.3);
+    --shadow-card: 0 4px 24px -4px hsl(0 0% 0% / 0.4);
+    --shadow-elevated: 0 8px 32px -8px hsl(0 0% 0% / 0.5);
+
+    --sidebar-background: 220 18% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 142 76% 45%;
+    --sidebar-primary-foreground: 220 20% 6%;
+    --sidebar-accent: 220 14% 16%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 14% 18%;
+    --sidebar-ring: 142 76% 45%;
+  }
+
+  .dark {
+    /* Same as root - already dark theme */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+    background: var(--gradient-dark);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Glass Card Effect */
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50 rounded-xl;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Position Badge Colors */
+  .pos-gol { @apply bg-[hsl(var(--pos-gol))] text-background; }
+  .pos-zag { @apply bg-[hsl(var(--pos-zag))] text-background; }
+  .pos-lat { @apply bg-[hsl(var(--pos-lat))] text-background; }
+  .pos-mei { @apply bg-[hsl(var(--pos-mei))] text-background; }
+  .pos-ata { @apply bg-[hsl(var(--pos-ata))] text-background; }
+  .pos-tec { @apply bg-[hsl(var(--pos-tec))] text-background; }
+
+  /* Glow Effects */
+  .glow-green {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 30px -5px hsl(45 93% 58% / 0.3);
+  }
+
+  /* Stat Card */
+  .stat-card {
+    @apply glass-card p-4 transition-all duration-300;
+  }
+
+  .stat-card:hover {
+    @apply border-primary/50;
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Player Card */
+  .player-card {
+    @apply glass-card overflow-hidden transition-all duration-300 cursor-pointer;
+  }
+
+  .player-card:hover {
+    @apply -translate-y-1 border-primary/50;
+    box-shadow: var(--shadow-elevated), var(--shadow-glow);
+  }
+
+  /* Table Styles */
+  .stats-table {
+    @apply w-full;
+  }
+
+  .stats-table th {
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground bg-muted/50;
+  }
+
+  .stats-table td {
+    @apply px-4 py-3 text-sm border-t border-border/50;
+  }
+
+  .stats-table tr:hover td {
+    @apply bg-muted/30;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Chart Container */
+  .chart-container {
+    @apply glass-card p-6;
+  }
+
+  /* Hero Section */
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  .gold-gradient {
+    background: var(--gradient-gold);
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-hero);
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-gold);
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+}

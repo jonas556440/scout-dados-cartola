@@ -1,0 +1,42 @@
+[Unit]
+Description=Cartola FC 2026 API Server
+After=network.target
+
+[Service]
+Type=simple
+# Usuário dedicado para segurança (criar com: sudo useradd -r -s /bin/false cartolafc)
+User=www
+Group=www
+WorkingDirectory=/www/wwwroot/scoutdados.com.br
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="ENV=production"
+
+# Comando de execução
+ExecStart=/usr/bin/python3 -m uvicorn api_server:app --host 0.0.0.0 --port 8000 --log-level info
+
+# Restart automático
+Restart=always
+RestartSec=10
+StartLimitInterval=300
+StartLimitBurst=5
+
+# Logs
+StandardOutput=append:/www/wwwroot/scoutdados.com.br/logs/api_server.log
+StandardError=append:/www/wwwroot/scoutdados.com.br/logs/api_server_error.log
+
+# Limites de recursos (opcional)
+MemoryMax=512M
+CPUQuota=50%
+
+# Segurança adicional
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/www/wwwroot/scoutdados.com.br/data /www/wwwroot/scoutdados.com.br/logs
+
+# Timeout
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

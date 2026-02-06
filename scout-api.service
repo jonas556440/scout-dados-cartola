@@ -1,0 +1,69 @@
+# Systemd Service para FastAPI (Produção)
+# Arquivo: /etc/systemd/system/scout-api.service
+#
+# Para instalar:
+# sudo cp scout-api.service /etc/systemd/system/
+# sudo systemctl daemon-reload
+# sudo systemctl enable scout-api
+# sudo systemctl start scout-api
+# sudo systemctl status scout-api
+
+[Unit]
+Description=ScoutDados API (FastAPI + Uvicorn)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+
+# Diretórios
+WorkingDirectory=/root/cartolafc2026
+RuntimeDirectory=scout-api
+
+# Variáveis de ambiente
+Environment="ENV=production"
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONPATH=/root/cartolafc2026"
+
+# Comando de execução
+ExecStart=/root/cartolafc2026/venv/bin/uvicorn api_server:app \
+    --host 127.0.0.1 \
+    --port 8000 \
+    --workers 2 \
+    --log-level info \
+    --access-log \
+    --use-colors
+
+# Reinicialização automática
+Restart=always
+RestartSec=3
+StartLimitInterval=60
+StartLimitBurst=5
+
+# Limites de recursos
+LimitNOFILE=65535
+MemoryMax=512M
+CPUQuota=100%
+
+# Timeout
+TimeoutStartSec=30
+TimeoutStopSec=30
+
+# Logs
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=scout-api
+
+# Segurança
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Permissões (relaxadas por estar em /root)
+# Em produção, mova para /opt/scout e ajuste permissões
+ReadWritePaths=/root/cartolafc2026/data
+ReadWritePaths=/root/cartolafc2026/logs
+
+[Install]
+WantedBy=multi-user.target
