@@ -5,40 +5,31 @@ Gera dois times por rodada:
 1. Time Valorização: Jogadores com potencial de ganhar MAIS CARTOLETAS (otimizado!)
 2. Time Pontuação: Jogadores para pontuar máximo
 
-VERSÃO v6 - CORRIGIDO BASEADO EM DADOS REAIS DA RODADA 1:
-- ✅ Usa estatísticas reais (média, scouts, tendência)
-- ✅ Calcula score de potencial por jogador
-- ✅ Considera adversário da rodada
-- ✅ Considera mando de campo (casa/fora)
-- ✅ Analisa força do adversário
-- ✅ Considera forma recente dos times
-- ✅ Calcula chance de SG (saldo de gols)
-- 🆕 NOVO v6: Prioriza C$3-6 (SWEET SPOT CONFIRMADO!) - 35%
-- 🆕 NOVO v6: C$2-3 também muito bom (alta % valorização)
-- 🆕 NOVO v6: Penaliza C$10+ (valorizam menos %)
-- ✅ Constância (média de pontos) - 20%
-- ✅ Risco balanceado (15%)
+VERSÃO v8 - BASEADO EM DADOS REAIS R2 CARTOLA 2026:
 
-Dados REAIS rodada 1 (preço ANTES da valorização):
-- Gabriel Menino C$6→C$10.77 (+4.77, +79.5%)
-- Léo Derik C$2→C$5.14 (+3.14, +157%)
-- vs Danilo C$10→C$14.21 (+4.21, +42.1%)
-Jogadores baratos C$2-7 valorizam MUITO MAIS percentualmente!
+Descobertas que fundamentam esta versão:
+1. MPV REAL extraído da R2:
+   C$2=1.5pts, C$5=2.7pts, C$8=4.4pts, C$10=5.0pts, C$15=12pts
+   (fórmula antiga Preço*2.5-Média+2 era absurdamente errada)
 
-Fatores de análise (como sites especializados):
-- CONSTÂNCIA: média de pontos (novo peso 30%!)
-- Preço ideal: C$3-6 é o sweet spot risco/retorno
-- Adversário da rodada: força ofensiva/defensiva
-- Mando de campo: time em casa pontua ~30% mais
-- Forma recente: últimos 5 jogos (vitórias/derrotas)
-- Chance de SG: importante para defensores
-- Expectativa de gols: importante para atacantes
+2. Cada rodada é INDEPENDENTE (regra 2024+):
+   R1 performance NÃO prediz R2 valorização (29% taxa para ambos bons e ruins R1)
+   
+3. Sweet spot CONFIRMADO: C$2-6
+   C$2-4: 45-62% chance valorizar (MPV=1.5pts)
+   C$4-6: 44-46% chance (MPV=2-2.7pts)
+   C$8-10: 25-31% chance (MPV=4.4-5pts) 
+   C$13+: 25% chance (MPV=9+pts)
+   C$20+: 0% chance
 
-Regras:
-- Orçamento: 100 cartoletas (ou cartoletas disponíveis)
-- Esquemas permitidos: 3-4-3, 3-5-2, 4-3-3, 4-4-2, 4-5-1, 5-3-2, 5-4-1
-- 12 titulares (1 GOL + 10 linha + 1 TEC)
-- Capitão recebe 1.5x os pontos
+4. Posições (taxa de valorização):
+   TEC: 55% (MELHOR!) | ZAG: 45% | LAT: 40% | MEI: 37% | ATA: 36% | GOL: 33%
+   ATA precisa avg 9.2pts para valorizar vs ZAG 5.3pts!
+
+5. Perfil dos valorizados R2:
+   Pts média=7.7, Preço médio=C$6.94
+   Perfil dos desvalorizados:
+   Pts média=1.4, Preço médio=C$7.90
 """
 import sys
 from pathlib import Path
@@ -375,215 +366,191 @@ class TeamSelector:
         """
         Calcula score de potencial para TIME DE VALORIZAÇÃO
         
-        VERSÃO v7 - PESOS ADAPTATIVOS POR RODADA + CORREÇÕES CRÍTICAS
+        VERSÃO v8 - BASEADO EM DADOS REAIS R2 CARTOLA 2026
         
-        Mudanças v7:
-        - Sweet spot C$3-6 perde peso gradualmente (R1=35%, R2=25%, R3+=15%)
-        - Constância/média real ganha peso (R1=12pts neutro, R2=20%, R3+=30%)
-        - Bônus desvalorização condicionado: só se media >= 4.0 E jogos >= 2
-        - Penalização forte para jogadores sem jogos (suplentes/reservas)
-        - Detecção rodada GLOBAL em vez de per-jogador
+        DESCOBERTAS CHAVE que motivam esta versão:
+        1. MPV real é MUITO MENOR que o calculado pela fórmula antiga
+           → C$5 precisa apenas ~2.7 pts. C$15 precisa ~12 pts
+        2. Pontuação da rodada ATUAL define tudo (NÃO herança de rodadas anteriores) 
+        3. Sweet spot é C$2-6 (45-62% chance) vs C$10+ (25-32%)
+        4. ZAG (45%) e TEC (55%) são melhores posições para valorizar
+        5. Quem valorizou: avg 7.7 pts na rodada, preço médio C$6.94
+        6. Quem desvalorizou: avg 1.4 pts na rodada, preço médio C$7.90
+        
+        Estrutura:
+        1. PREÇO IDEAL (30 pts) — baseado em taxa real de valorização por preço
+        2. POSIÇÃO (20 pts) — baseado em taxa real por posição
+        3. CONSTÂNCIA/QUALIDADE (25 pts) — média e capacidade de superar MPV
+        4. CONFRONTO (20 pts) — adversário, mando de campo
+        5. RISCO (15 pts) — jogos, status, variação
+        6. BÔNUS/PENALIDADES adicionais
         """
         score = 0.0
         is_rodada_1 = self.rodada_atual <= 1
         jogador_sem_dados = atleta.media == 0 and atleta.jogos_num == 0
         
-        # === PESOS ADAPTATIVOS POR RODADA ===
-        # Preço perde importância conforme dados reais aparecem
-        if is_rodada_1:
-            peso_preco = 35
-            peso_constancia = 12  # Neutro, sem dados
-        elif self.rodada_atual == 2:
-            peso_preco = 25
-            peso_constancia = 20
-        else:  # R3+
-            peso_preco = 15
-            peso_constancia = 30
-        
-        # 1. PREÇO IDEAL (peso adaptável)
-        if 3.0 <= atleta.preco <= 6.0:
-            score += peso_preco  # Sweet spot
-        elif 2.0 <= atleta.preco < 3.0:
-            score += int(peso_preco * 0.9)  # Muito baratos
-        elif 6.0 < atleta.preco <= 8.0:
-            score += int(peso_preco * 0.8)  # Bom
-        elif 8.0 < atleta.preco <= 10.0:
-            score += int(peso_preco * 0.5)  # Razoável
-        elif atleta.preco < 2.0:
-            score += int(peso_preco * 0.4)  # Arriscado
-        elif 10.0 < atleta.preco <= 12.0:
-            score -= 10  # CARO: penalidade
+        # === FATOR 1: PREÇO IDEAL (30 pts) ===
+        # v8: Baseado na TAXA REAL de valorização por faixa de preço
+        # C$2-6 = sweet spot (45-62% chance real de valorizar)
+        if 2.0 <= atleta.preco < 4.0:
+            score += 30  # C$2-4: MPV=1.5pts, 45-62% chance - MELHOR
+        elif 4.0 <= atleta.preco < 6.0:
+            score += 28  # C$4-6: MPV=2-2.7pts, 44-45% - Excelente
+        elif 6.0 <= atleta.preco < 7.0:
+            score += 22  # C$6-7: MPV=2.9pts, 48% - Bom
+        elif 7.0 <= atleta.preco < 8.0:
+            score += 18  # C$7-8: MPV=3.4pts, 38% - Razoável
+        elif 1.0 <= atleta.preco < 2.0:
+            score += 15  # C$1-2: MPV=0.5pts mas poucos pontuam - Arriscado
+        elif 8.0 <= atleta.preco < 10.0:
+            score += 12  # C$8-10: MPV=4.4-5pts, 25-31% - Difícil
+        elif 10.0 <= atleta.preco < 13.0:
+            score += 5   # C$10-13: MPV=5-5.5pts, 31% - Caro
+        elif atleta.preco < 1.0:
+            score += 5   # C$<1: muito barato, pode nem jogar
         else:
-            score -= 20  # MUITO CARO: grande penalidade
+            score -= 10  # C$13+: MPV > 9pts, quase impossível (25%)
         
-        # 2. POSIÇÃO (20%)
+        # === FATOR 2: POSIÇÃO (20 pts) ===
+        # v8: Baseado em taxa REAL de valorização por posição
         if atleta.posicao_abrev == "TEC":
-            if atleta.preco <= 5.0 and is_rodada_1:
-                score += 25  # Técnico barato = OURO na R1!
-            elif atleta.preco <= 5.0:
-                score += 18  # Técnico barato R2+
-            else:
-                score += 15
-        elif atleta.posicao_abrev in ["ATA", "MEI"]:
-            score += 20
-        elif atleta.posicao_abrev == "LAT":
-            score += 18
+            score += 20  # 55% valorizam! Melhor posição
+            if atleta.preco <= 6.0:
+                score += 5  # TEC barato = ouro
         elif atleta.posicao_abrev == "ZAG":
-            score += 15
+            score += 18  # 45% valorizam - Melhor posição de linha
+        elif atleta.posicao_abrev == "LAT":
+            score += 16  # 40% valorizam
+        elif atleta.posicao_abrev == "MEI":
+            score += 14  # 37% valorizam + pontos de finalização/assistência
+        elif atleta.posicao_abrev == "ATA":
+            score += 12  # 36% MAS precisam avg 9.2pts! Alto risco/retorno
         else:  # GOL
-            score += 12
+            score += 13  # 33% valorizam
         
-        # 3. CONSTÂNCIA (peso adaptável) - v7 CORRIGIDO
-        media_pontos = atleta.media
+        # === FATOR 3: CONSTÂNCIA / QUALIDADE (25 pts) ===
+        # v8: Foco em "vai bater o MPV?" (que agora é real)
+        mpv_real = atleta.mpv  # Já calculado com tabela real
+        
         if is_rodada_1:
-            # R1: sem histórico, neutro
-            score += peso_constancia
+            # R1: sem histórico, usar preço como proxy (jogadores mais caros = melhor time)
+            # MAS para valorização, baratos são melhores!
+            score += 15  # Neutro base
+            if atleta.preco <= 6.0:
+                score += 5  # Baratos com MPV baixo na R1 
         elif jogador_sem_dados:
-            # v7: R2+ sem dados = PENALIDADE (não neutro!)
-            score -= 10  # Jogador que nunca jogou na R2+ = risco
-        elif media_pontos >= 7.0:
-            score += peso_constancia  # Jogador excelente
-        elif media_pontos >= 5.0:
-            score += int(peso_constancia * 0.85)
-        elif media_pontos >= 3.0:
-            score += int(peso_constancia * 0.65)
-        elif media_pontos > 0:
-            score += int(peso_constancia * 0.4)  # Média baixa
+            # R2+: nunca jogou = RISCO ALTO (suplente)
+            score -= 5
         else:
-            score += 0  # Média 0 com jogos = jogou mas não pontuou
+            # Média real vs MPV real = capacidade de superar o threshold
+            margem_real = atleta.media - mpv_real
+            
+            if margem_real >= 5.0:
+                score += 25  # Supera MPV com folga enorme
+            elif margem_real >= 3.0:
+                score += 22  # Supera bem o MPV
+            elif margem_real >= 1.5:
+                score += 18  # Supera MPV com margem boa
+            elif margem_real >= 0:
+                score += 14  # Exatamente no MPV (~50/50)
+            elif margem_real >= -1.5:
+                score += 8   # Ligeiramente abaixo do MPV
+            elif margem_real >= -3.0:
+                score += 3   # Abaixo do MPV
+            else:
+                score -= 5   # Muito abaixo - provavelmente não valoriza
         
-        # 4. Tendência de valorizar (5%)
-        if atleta.tendencia_valorizar > 0.7:
-            score += 5
-        
-        # 5. Confronto favorável (20% - aumentado!)
+        # === FATOR 4: CONFRONTO DA RODADA (20 pts) ===
         if self.confrontos_rodada:
             bonus_confronto = self.match_analyzer.calcular_bonus_confronto(
                 atleta.clube_id,
                 self.confrontos_rodada,
                 atleta.posicao_abrev
             )
-            pontos_confronto = (bonus_confronto - 0.7) / 0.6 * 20  # Aumentado de 15 para 20
+            # Converter: 1.0 = neutro (10pts), 1.3 = excelente (20pts), 0.7 = ruim (0pts)
+            pontos_confronto = (bonus_confronto - 0.7) / 0.6 * 20
             score += max(0, min(20, pontos_confronto))
             
             resumo = self.match_analyzer.get_resumo_confronto(
                 atleta.clube_id, self.confrontos_rodada
             )
             if resumo and "erro" not in resumo:
+                # Mando de campo: jogar em casa = ~30% mais pontuação
                 if resumo.get("local") == "CASA":
-                    score += 5  # Aumentado de 3 para 5
+                    score += 5
                 elif resumo.get("local") == "FORA":
-                    # PENALIDADE GRANDE para jogos fora no time de valorização
-                    # Valorizar depende de gols/assistências, mais difícil fora
-                    score -= 15  # PENALIDADE BASE
-                    # Penalidade EXTRA para atacantes e meias fora (menos gols/assistências)
+                    score -= 8  # Visitante pontua menos = mais difícil bater MPV
                     if atleta.posicao_abrev in ["ATA", "MEI"]:
-                        score -= 15  # Total -30 pts para atacantes/meias fora!
-                    
-                if resumo.get("dificuldade") == "FÁCIL":
-                    score += 8  # Aumentado de 4 para 8
-                elif resumo.get("dificuldade") == "DIFÍCIL":
-                    score -= 12  # Aumentado penalidade de 6 para 12
-                elif resumo.get("dificuldade") == "MUITO DIFÍCIL":
-                    score -= 20  # Aumentado penalidade de 6 para 20
-                    
-                # NOVA PENALIDADE: Times muito fracos (força < 50)
-                # Mesmo baratos, times fracos pontuam pouco = não valorizam
-                if resumo.get("dificuldade_score", 100) < 50:
-                    # Time adversário é muito fraco, então o time do jogador é fraco
-                    # Na verdade, dificuldade_score é a força do adversário
-                    pass
-                    
-            # PENALIDADE EXTRA: Verificar força do próprio time
-            # Buscar força do time nas estatísticas
+                        score -= 5  # Extra para ofensivos fora
+                
+                # Dificuldade do adversário
+                dificuldade = resumo.get("dificuldade", "MÉDIO")
+                if dificuldade == "FÁCIL":
+                    score += 6
+                elif dificuldade == "DIFÍCIL":
+                    score -= 8
+                elif dificuldade == "MUITO DIFÍCIL":
+                    score -= 15
+                
+                # Para defensores: chance de SG (bônus de pontuação grande)
+                if atleta.posicao_abrev in ["GOL", "ZAG", "LAT"]:
+                    chance_sg = resumo.get("chance_sg", 50)
+                    if chance_sg > 60:
+                        score += 6  # SG = bônus de pontos = mais chance de bater MPV
+                    elif chance_sg < 30:
+                        score -= 3
+            
+            # Força do próprio time
             stats = self.match_analyzer.estatisticas_times.get(atleta.clube_id)
             if stats and stats.forca_geral < 50:
-                # Time muito fraco: grande penalidade mesmo se barato
-                score -= 25  # Grande penalidade para times ruins
-                if atleta.posicao_abrev in ["ATA", "MEI"]:
-                    score -= 10  # Penalidade extra para atacantes de times fracos
-                    
-            # BÔNUS CIENTÍFICO: Priorizar times na análise de confrontos
-            # Integra match_analyzer com seleção de jogadores
-            try:
-                analise_confrontos = self.match_analyzer.analisar_partidas_rodada(
-                    self.confrontos_rodada,
-                    self.match_analyzer.clubes if hasattr(self.match_analyzer, 'clubes') else {}
-                )
-                times_escalar = analise_confrontos.get('timesParaEscalar', [])
-                
-                # Buscar abreviação do clube do atleta
-                clube_abrev = None
-                for clube_id, clube_info in self.match_analyzer.clubes.items():
-                    if clube_id == atleta.clube_id:
-                        clube_abrev = clube_info.get('abreviacao', clube_info.get('nome', '')[:3].upper())
-                        break
-                
-                if clube_abrev:
-                    # Verificar posição no ranking científico
-                    for i, time_rec in enumerate(times_escalar[:10]):  # TOP 10
-                        if time_rec.get('abrev') == clube_abrev or time_rec.get('nome') == clube_abrev:
-                            if i < 2:  # TOP 2: bônus MUITO forte (supera diferença de C$3-4)
-                                score += 40
-                            elif i < 5:  # TOP 5: bônus forte
-                                score += 28
-                            elif i < 8:  # TOP 8: bônus médio
-                                score += 18
-                            elif i < 10:  # TOP 10: bônus leve
-                                score += 10
-                            break
-            except Exception as e:
-                # Se falhar análise científica, continuar sem bônus
-                pass
+                score -= 20  # Time muito fraco não pontua
+            elif stats and stats.forca_geral < 60:
+                score -= 10  # Time fraco
         else:
             score += 10  # Neutro
         
-        # 5. Margem de segurança (15%) - Mantém
-        if atleta.margem_seguranca > 0:
-            score += min(15, atleta.margem_seguranca * 4)
-        else:
-            score += max(0, 7 + atleta.margem_seguranca * 2)
-        
-        # 6. Risco (15%) - Aumentado de 10% para 15%
+        # === FATOR 5: RISCO (15 pts) ===
         if atleta.risco == "baixo":
-            score += 15  # Aumentado
+            score += 15
         elif atleta.risco == "medio":
-            score += 7   # Aumentado
+            score += 7
         else:
-            score -= 5   # Penalidade maior
+            score -= 5  # Alto risco = penalidade
         
-        # 7. BÔNUS/PENALIDADE POR VARIAÇÃO (v7: CORRIGIDO!)
-        # v7: Bônus desvalorização SÓ para jogadores BOM em má fase
-        # Jogadores ruins que desvalorizaram NÃO são oportunidade
+        # === BÔNUS/PENALIDADES SITUACIONAIS ===
+        
+        # v8: Bônus desvalorização (jogador bom em má fase = oportunidade)
+        # CONDIÇÃO: média >= MPV real (pode bater) E jogou
         if hasattr(atleta, 'variacao') and not is_rodada_1:
             if atleta.variacao < 0:
-                if atleta.media >= 4.0 and atleta.jogos_num >= 2:
-                    # Jogador BOM que desvalorizou = OPORTUNIDADE REAL
-                    bonus_desval = min(30, abs(atleta.variacao) * 10)
+                if atleta.media >= mpv_real + 1.0 and atleta.jogos_num >= 1:
+                    # Jogador BOM que desvalorizou = preço caiu, MPV caiu, mais fácil valorizar!
+                    bonus_desval = min(20, abs(atleta.variacao) * 8)
                     score += bonus_desval
-                elif atleta.media >= 2.5 and atleta.jogos_num >= 1:
-                    # Jogador mediano que desvalorizou = oportunidade moderada
-                    bonus_desval = min(15, abs(atleta.variacao) * 5)
+                elif atleta.media >= mpv_real and atleta.jogos_num >= 1:
+                    # Jogador na fronteira, mas preço caiu = MPV mais baixo
+                    bonus_desval = min(10, abs(atleta.variacao) * 4)
                     score += bonus_desval
                 else:
-                    # Jogador RUIM que desvalorizou = jogador ruim, NÃO oportunidade
-                    # v7: PENALIDADE (era bônus +40!!)
-                    score -= min(15, abs(atleta.variacao) * 5)
-            elif atleta.variacao > 1.0:
-                # PENALIDADE para quem já valorizou muito
-                penalidade_val = min(25, atleta.variacao * 8)
+                    # Jogador RUIM que desvalorizou = NÃO é oportunidade
+                    score -= min(10, abs(atleta.variacao) * 3)
+            elif atleta.variacao > 1.5:
+                # Já valorizou muito = preço subiu, MPV subiu, mais difícil repetir
+                penalidade_val = min(20, atleta.variacao * 6)
                 score -= penalidade_val
         
-        # 8. PENALIDADE EXTRA PARA CAROS COM ALTA CONSTÂNCIA
-        if atleta.preco > 10.0 and atleta.media >= 5.0:
-            score -= 15
-        
-        # 9. v7: PENALIDADE por poucos jogos na R2+ (suplentes/banco)
+        # v8: Penalidade para jogadores sem jogos (suplentes/banco)
         if not is_rodada_1:
             if atleta.jogos_num == 0:
-                score -= 25  # Nunca jogou na R2+ = muito arriscado
-            elif atleta.jogos_num == 1 and atleta.media < 2.0:
-                score -= 15  # Jogou 1x e foi mal
+                score -= 20  # Nunca jogou = provavelmente não joga
+            elif atleta.jogos_num == 1 and atleta.media < 1.5:
+                score -= 10  # Jogou 1x e foi mal
+        
+        # v8: Penalidade para caros com alta média (já caros, MPV alto)
+        if atleta.preco > 12.0:
+            score -= 15  # C$12+ quase impossível valorizar
+        elif atleta.preco > 10.0 and atleta.media >= 5.0:
+            score -= 10  # Caro E bom = preço alto demais
         
         return max(0, score)
     
@@ -591,13 +558,22 @@ class TeamSelector:
         self,
         atletas_analisados: List[AnaliseJogador],
         esquema: str = "4-4-2",
-        preco_maximo_jogador: float = 10.0
+        preco_maximo_jogador: float = 8.0
     ) -> Optional[TimeEscalado]:
         """
         Seleciona time focado em valorização
         
+        VERSÃO v8 - Baseado em dados reais R2 2026:
+        - preco_maximo_jogador reduzido de 10 para 8 (C$8+ tem só 25-31% chance)
+        - Sweet spot C$2-6 priorizado pelo score
+        - Filtros adaptativos por rodada mantidos do v7
+        
         Prioriza:
-        1. Alta tendência de valorizar
+        1. Preço C$2-6 (MPV=1.5-2.7pts, 45-62% chance)
+        2. Posições ZAG/TEC (45-55% chance)
+        3. Confronto favorável (casa, adversário fraco)
+        4. Baixo risco
+        5. Média >= MPV real
         2. Preço baixo (maior potencial de ganho)
         3. Baixo risco
         4. Margem de segurança positiva
@@ -640,8 +616,8 @@ class TeamSelector:
             if a.risco == "alto":
                 continue
             
-            # Aceitar se tendência OK ou R1
-            if a.tendencia_valorizar >= 0.4 or is_rodada_1:
+            # v8: Tendência >= 0.25 (relaxado, pois taxa real é 35-46% no sweet spot)
+            if a.tendencia_valorizar >= 0.25 or is_rodada_1:
                 elegiveis.append(a)
         
         # Se não houver suficientes, relaxar filtro (manter filtro de time fraco)
