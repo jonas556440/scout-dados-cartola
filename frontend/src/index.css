@@ -41,6 +41,12 @@
     --info: 200 80% 55%;
     --info-foreground: 220 20% 6%;
 
+    /* Strategy Colors */
+    --valorizacao: 142 76% 45%;
+    --valorizacao-foreground: 220 20% 6%;
+    --pontuacao: 214 95% 60%;
+    --pontuacao-foreground: 220 20% 6%;
+
     /* Position Colors */
     --pos-gol: 200 80% 55%;
     --pos-zag: 280 70% 55%;
@@ -58,6 +64,8 @@
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(142, 76%, 45%) 0%, hsl(160, 60%, 35%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(45, 93%, 58%) 0%, hsl(35, 90%, 50%) 100%);
+    --gradient-valorizacao: linear-gradient(135deg, hsl(142, 76%, 45%) 0%, hsl(160, 84%, 39%) 100%);
+    --gradient-pontuacao: linear-gradient(135deg, hsl(214, 95%, 60%) 0%, hsl(230, 80%, 55%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(220, 20%, 8%) 0%, hsl(220, 20%, 4%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(220, 18%, 12%) 0%, hsl(220, 18%, 8%) 100%);
 
@@ -121,6 +129,31 @@
 
   .glow-gold {
     box-shadow: 0 0 30px -5px hsl(45 93% 58% / 0.3);
+  }
+
+  .glow-valorizacao {
+    box-shadow: 0 0 30px -5px hsl(142 76% 45% / 0.3);
+  }
+
+  .glow-pontuacao {
+    box-shadow: 0 0 30px -5px hsl(214 95% 60% / 0.3);
+  }
+
+  /* Team Type Cards */
+  .team-card-valorizacao {
+    border-color: hsl(142 76% 45% / 0.3);
+  }
+  .team-card-valorizacao:hover {
+    border-color: hsl(142 76% 45% / 0.6);
+    box-shadow: 0 0 30px -5px hsl(142 76% 45% / 0.25);
+  }
+
+  .team-card-pontuacao {
+    border-color: hsl(214 95% 60% / 0.3);
+  }
+  .team-card-pontuacao:hover {
+    border-color: hsl(214 95% 60% / 0.6);
+    box-shadow: 0 0 30px -5px hsl(214 95% 60% / 0.25);
   }
 
   /* Stat Card */
@@ -189,6 +222,14 @@
 
   .gold-gradient {
     background: var(--gradient-gold);
+  }
+
+  .valorizacao-gradient {
+    background: var(--gradient-valorizacao);
+  }
+
+  .pontuacao-gradient {
+    background: var(--gradient-pontuacao);
   }
 }
 

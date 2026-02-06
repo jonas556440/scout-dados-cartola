@@ -3,7 +3,7 @@ import type { Player, Team } from "@/types/cartola";
 import { FORMATIONS, POSITION_COLORS } from "@/types/cartola";
 import { PositionBadge } from "./PositionBadge";
 import { motion } from "framer-motion";
-import { Star, Users, Wallet, Target } from "lucide-react";
+import { Star, Users, Wallet, Target, TrendingUp, Zap } from "lucide-react";
 
 interface FormationDisplayProps {
   team: Team;
@@ -22,6 +22,7 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
   }
 
   const formation = FORMATIONS[team.esquema] || FORMATIONS['4-4-2'];
+  const isVal = team.tipo === 'valorizacao';
   
   // Mapear jogadores para posições
   const getPlayerForPosition = (positionIndex: number) => {
@@ -40,23 +41,55 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
   };
 
   return (
-    <div className={cn("glass-card overflow-hidden", className)}>
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border/50">
-        <div>
-          <h3 className="font-display text-lg font-bold">{team.nome}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className={cn(
-              "px-2 py-0.5 text-xs font-bold rounded-full",
-              team.tipo === 'valorizacao' ? "bg-primary/20 text-primary" : "bg-secondary/20 text-secondary"
+    <div className={cn(
+      "glass-card overflow-hidden transition-all",
+      isVal ? "team-card-valorizacao" : "team-card-pontuacao",
+      className
+    )}>
+      {/* Header com cor distinta */}
+      <div className={cn(
+        "flex items-center justify-between p-4 border-b",
+        isVal
+          ? "bg-green-500/5 border-green-500/20"
+          : "bg-blue-500/5 border-blue-500/20"
+      )}>
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "p-2 rounded-lg",
+            isVal
+              ? "bg-gradient-to-br from-green-500 to-emerald-600"
+              : "bg-gradient-to-br from-blue-500 to-indigo-600"
+          )}>
+            {isVal
+              ? <TrendingUp className="w-5 h-5 text-white" />
+              : <Zap className="w-5 h-5 text-white" />
+            }
+          </div>
+          <div>
+            <h3 className={cn(
+              "font-display text-lg font-bold",
+              isVal ? "text-green-400" : "text-blue-400"
             )}>
-              {team.tipo === 'valorizacao' ? 'Valorização' : 'Pontuação'}
-            </span>
-            <span className="text-sm text-muted-foreground">{team.esquema}</span>
+              {team.nome || (isVal ? 'Time Valorização' : 'Time Pontuação')}
+            </h3>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className={cn(
+                "px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider",
+                isVal
+                  ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                  : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+              )}>
+                {isVal ? '💰 Valorização' : '⚡ Pontuação'}
+              </span>
+              <span className="text-sm text-muted-foreground">{team.esquema}</span>
+            </div>
           </div>
         </div>
         <div className="text-right">
-          <div className="flex items-center gap-1 text-lg font-bold text-primary">
+          <div className={cn(
+            "flex items-center gap-1 text-lg font-bold",
+            isVal ? "text-green-400" : "text-blue-400"
+          )}>
             <Wallet className="w-4 h-4" />
             C${(team.custoTotal ?? 0).toFixed(0)}
           </div>
@@ -67,17 +100,25 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
       </div>
 
       {/* Campo */}
-      <div className="relative aspect-[3/4] bg-gradient-to-b from-green-900/40 to-green-800/40 overflow-hidden">
+      <div className={cn(
+        "relative aspect-[3/4] overflow-hidden",
+        isVal
+          ? "bg-gradient-to-b from-green-900/40 to-green-800/40"
+          : "bg-gradient-to-b from-blue-900/30 to-slate-900/40"
+      )}>
         {/* Linhas do campo */}
-        <div className="absolute inset-4 border-2 border-white/20 rounded-lg">
+        <div className={cn(
+          "absolute inset-4 border-2 rounded-lg",
+          isVal ? "border-white/20" : "border-white/15"
+        )}>
           {/* Linha do meio */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/20" />
+          <div className={cn("absolute top-1/2 left-0 right-0 h-0.5", isVal ? "bg-white/20" : "bg-white/15")} />
           {/* Círculo central */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 border-2 border-white/20 rounded-full" />
+          <div className={cn("absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 border-2 rounded-full", isVal ? "border-white/20" : "border-white/15")} />
           {/* Área do gol */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-12 border-2 border-white/20 border-b-0" />
+          <div className={cn("absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-12 border-2 border-b-0", isVal ? "border-white/20" : "border-white/15")} />
           {/* Grande área */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-24 border-2 border-white/20 border-b-0" />
+          <div className={cn("absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-24 border-2 border-b-0", isVal ? "border-white/20" : "border-white/15")} />
         </div>
 
         {/* Jogadores */}
@@ -134,7 +175,10 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
                   <div className="text-[10px] font-semibold text-white drop-shadow-lg whitespace-nowrap leading-tight">
                     {player.apelido.length > 8 ? player.apelido.substring(0, 8) + '.' : player.apelido}
                   </div>
-                  <div className="text-[9px] text-primary font-bold leading-tight">
+                  <div className={cn(
+                    "text-[9px] font-bold leading-tight",
+                    isVal ? "text-green-400" : "text-blue-400"
+                  )}>
                     C${(player.preco ?? 0).toFixed(1)}
                   </div>
                   {/* Pontuação/Valorização atual - NOVO */}
@@ -175,7 +219,7 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
             >
               <PositionBadge position={player.posicao} size="sm" />
               <span className="text-xs font-medium">{player.apelido}</span>
-              <span className="text-xs text-primary">C${(player.preco ?? 0).toFixed(1)}</span>
+              <span className={cn("text-xs font-bold", isVal ? "text-green-400" : "text-blue-400")}>C${(player.preco ?? 0).toFixed(1)}</span>
               {/* Pontuação atual - NOVO */}
               {player.pontuacao !== undefined && player.pontuacao > 0 && (
                 <span className="text-xs text-secondary font-bold bg-secondary/20 px-1 rounded">
@@ -199,9 +243,12 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 divide-x divide-border/50 border-t border-border/50">
+      <div className={cn(
+        "grid grid-cols-3 divide-x divide-border/50 border-t",
+        isVal ? "border-green-500/20" : "border-blue-500/20"
+      )}>
         <div className="p-3 text-center">
-          <div className="text-lg font-bold text-primary">C${(team.custoTotal ?? 0).toFixed(0)}</div>
+          <div className={cn("text-lg font-bold", isVal ? "text-green-400" : "text-blue-400")}>C${(team.custoTotal ?? 0).toFixed(0)}</div>
           <div className="text-xs text-muted-foreground">Custo Total</div>
         </div>
         <div className="p-3 text-center">

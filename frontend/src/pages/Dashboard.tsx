@@ -14,6 +14,7 @@ import {
   Zap,
   Loader2,
   AlertCircle,
+  Info,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -191,6 +192,28 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* Explicação das Estratégias */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mb-6"
+      >
+        <div className="glass-card p-4 border-info/20">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-info mt-0.5 shrink-0" />
+            <div>
+              <h3 className="font-display text-sm font-bold text-info mb-1">Como funcionam as sugestões?</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Geramos <strong className="text-green-400">dois tipos de time</strong> para cada rodada: 
+                o <strong className="text-green-400">💰 Time Valorização</strong> foca em jogadores baratos (C$3-6) que vão subir de preço — ideal para aumentar seu patrimônio. 
+                O <strong className="text-blue-400">⚡ Time Pontuação</strong> seleciona jogadores com maior chance de pontuar bem — ideal para subir no ranking.
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Times Sugeridos */}
@@ -241,14 +264,14 @@ const Dashboard = () => {
       {/* Top Players */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Valorizadores */}
-        <div className="glass-card p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-primary/20 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-primary" />
+        <div className="glass-card p-6 team-card-valorizacao">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg">
+              <TrendingUp className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-display text-lg font-bold">Top Valorizadores</h3>
-              <p className="text-xs text-muted-foreground">Maior potencial de valorização</p>
+              <h3 className="font-display text-lg font-bold text-green-400">💰 Top Valorizadores</h3>
+              <p className="text-xs text-muted-foreground">Maior potencial de subir de preço</p>
             </div>
           </div>
           
@@ -258,21 +281,21 @@ const Dashboard = () => {
                 key={player.id} 
                 player={player} 
                 compact 
-                className={index === 0 ? "border-primary/50" : ""}
+                className={index === 0 ? "border-green-500/50" : ""}
               />
             ))}
           </div>
         </div>
 
         {/* Top Pontuadores */}
-        <div className="glass-card p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-secondary/20 rounded-lg">
-              <Zap className="w-5 h-5 text-secondary" />
+        <div className="glass-card p-6 team-card-pontuacao">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
+              <Zap className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-display text-lg font-bold">Top Pontuadores</h3>
-              <p className="text-xs text-muted-foreground">Maior potencial de pontuação</p>
+              <h3 className="font-display text-lg font-bold text-blue-400">⚡ Top Pontuadores</h3>
+              <p className="text-xs text-muted-foreground">Maior chance de pontuar na rodada</p>
             </div>
           </div>
           

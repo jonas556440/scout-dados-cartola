@@ -8,7 +8,6 @@ import { Loader2, AlertCircle, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -17,13 +16,11 @@ import {
   RefreshCw, 
   Save, 
   Search,
-  Filter,
   Star,
   TrendingUp,
   Zap,
 } from "lucide-react";
 import type { Player, Position } from "@/types/cartola";
-import { PositionBadge } from "@/components/cartola/PositionBadge";
 import { cn } from "@/lib/utils";
 
 const POSITIONS: Position[] = ['GOL', 'ZAG', 'LAT', 'MEI', 'ATA', 'TEC'];
@@ -47,6 +44,8 @@ const Escalacao = () => {
   const gerarEscalacao = useGerarEscalacao();
 
   const teamData = tipoTime === 'valorizacao' ? escalacaoData?.timeValorizacao : escalacaoData?.timePontuacao;
+
+  const isVal = tipoTime === 'valorizacao';
 
   // Função para regenerar time
   const handleRegenerar = async () => {
@@ -83,7 +82,7 @@ const Escalacao = () => {
     
     toast({
       title: "Time salvo!",
-      description: `Time ${tipoTime === 'valorizacao' ? 'Valorização' : 'Pontuação'} salvo com sucesso.`,
+      description: `Time ${isVal ? 'Valorização' : 'Pontuação'} salvo com sucesso.`,
     });
   };
 
@@ -150,7 +149,10 @@ const Escalacao = () => {
             </Button>
             
             <Button 
-              className="hero-gradient text-primary-foreground gap-2"
+              className={cn(
+                "gap-2 text-white",
+                isVal ? "valorizacao-gradient" : "pontuacao-gradient"
+              )}
               onClick={handleSalvar}
               disabled={!teamData || timeSalvo}
             >
@@ -161,28 +163,72 @@ const Escalacao = () => {
         </div>
       </motion.div>
 
-      {/* Tabs */}
-      <Tabs value={tipoTime} onValueChange={(v) => setTipoTime(v as 'valorizacao' | 'pontuacao')} className="mb-8">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="valorizacao" className="gap-2" title="Jogadores baratos (C$3-6) com potencial de subir de preço">
-            <TrendingUp className="w-4 h-4" />
-            Valorização
-          </TabsTrigger>
-          <TabsTrigger value="pontuacao" className="gap-2" title="Jogadores com maior chance de fazer pontos na rodada">
-            <Zap className="w-4 h-4" />
-            Pontuação
-          </TabsTrigger>
-        </TabsList>
-        
-        {/* Explicação do tipo de time */}
-        <div className="mt-4 p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
-          {tipoTime === 'valorizacao' ? (
-            <p>💰 <strong>Time Valorização:</strong> Foca em jogadores baratos (C$3-6) que vão subir de preço. Ideal para aumentar seu patrimônio em cartoletas.</p>
-          ) : (
-            <p>⚡ <strong>Time Pontuação:</strong> Foca em jogadores com maior chance de pontuar bem na rodada. Ideal para subir no ranking da liga.</p>
+      {/* Strategy Selector - Cards visuais */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <button
+          onClick={() => { setTipoTime('valorizacao'); setTimeSalvo(false); }}
+          className={cn(
+            "rounded-xl p-4 text-left transition-all border-2",
+            tipoTime === 'valorizacao'
+              ? "bg-green-500/10 border-green-500/50 shadow-lg shadow-green-500/10"
+              : "bg-card/50 border-border/50 hover:border-green-500/30 opacity-60 hover:opacity-100"
           )}
-        </div>
-      </Tabs>
+        >
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "p-2.5 rounded-xl transition-all",
+              tipoTime === 'valorizacao'
+                ? "bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg"
+                : "bg-green-500/20"
+            )}>
+              <TrendingUp className={cn("w-5 h-5", tipoTime === 'valorizacao' ? "text-white" : "text-green-400")} />
+            </div>
+            <div>
+              <h3 className={cn(
+                "font-display font-bold text-base",
+                tipoTime === 'valorizacao' ? "text-green-400" : "text-muted-foreground"
+              )}>
+                💰 Time Valorização
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Jogadores baratos (C$3-6) que vão subir de preço
+              </p>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => { setTipoTime('pontuacao'); setTimeSalvo(false); }}
+          className={cn(
+            "rounded-xl p-4 text-left transition-all border-2",
+            tipoTime === 'pontuacao'
+              ? "bg-blue-500/10 border-blue-500/50 shadow-lg shadow-blue-500/10"
+              : "bg-card/50 border-border/50 hover:border-blue-500/30 opacity-60 hover:opacity-100"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "p-2.5 rounded-xl transition-all",
+              tipoTime === 'pontuacao'
+                ? "bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg"
+                : "bg-blue-500/20"
+            )}>
+              <Zap className={cn("w-5 h-5", tipoTime === 'pontuacao' ? "text-white" : "text-blue-400")} />
+            </div>
+            <div>
+              <h3 className={cn(
+                "font-display font-bold text-base",
+                tipoTime === 'pontuacao' ? "text-blue-400" : "text-muted-foreground"
+              )}>
+                ⚡ Time Pontuação
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Jogadores com maior chance de pontuar na rodada
+              </p>
+            </div>
+          </div>
+        </button>
+      </div>
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
