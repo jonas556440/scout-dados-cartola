@@ -14,10 +14,12 @@ import {
   Github,
   Mail,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Trophy
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDashboard } from "@/hooks/useCartolaApi";
+import { SEO } from "@/components/SEO";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -108,16 +110,20 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-950/20 via-background to-background">
+      <SEO path="/" />
       {/* Header/Nav */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
-              <span className="text-white font-bold">C</span>
+              <span className="text-white font-bold">S</span>
             </div>
             <span className="font-bold text-xl">ScoutDados</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
+            <Link to="/brasileirao" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Brasileirão
+            </Link>
             <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Dashboard
             </Link>
@@ -127,8 +133,14 @@ export default function LandingPage() {
             <Link to="/confrontos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Confrontos
             </Link>
+            <Link to="/scouts" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Scouts
+            </Link>
             <Link to="/mercado" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Mercado
+            </Link>
+            <Link to="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Blog
             </Link>
           </nav>
           <Button onClick={() => navigate('/escalacao')} className="bg-green-600 hover:bg-green-700">
@@ -145,10 +157,10 @@ export default function LandingPage() {
             100% Gratuito
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent leading-tight">
-            Escale Seu Time com Inteligência de Dados
+            Estatísticas do Brasileirão &<br />Inteligência para o Cartola
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Algoritmos avançados analisam <strong>20+ fatores</strong> para gerar os melhores times do Cartola FC 2026 - completamente grátis.
+            Classificação com <strong>simulação Monte Carlo</strong>, previsão de placares, análise de scouts e escalação inteligente para o Cartola FC 2026 — completamente grátis.
           </p>
           
           {/* Stats Badge */}
@@ -170,11 +182,20 @@ export default function LandingPage() {
             <Button 
               size="lg" 
               className="gap-2 text-lg px-8 py-6 bg-green-600 hover:bg-green-700"
+              onClick={() => navigate('/brasileirao')}
+            >
+              <Trophy className="w-5 h-5" />
+              Ver Brasileirão
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="gap-2 text-lg px-8 py-6"
               onClick={() => navigate('/escalacao')}
             >
               <Zap className="w-5 h-5" />
-              Gerar Minha Escalação
-              <ChevronRight className="w-4 h-4" />
+              Gerar Escalação
             </Button>
             <Button 
               size="lg" 
@@ -183,7 +204,7 @@ export default function LandingPage() {
               onClick={() => navigate('/dashboard')}
             >
               <BarChart3 className="w-5 h-5" />
-              Ver Dashboard
+              Dashboard
             </Button>
           </div>
         </div>
@@ -278,19 +299,31 @@ export default function LandingPage() {
         <Card className="bg-gradient-to-r from-green-600/10 to-emerald-600/10 border-green-600/20">
           <CardContent className="py-12 text-center">
             <h2 className="text-3xl font-bold mb-4">
-              Pronto para Dominar o Cartola?
+              Pronto para Dominar o Brasileirão?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Junte-se a milhares de cartoleiros que já usam análise de dados para escalar times vencedores.
+              Classificação com probabilidades, previsão de placares e escalação 
+              inteligente para o Cartola FC — tudo grátis e atualizado a cada rodada.
             </p>
-            <Button 
-              size="lg" 
-              className="gap-2 text-lg px-8 py-6 bg-green-600 hover:bg-green-700"
-              onClick={() => navigate('/escalacao')}
-            >
-              <Zap className="w-5 h-5" />
-              Gerar Escalação Grátis
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="gap-2 text-lg px-8 py-6 bg-green-600 hover:bg-green-700"
+                onClick={() => navigate('/brasileirao')}
+              >
+                <Trophy className="w-5 h-5" />
+                Ver Classificação
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="gap-2 text-lg px-8 py-6"
+                onClick={() => navigate('/escalacao')}
+              >
+                <Zap className="w-5 h-5" />
+                Gerar Escalação Grátis
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </section>
@@ -303,13 +336,13 @@ export default function LandingPage() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
-                  <span className="text-white font-bold">C</span>
+                  <span className="text-white font-bold">S</span>
                 </div>
                 <span className="font-bold text-xl">ScoutDados</span>
               </div>
               <p className="text-muted-foreground text-sm mb-4">
-                Sistema de análise inteligente para Cartola FC 2026. 
-                Algoritmos avançados para escalações otimizadas.
+                Estatísticas do Brasileirão 2026 e ferramentas inteligentes para Cartola FC.
+                Classificação, previsões, scouts e escalações otimizadas.
               </p>
               <p className="text-xs text-muted-foreground">
                 Este site não é afiliado, endossado ou patrocinado pela Globo ou Cartola FC. 
@@ -321,6 +354,11 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Navegação</h4>
               <ul className="space-y-2 text-sm">
+                <li>
+                  <Link to="/brasileirao" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Brasileirão
+                  </Link>
+                </li>
                 <li>
                   <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
                     Dashboard
@@ -334,6 +372,11 @@ export default function LandingPage() {
                 <li>
                   <Link to="/confrontos" className="text-muted-foreground hover:text-foreground transition-colors">
                     Confrontos
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/scouts" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Scouts & Análises
                   </Link>
                 </li>
                 <li>
@@ -351,6 +394,16 @@ export default function LandingPage() {
                 <li>
                   <Link to="/sobre" className="text-muted-foreground hover:text-foreground transition-colors">
                     Sobre
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacidade" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Política de Privacidade
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/termos" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Termos de Uso
                   </Link>
                 </li>
                 <li>

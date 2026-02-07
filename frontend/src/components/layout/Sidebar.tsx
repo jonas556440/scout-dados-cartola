@@ -7,23 +7,47 @@ import {
   Trophy,
   TrendingUp,
   History,
-  Settings,
   Swords,
   BarChart3,
   Menu,
   X,
+  Shield,
+  FileText,
+  Star,
+  Newspaper,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useDashboard } from "@/hooks/useCartolaApi";
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: Users, label: 'Escalação', href: '/escalacao' },
-  { icon: Swords, label: 'Confrontos', href: '/confrontos' },
-  { icon: TrendingUp, label: 'Mercado', href: '/mercado' },
-  { icon: History, label: 'Histórico', href: '/historico' },
-  { icon: BarChart3, label: 'Estatísticas', href: '/estatisticas' },
+const navSections = [
+  {
+    header: "Brasileirão",
+    emoji: "🏆",
+    items: [
+      { icon: Trophy, label: 'Classificação', href: '/brasileirao' },
+      { icon: Swords, label: 'Confrontos', href: '/confrontos' },
+      { icon: Star, label: 'Scouts', href: '/scouts' },
+    ],
+  },
+  {
+    header: "Cartola FC",
+    emoji: "⚽",
+    items: [
+      { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+      { icon: Users, label: 'Escalação', href: '/escalacao' },
+      { icon: TrendingUp, label: 'Mercado', href: '/mercado' },
+      { icon: History, label: 'Histórico', href: '/historico' },
+    ],
+  },
+  {
+    header: "Análises",
+    emoji: "📊",
+    items: [
+      { icon: BarChart3, label: 'Estatísticas', href: '/estatisticas' },
+      { icon: Newspaper, label: 'Blog', href: '/blog' },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -66,53 +90,70 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center gap-3 p-6 border-b border-sidebar-border">
           <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
-            <Trophy className="w-5 h-5 text-primary-foreground" />
+            <span className="text-lg font-bold text-primary-foreground">S</span>
           </div>
           <div>
-            <h1 className="font-display text-lg font-bold">Cartola FC</h1>
-            <p className="text-xs text-muted-foreground">2026</p>
+            <h1 className="font-display text-lg font-bold">ScoutDados</h1>
+            <p className="text-xs text-muted-foreground">Estatísticas & Cartola</p>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.href;
-            
-            return (
-              <Link
-                key={item.href}
-                to={item.href}
-                onClick={() => setIsOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
-                  "hover:bg-sidebar-accent",
-                  isActive && "bg-sidebar-accent text-sidebar-primary"
-                )}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeNav"
-                    className="absolute left-0 w-1 h-8 bg-sidebar-primary rounded-r-full"
-                  />
-                )}
-                <item.icon className={cn(
-                  "w-5 h-5 transition-colors",
-                  isActive ? "text-sidebar-primary" : "text-sidebar-foreground/60"
-                )} />
-                <span className={cn(
-                  "font-medium transition-colors",
-                  isActive ? "text-sidebar-foreground" : "text-sidebar-foreground/60"
-                )}>
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
+        <nav className="p-4 space-y-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 240px)' }}>
+          {navSections.map((section) => (
+            <div key={section.header}>
+              <div className="text-xs uppercase text-muted-foreground tracking-wider mt-4 mb-2 px-3 flex items-center gap-1.5">
+                <span>{section.emoji}</span>
+                <span>{section.header}</span>
+              </div>
+              {section.items.map((item) => {
+                const isActive = location.pathname === item.href;
+                
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
+                      "hover:bg-sidebar-accent",
+                      isActive && "bg-sidebar-accent text-sidebar-primary"
+                    )}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeNav"
+                        className="absolute left-0 w-1 h-8 bg-sidebar-primary rounded-r-full"
+                      />
+                    )}
+                    <item.icon className={cn(
+                      "w-5 h-5 transition-colors",
+                      isActive ? "text-sidebar-primary" : "text-sidebar-foreground/60"
+                    )} />
+                    <span className={cn(
+                      "font-medium transition-colors",
+                      isActive ? "text-sidebar-foreground" : "text-sidebar-foreground/60"
+                    )}>
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* Bottom Section */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-sidebar-border">
+          {/* Legal Links */}
+          <div className="flex items-center gap-3 mb-3 px-2">
+            <Link to="/privacidade" onClick={() => setIsOpen(false)} className="text-[10px] text-sidebar-foreground/40 hover:text-sidebar-foreground/80 transition-colors flex items-center gap-1">
+              <Shield className="w-3 h-3" />Privacidade
+            </Link>
+            <Link to="/termos" onClick={() => setIsOpen(false)} className="text-[10px] text-sidebar-foreground/40 hover:text-sidebar-foreground/80 transition-colors flex items-center gap-1">
+              <FileText className="w-3 h-3" />Termos
+            </Link>
+          </div>
           <div className="glass-card p-4">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">

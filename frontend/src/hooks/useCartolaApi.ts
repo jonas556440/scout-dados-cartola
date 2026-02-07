@@ -5,7 +5,26 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartolaApi } from '@/config/api';
 import { cacheUtils } from '@/lib/persistor';
-import type { Player, Team, Match, DashboardStats } from '@/types/cartola';
+import type { 
+    Player, 
+    Team, 
+    Match, 
+    DashboardStats,
+    PrevisaoRodadaResponse,
+    PrevisaoCustomizadaRequest,
+    PrevisaoCustomizadaResponse,
+    NoticiasTimeResponse,
+    NoticiasRodadaResponse,
+    ConfrontosAnaliseResponse,
+    ForcaTimesResponse,
+    ForcaTime,
+    ClassificacaoResponse,
+    RodadaDetalhadaResponse,
+    AcuraciaResponse,
+    ScoutsDestaquesResponse,
+    ScoutDetalhadoResponse,
+    DesfalquesResponse,
+} from '@/types/cartola';
 
 // ============ Dashboard ============
 
@@ -99,43 +118,12 @@ export function useConfrontos(rodada?: number) {
     });
 }
 
-interface ConfrontosAnalise {
-    rodada: number;
-    timesParaEscalar: Array<{
-        clubeId: number;
-        nome: string;
-        abrev: string;
-        adversario: string;
-        local: string;
-        dificuldade: string;
-        chanceSg: number;
-        expectativaGols: number;
-        scoreGeral: number;
-    }>;
-    timesParaEvitar: Array<{
-        clubeId: number;
-        abrev: string;
-        adversario: string;
-        dificuldade: string;
-    }>;
-    melhoresParaSg: Array<{
-        clubeId: number;
-        abrev: string;
-        adversario: string;
-        chanceSg: number;
-    }>;
-    melhoresParaGols: Array<{
-        clubeId: number;
-        abrev: string;
-        adversario: string;
-        expectativaGols: number;
-    }>;
-}
+// ============ Confrontos Análise ============
 
 export function useConfrontosAnalise(rodada?: number) {
     return useQuery({
         queryKey: ['confrontos-analise', rodada],
-        queryFn: () => cartolaApi.getConfrontosAnalise(rodada) as Promise<ConfrontosAnalise>,
+        queryFn: () => cartolaApi.getConfrontosAnalise(rodada) as Promise<ConfrontosAnaliseResponse>,
         staleTime: 1000 * 60 * 10, // 10 minutos
         gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
         retry: 2,
@@ -152,31 +140,7 @@ export function useConfrontosAnalise(rodada?: number) {
 
 // ============ Força dos Times ============
 
-interface ForcaTime {
-    id: number;
-    nome: string;
-    abrev: string;
-    posicao: number;
-    jogos: number;
-    vitorias: number;
-    empates: number;
-    derrotas: number;
-    golsPro: number;
-    golsContra: number;
-    forcaCasa: number;
-    forcaFora: number;
-    forcaGeral: number;
-    forma: string;
-    ranking: number;
-    escudo?: string;
-}
-
-interface ForcaTimesResponse {
-    rodada: number;
-    times: ForcaTime[];
-    metodologia: string;
-    peso_historico: number;
-}
+// ============ Força dos Times ============
 
 export function useForcaTimes(rodada?: number) {
     return useQuery({
@@ -291,6 +255,143 @@ export function useHistoricoStatus() {
         staleTime: 1000 * 60 * 5,
         retry: 2,
         retryDelay: 1000,
+    });
+}
+
+// ============ Salvar Time ============
+
+export function useSalvarTime() {
+    const queryClient = useQueryClient();
+    
+    return useMutation({
+        mutationFn: (data: {
+            tipo: string;
+            rodada: number;
+            titulares_ids: number[];
+            capitao_id: number;
+            esquema?: string;
+            cartoletas: number;
+            pontuacaoEsperada?: number;
+        }) => cartolaApi.salvarTime(data),
+        onSuccess: () => {
+            // Invalidar cache do histórico para refletir o novo time
+            queryClient.invalidateQueries({ queryKey: ['historico-rodadas'] });
+            queryClient.invalidateQueries({ queryKey: ['historico-status'] });
+        },
+    });
+}
+
+// ============ ENDPOINTS ÓRFÃOS - CONECTADOS (FASE 1) ============
+
+// /api/previsoes/placares - Previsão de placares da rodada
+export function usePrevisaoPlacares(rodada?: number) {
+    return useQuery({
+        queryKey: ['previsao-placares', rodada],
+        queryFn: () => cartolaApi.getPrevisaoPlacares(rodada) as Promise<PrevisaoRodadaResponse>,
+        staleTime: 1000 * 60 * 30, // 30 minutos (previsões mudam pouco)
+        gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
+        retry: 2,
+        retryDelay: 1000,
+    });
+}
+
+// /api/previsoes/customizado - Previsão de jogo customizado (mutation)
+export function usePrevisaoCustomizada() {
+    return useMutation({
+        mutationFn: (request: PrevisaoCustomizadaRequest) => 
+            cartolaApi.postPrevisaoCustomizada(request) as Promise<PrevisaoCustomizadaResponse>,
+    });
+}
+
+// /api/noticias/{clube_abrev} - Notícias e desfalques de um time
+export function useNoticiasTime(clubeAbrev: string) {
+    return useQuery({
+        queryKey: ['noticias-time', clubeAbrev],
+        queryFn: () => cartolaApi.getNoticiasTime(clubeAbrev) as Promise<NoticiasTimeResponse>,
+        staleTime: 1000 * 60 * 15, // 15 minutos (notícias mudam relativamente rápido)
+        gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
+        retry: 2,
+        retryDelay: 1000,
+        enabled: !!clubeAbrev, // Só buscar se tiver clube
+    });
+}
+
+// /api/noticias/rodada/{rodada} - Desfalques consolidados da rodada
+export function useNoticiasRodada(rodada?: number) {
+    return useQuery({
+        queryKey: ['noticias-rodada', rodada],
+        queryFn: () => cartolaApi.getNoticiasRodada(rodada) as Promise<NoticiasRodadaResponse>,
+        staleTime: 1000 * 60 * 20, // 20 minutos
+        gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
+        retry: 2,
+        retryDelay: 1000,
+    });
+}
+
+// ============ Brasileirão ============
+
+export function useClassificacao() {
+    return useQuery({
+        queryKey: ['brasileirao-classificacao'],
+        queryFn: () => cartolaApi.getClassificacao() as Promise<ClassificacaoResponse>,
+        staleTime: 1000 * 60 * 10,
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 2,
+        retryDelay: 1000,
+    });
+}
+
+export function useRodadaDetalhada(rodada: number) {
+    return useQuery({
+        queryKey: ['brasileirao-rodada', rodada],
+        queryFn: () => cartolaApi.getRodadaDetalhada(rodada) as Promise<RodadaDetalhadaResponse>,
+        staleTime: 1000 * 60 * 10,
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 2,
+        enabled: rodada > 0,
+    });
+}
+
+export function useAcuracia() {
+    return useQuery({
+        queryKey: ['brasileirao-acuracia'],
+        queryFn: () => cartolaApi.getAcuracia() as Promise<AcuraciaResponse>,
+        staleTime: 1000 * 60 * 30,
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 2,
+    });
+}
+
+// ============ Scouts ============
+
+export function useScoutsDestaques(rodada?: number) {
+    return useQuery({
+        queryKey: ['scouts-destaques', rodada],
+        queryFn: () => cartolaApi.getScoutsDestaques(rodada) as Promise<ScoutsDestaquesResponse>,
+        staleTime: 1000 * 60 * 10,
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 2,
+    });
+}
+
+export function useScoutJogador(atletaId: number) {
+    return useQuery({
+        queryKey: ['scout-jogador', atletaId],
+        queryFn: () => cartolaApi.getScoutJogador(atletaId) as Promise<ScoutDetalhadoResponse>,
+        staleTime: 1000 * 60 * 10,
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 2,
+        enabled: atletaId > 0,
+    });
+}
+
+export function useDesfalques() {
+    return useQuery({
+        queryKey: ['scouts-desfalques'],
+        queryFn: () => cartolaApi.getDesfalques() as Promise<DesfalquesResponse>,
+        staleTime: 1000 * 60 * 15,
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 2,
     });
 }
 

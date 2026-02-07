@@ -53,34 +53,34 @@ tail -f /root/cartolafc2026/scheduler.log
 
 ---
 
-### Frontend React (Porta 5176)
+### Frontend React (Estáticos via OpenLiteSpeed)
+
+**Em produção, não há serviço frontend separado.** O OpenLiteSpeed serve os arquivos estáticos do diretório `frontend/dist/`.
+
 ```bash
-# Ver status
-sudo systemctl status cartolafc-frontend.service
+# Build do frontend (gera dist/)
+cd /www/wwwroot/scoutdados.com.br/frontend && bun run build
 
-# Iniciar
-sudo systemctl start cartolafc-frontend.service
-
-# Parar
-sudo systemctl stop cartolafc-frontend.service
-
-# Reiniciar
-sudo systemctl restart cartolafc-frontend.service
-
-# Ver logs
-sudo journalctl -u cartolafc-frontend.service -f
+# Reiniciar OpenLiteSpeed para servir novos arquivos
+/usr/local/lsws/bin/lswsctrl restart
 ```
 
-**Configuração:** `/etc/systemd/system/cartolafc-frontend.service`
-**Comando:** `npx vite --host 0.0.0.0 --port 5176`
-**WorkingDirectory:** `/root/cartolafc2026/frontend`
+**Para desenvolvimento local:**
+```bash
+cd /www/wwwroot/scoutdados.com.br/frontend
+bun run dev  # Porta 5176 com hot reload
+```
+
+**Configuração:** OpenLiteSpeed virtual host aponta para `frontend/dist/`  
+**Produção:** Arquivos estáticos (HTML/CSS/JS) sem processo Node  
+**Dev:** Vite dev server com HMR
 
 
 ## 🔍 Verificação Rápida
 
 ### Ambos os serviços
 ```bash
-sudo systemctl status cartolafc-backend.service cartolafc-frontend.service
+sudo systemctl status cartolafc-backend.service cartolafc-scheduler.service
 ```
 
 ### Testar endpoints
@@ -88,15 +88,20 @@ sudo systemctl status cartolafc-backend.service cartolafc-frontend.service
 # Backend
 curl http://localhost:8000/api/status
 
-# Frontend
+# Frontend (produção via OpenLiteSpeed na porta 443/80)
+curl https://scoutdados.com.br
+
+# Frontend (dev, se rodando)
 curl http://localhost:5176
 ```
 
 ### Verificar portas
 ```bash
 # Ver processos nas portas
-sudo lsof -i :8000  # Backend
-sudo lsof -i :5176  # Frontend
+sudo lsof -i :8000  # Backend FastAPI
+sudo lsof -i :80    # OpenLiteSpeed HTTP
+sudo lsof -i :443   # OpenLiteSpeed HTTPS
+sudo lsof -i :5176  # Vite dev (só se rodando localmente)
 
 # Ou
 sudo netstat -tlnp | grep -E "8000|5176"

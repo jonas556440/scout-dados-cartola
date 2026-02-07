@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SEO } from "@/components/SEO";
 
 const Dashboard = () => {
   // Usar dados da API real (com dataUpdatedAt para cache info)
@@ -104,6 +105,11 @@ const Dashboard = () => {
 
   return (
     <MainLayout>
+      <SEO
+        title="Dashboard"
+        description="Painel do Cartola FC 2026: mercado, escalação otimizada, confrontos e destaques da rodada."
+        path="/dashboard"
+      />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

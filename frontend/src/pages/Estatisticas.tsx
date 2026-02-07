@@ -355,12 +355,12 @@ const Estatisticas = () => {
                     <td className="p-3 text-center text-sm">{time.derrotas}</td>
                     <td className="p-3 text-center">
                       <span className="inline-flex items-center justify-center px-2 py-1 rounded-md bg-primary/20 text-primary font-semibold">
-                        {time.forcaCasa.toFixed(0)}
+                        {(time.forcaCasa ?? 0).toFixed(0)}
                       </span>
                     </td>
                     <td className="p-3 text-center">
                       <span className="inline-flex items-center justify-center px-2 py-1 rounded-md bg-secondary/20 text-secondary font-semibold">
-                        {time.forcaFora.toFixed(0)}
+                        {(time.forcaFora ?? 0).toFixed(0)}
                       </span>
                     </td>
                   </tr>

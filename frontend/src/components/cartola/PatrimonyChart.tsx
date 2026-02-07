@@ -29,9 +29,9 @@ export function PatrimonyChart({ data, className }: PatrimonyChartProps) {
 
   const ultimoPatrimonio = data[data.length - 1];
   const primeiroPatrimonio = data[0];
-  const variacaoTotal = ultimoPatrimonio 
+  const variacaoTotal = (ultimoPatrimonio && typeof ultimoPatrimonio.cartoletas === 'number')
     ? ((ultimoPatrimonio.cartoletas - 100) / 100 * 100).toFixed(1)
-    : 0;
+    : '0.0';
 
   return (
     <motion.div
@@ -64,7 +64,7 @@ export function PatrimonyChart({ data, className }: PatrimonyChartProps) {
           </div>
           <div>
             <div className="text-lg font-bold text-primary">
-              C${ultimoPatrimonio?.cartoletas.toFixed(1) || '100.0'}
+              C${(ultimoPatrimonio?.cartoletas ?? 100).toFixed(1)}
             </div>
             <div className="text-xs text-muted-foreground">Patrimônio Atual</div>
           </div>
@@ -76,7 +76,7 @@ export function PatrimonyChart({ data, className }: PatrimonyChartProps) {
           </div>
           <div>
             <div className="text-lg font-bold text-secondary">
-              {ultimoPatrimonio?.pontuacaoTotal.toFixed(1) || '0'}
+              {(ultimoPatrimonio?.pontuacaoTotal ?? 0).toFixed(1)}
             </div>
             <div className="text-xs text-muted-foreground">Pontuação Total</div>
           </div>

@@ -1,191 +1,181 @@
-# Copilot Instructions - Cartola FC 2026
+# Copilot Instructions - ScoutDados.com.br
 
-## Visão Geral da Arquitetura
+## Arquitetura
 
-Sistema fullstack para análise e escalação inteligente no Cartola FC, composto por:
+Portal de estatísticas de futebol (Cartola FC + Brasileirão). Monolito FastAPI + SPA React.
 
-| Componente | Tecnologia | Porta | Arquivo Principal |
-|------------|------------|-------|-------------------|
-| **Backend API** | FastAPI + Uvicorn | 8000 | `api_server.py` |
-| **Frontend** | React + Vite + shadcn/ui | 5176 | `frontend/` |
-| **CLI** | Rich + Click | - | `main.py` |
-| **Scheduler** | APScheduler | - | `scheduler_service.py` |
-| **Banco** | SQLite (SQLAlchemy) | - | `data/cartola.db` |
+| Componente | Stack | Porta | Entrada |
+|------------|-------|-------|---------|
+| Backend API | FastAPI + Uvicorn | 8000 | `api_server.py` (~2000 linhas, monolítico — sem APIRouter) |
+| Frontend | React 18 + Vite (SWC) + shadcn/ui + React Query 5 | 5176 | `frontend/` |
+| Scheduler | APScheduler (BackgroundScheduler) | — | `scheduler_service.py` |
+| CLI | Rich + Click | — | `main.py` |
+| DB | SQLite + SQLAlchemy (WAL mode) | — | `data/cartola.db` |
 
-## Fluxo de Dados Principal
+**Fluxo de dados:** API Cartola Globo → `src/api/cartola_api.py` (requests síncrono, cache 5min, retry 3x) → `src/analysis/` (MPV, TeamSelector, ScorePredictor) → `api_server.py` (endpoints `/api/*`) → Frontend (proxy Vite `/api` → `:8000`)
 
-```
-API Cartola Globo → CartolaAPI (src/api/) → MPVCalculator/TeamSelector (src/analysis/)
-                                          ↓
-                                    DatabaseManager (src/database/)
-                                          ↓
-                              api_server.py (FastAPI endpoints /api/*)
-                                          ↓
-                              Frontend (Vite proxy /api → :8000)
-```
+**Produção:** OpenLiteSpeed serve estáticos (`frontend/dist/`), 2 serviços systemd (`cartolafc-backend`, `cartolafc-scheduler`).
 
-## Convenções Críticas
+## Convenções Obrigatórias
 
-### Backend Python
-
-- **Imports absolutos**: Sempre use `sys.path.append(str(Path(__file__).parent.parent))` no início de arquivos Python
-  - Importações de `src/` e `config/` dependem do path sendo adicionado primeiro
-  - Ver exemplos em [api_server.py](api_server.py), [main.py](main.py), [scheduler_service.py](scheduler_service.py)
-- **Pydantic models**: Endpoints FastAPI retornam modelos compatíveis com `frontend/src/types/cartola.ts`
-  - `PlayerResponse` ↔ `Player`, `ClubResponse` ↔ `Club`, `MatchResponse` ↔ `Match`
-  - **Crítico**: Manter sincronia entre Pydantic e TypeScript ao adicionar campos
-- **Cache da API**: `CartolaAPI._cache` com timeout de 5 minutos - evite chamadas repetidas
-  - Cache por endpoint usando dict com chave `(endpoint, timestamp)`
-- **Retry automático**: 3 tentativas com delay de 1s para API externa
-  - **Não fazer retry em erros 4xx** (apenas 5xx e timeouts)
-  - Ver `_make_request()` em [src/api/cartola_api.py](src/api/cartola_api.py)
-
+### Python — Path hack obrigatório
+Todo arquivo Python executável do root precisa deste preâmbulo **antes** de qualquer import de `src/` ou `config/`:
 ```python
-# Padrão de import no projeto
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent))
-
-from src.api.cartola_api import CartolaAPI
-from config.settings import settings
+sys.path.append(str(Path(__file__).parent))  # .parent se na raiz, .parent.parent se em subpasta
 ```
 
-### Frontend TypeScript
+### Sincronia Pydantic ↔ TypeScript (3 arquivos sempre juntos)
+Ao adicionar/alterar campos em responses da API, editar **os três** :
+1. **Pydantic model** em `api_server.py` (ex: `PlayerResponse`, `MatchResponse`)
+2. **Função converter** em `api_server.py` (`converter_atleta_para_response()` ou `converter_partida_para_response()`) — bridge entre dict cru da API Cartola → Pydantic model
+3. **Interface TS** em `frontend/src/types/cartola.ts` (ex: `Player`, `Match`)
 
-- **Path alias**: Use `@/` para imports (configurado em `tsconfig.json` e `vite.config.ts`)
-- **API hooks**: Use hooks de `useCartolaApi.ts` com React Query, **não fetch direto**
-  - `useAtletas()`, `useConfrontos()`, `useDashboard()` com staleTime/refetchInterval configurados
-  - Todos os hooks retornam `{ data, isLoading, error, refetch }`
-- **Tipos**: Interfaces em `src/types/cartola.ts` - manter sincronizado com Pydantic models
-- **Proxy**: `/api/*` é proxiado para `localhost:8000` no dev (ver [vite.config.ts](frontend/vite.config.ts))
-  - Em produção, usar reverse proxy (nginx/caddy)
+### Novo endpoint — Checklist completo
+Ao criar endpoint no backend, completar **toda a cadeia**:
+1. Endpoint em `api_server.py` (seguir padrão try/except com HTTPException 503 se API indisponível)
+2. Path em `frontend/src/config/api.ts` → `API_ENDPOINTS`
+3. Método no objeto `cartolaApi` (mesmo arquivo)
+4. Hook React Query em `frontend/src/hooks/useCartolaApi.ts`
+5. Tipo/interface em `frontend/src/types/cartola.ts`
 
+### Frontend — API sempre via hooks
 ```typescript
-// Padrão de uso da API - SEMPRE via hooks
-import { useAtletas, useConfrontos } from '@/hooks/useCartolaApi';
+// ✅ hooks React Query — frontend/src/hooks/useCartolaApi.ts
+const { data, isLoading } = useAtletas({ posicao: 'ATA' });
 
-// ❌ ERRADO - não fazer fetch direto
-fetch('/api/atletas')
-
-// ✅ CORRETO
-const { data: atletas, isLoading } = useAtletas({ posicao: 'ATA' });
+// ❌ NUNCA fetch direto
+fetch('/api/mercado/atletas');
 ```
 
-### Algoritmos de Seleção (src/analysis/team_selector.py)
+### Frontend — Organização de componentes
+- `components/ui/` — shadcn/ui primitives (Radix) — usar `cn()` de `@/lib/utils` para classes
+- `components/cartola/` — componentes de domínio (PlayerCard, MatchCard, FormationDisplay)
+- `components/layout/` — MainLayout (sidebar + conteúdo) e Sidebar
+- `components/SEO.tsx` — wrapper Helmet para meta tags OG/Twitter
+- Path alias `@/` → `frontend/src/`
+- Ícones: sempre `lucide-react`
+- Animações: `framer-motion` (motion.div com initial/animate)
 
-**Dois tipos de time por rodada com estratégias distintas:**
+### Frontend — Branding e navegação
+- **Marca:** "ScoutDados" em toda a UI. "Cartola FC" é só nome de seção no menu
+- **Logo:** quadrado verde com letra "S" (não usar ícone Trophy, não usar "C")
+- **Sidebar:** 3 seções com headers (`🏆 Brasileirão`, `⚽ Cartola FC`, `📊 Análises`)
+- **Nunca usar** "Cartola FC 2026" como título/marca do app
 
-1. **Time Valorização**: Foca em jogadores C$3-6 (sweet spot confirmado por dados reais)
-   - Exemplo rodada 1: Gabriel Menino C$6→C$10.77 (+79.5%), Léo Derik C$2→C$5.14 (+157%)
-   - Fatores: Preço ideal (35%), Tendência (25%), Confronto (25%), Margem (15%)
-   
-2. **Time Pontuação**: Maximiza pontos considerando confrontos e mando de campo
-   - Fatores: Qualidade jogador (30%), Confronto (35%), Posição (15%), Risco (20%)
-   - Usa `MatchAnalyzer` para força ofensiva/defensiva, mando, chance SG, expectativa gols
+### Frontend — Blog
+- Posts em `frontend/src/content/posts.ts` (array de objetos TSX, sem MDX)
+- Páginas: `Blog.tsx` (lista) e `BlogPost.tsx` (individual por slug)
+- Usa `react-markdown` para renderizar conteúdo
+- Linguagem 100% estatística, disclaimer obrigatório em posts de previsão
 
-**Estruturas de dados principais:**
-- `AnaliseJogador` (dataclass): Contém `jogador`, `mpv`, `score`, `tendencia`, `risco`, `confronto`
-- `TimeEscalado` (dataclass): Contém `titulares`, `capitao`, `reservas`, `analise_confrontos`
-- `Confronto` (dataclass): Dados do jogo com força dos times, mando, forma recente
+### Frontend — Padrão de página
+Cada página: default export, importa `MainLayout` diretamente (não há layout aninhado no router), usa `<SEO>` para meta tags, estados loading/error antes do conteúdo.
+
+### Backend — Padrão de endpoint
+Endpoints são funções **síncronas** (`def`, não `async def`). Usam instâncias globais singleton (`api`, `mpv_calc`, `team_selector`, etc.) criadas no module-load. Padrão recorrente:
+```python
+@app.get("/api/...")
+def endpoint():
+    try:
+        mercado = api.get_mercado()
+        if not mercado:
+            raise HTTPException(status_code=503, detail="API Cartola indisponível")
+        clubes = mercado.get("clubes", {})
+        # ... lógica ...
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro: {str(e)}")
+```
+
+### Resiliência
+- `src/utils/cache.py`: `CircuitBreaker` por fonte + `@with_circuit_breaker("fonte")` decorator (async)
+- `src/utils/rate_limiter.py`: slowapi, 200/min default, endpoints pesados 30/min
+- `CartolaAPI` tem cache interno (dict, TTL 5min) separado do cache global
 
 ## Comandos de Desenvolvimento
 
 ```bash
-# Backend (sempre do root do projeto)
-pip install -r requirements.txt
+# Backend (do root)
 uvicorn api_server:app --reload --port 8000
 
-# Frontend (usa Bun, não npm)
+# Frontend (usa Bun, NÃO npm/yarn)
 cd frontend && bun install && bun run dev
 
-# CLI interativo
-python main.py
-# Comandos CLI: status | confrontos | escalar | salvar | patrimonio | historico
-
 # Testes
-pytest                           # Backend (não implementado ainda)
-cd frontend && bun run test      # Frontend (vitest)
+pytest tests/ -m smoke          # smoke tests (aceita 200 ou 503)
+pytest tests/ -v                # todos
+cd frontend && bun run test     # vitest
+
+# Produção
+sudo systemctl restart cartolafc-backend cartolafc-scheduler  # backend + scheduler
+cd frontend && bun run build  # rebuild do frontend
+/usr/local/lsws/bin/lswsctrl restart  # OpenLiteSpeed serve dist/
+sudo journalctl -u cartolafc-backend -f
 ```
-
-## Serviços Systemd (Produção)
-
-**Três serviços independentes rodando em background:**
-
-```bash
-# Ver status de todos
-sudo systemctl status cartolafc-backend cartolafc-frontend cartolafc-scheduler
-
-# Logs individuais
-sudo journalctl -u cartolafc-backend -f      # API logs
-sudo journalctl -u cartolafc-frontend -f     # Frontend logs
-tail -f scheduler.log                         # Scheduler logs (arquivo local)
-
-# Reiniciar após mudanças no código
-sudo systemctl restart cartolafc-backend
-sudo systemctl restart cartolafc-scheduler
-sudo systemctl restart cartolafc-frontend
-```
-
-**Arquivos de configuração:**
-- `/etc/systemd/system/cartolafc-backend.service` - API FastAPI
-- `/etc/systemd/system/cartolafc-frontend.service` - React/Vite (modo preview)
-- `/etc/systemd/system/cartolafc-scheduler.service` - Jobs agendados
-
-## Endpoints API Principais
-
-| Endpoint | Método | Descrição | Modelo Response |
-|----------|--------|-----------|-----------------|
-| `/api/status` | GET | Status do mercado e rodada atual | `MercadoStatus` |
-| `/api/mercado/atletas` | GET | Lista atletas com análise MPV | `List[PlayerResponse]` |
-| `/api/confrontos/analise` | GET | Análise de confrontos da rodada | `ConfrontosAnalise` |
-| `/api/escalacao/gerar` | POST | Gera times otimizados (val + pont) | `EscalacaoResponse` |
-| `/api/dashboard` | GET | Dados consolidados para dashboard | `DashboardStats` |
-| `/api/atletas/{atleta_id}` | GET | Detalhes + histórico de um atleta | `PlayerDetailResponse` |
-
-**Query params comuns:**
-- `rodada` (int): Rodada específica (default: rodada atual)
-- `posicao` (str): Filtrar por posição (GOL, ZAG, LAT, MEI, ATA, TEC)
-- `preco_max` (float): Filtrar por preço máximo
-- `limite` (int): Limitar número de resultados
-
-## Estrutura de Dados Chave
-
-**Backend (dataclasses):**
-- `AnaliseJogador` (mpv_calculator.py): Análise individual com MPV, tendência, risco, confronto
-- `TimeEscalado` (team_selector.py): Time completo com titulares (12), capitão (1), reservas (5)
-- `Confronto` (match_analyzer.py): Dados do jogo com força ofensiva/defensiva, mando, forma
-
-**Frontend (TypeScript interfaces):**
-- `Player` (cartola.ts): Compatível com `PlayerResponse` Pydantic
-- `Match` (cartola.ts): Compatível com `MatchResponse` Pydantic
-- `Club` (cartola.ts): Compatível com `ClubResponse` Pydantic
-
-**Integração crítica:** Ao adicionar campos no backend, adicione em ambos:
-1. Pydantic model em [api_server.py](api_server.py)
-2. Interface TypeScript em [frontend/src/types/cartola.ts](frontend/src/types/cartola.ts)
 
 ## Regras de Negócio Cartola
 
-- **Orçamento**: 100 cartoletas iniciais (usa patrimônio acumulado após rodadas)
-- **Formação**: 12 titulares = 1 GOL + 10 jogadores de linha + 1 TEC
-- **Esquemas válidos**: `3-4-3`, `3-5-2`, `4-3-3`, `4-4-2`, `4-5-1`, `5-3-2`, `5-4-1`
-  - Definidos em [config/settings.py](config/settings.py) - `ESQUEMAS_VALIDOS`
-- **Capitão**: Recebe 1.5x pontos da rodada
-- **Status jogador**: 7=Provável, 2=Dúvida, 3=Suspenso, 5=Contundido, 6=Nulo
-  - API retorna `status_id`, converter para string no frontend
-- **Limite por clube**: Máximo 5 jogadores do mesmo time (configurable)
+- **Formação:** 12 titulares (1 GOL + 10 linha + 1 TEC), esquemas em `config/settings.py` → `ESQUEMAS_VALIDOS`
+- **Capitão:** 1.5x pontos | **Orçamento:** 100 C$ | **Limite:** max 5 jogadores/clube
+- **Status IDs (API Cartola):** 7=Provável, 2=Dúvida, 3=Suspenso, 5=Contundido, 6=Nulo
+- **Dois times/rodada:** Valorização (C$3-6, maximiza Δpreço) e Pontuação (maximiza score)
+- **Scouts:** `config/settings.py` → `SCOUTS` dict (ex: `"G": 8.0`, `"CA": -1.0`)
 
-## API Externa (Cartola Globo)
+## Módulos de Análise (`src/analysis/`)
 
-**Base URL**: `https://api.cartolafc.globo.com`
+| Módulo | Classe | Uso |
+|--------|--------|-----|
+| `mpv_calculator.py` | `MPVCalculator` | Mínimo para valorizar: `≈ 0.55 * Preço^1.15` |
+| `team_selector.py` | `TeamSelector` | Gera 2 times otimizados, respeita restrições |
+| `match_analyzer.py` | `MatchAnalyzer` | Força dos times, prob 1x2, forma recente |
+| `confrontos_analyzer.py` | `ConfrontosAnalyzer` | Escalar/evitar times por posição |
+| `score_predictor.py` | `ScorePredictor` | V3 híbrido Poisson + frequências contextuais |
+| `advanced_predictor.py` | `AdvancedScorePredictor` | h2h + desfalques → `POST /api/previsoes/customizado` |
+| `monte_carlo.py` | `MonteCarloSimulator` | Simulação campeonato (título/Liberta/rebaixa) |
 
-**Endpoints usados:**
-- `/atletas/mercado` - Todos jogadores + preços + status (JSON ~2MB)
-- `/mercado/status` - Status mercado (aberto/fechado) + rodada atual
-- `/atletas/pontuados` - Scouts após rodada encerrar
-- `/partidas/{rodada}` - Jogos da rodada para análise confrontos
-- `/clubes` - Times brasileiros (id, nome, escudo)
+## API Cartola Globo
 
-**Rate limiting**: Sem limite oficial, mas usar cache de 5min para não sobrecarregar
-**Timeout**: 15s (reduzido de 30s para melhor UX)
-**Retry**: 3 tentativas com 1s de delay entre elas
+Base: `https://api.cartolafc.globo.com` | Sem auth | Cache 5min | Timeout 15s | Retry 3x (só 5xx)
+- `/atletas/mercado` — jogadores + preços (~2MB JSON, campo escudos: `escudos.60x60`)
+- `/mercado/status` — mercado aberto/fechado + rodada
+- `/atletas/pontuados` — scouts pós-rodada
+- `/partidas/{rodada}` — jogos da rodada
+- `/clubes` — times (id, nome, escudo)
+
+## Estrutura de Diretórios Chave
+
+```
+api_server.py              # TODOS endpoints + Pydantic models + converters (monolítico)
+config/settings.py         # Settings (pydantic-settings), posições, scouts, esquemas
+src/api/cartola_api.py     # Cliente HTTP síncrono (requests.Session, cache dict interno)
+src/analysis/              # 7 módulos de análise (ver tabela acima)
+src/database/models.py     # 12 tabelas SQLAlchemy (Clube, Atleta, Partida, Scout, etc.)
+src/database/db_manager.py # CRUD com context manager: with self.get_session() as session
+src/database/history_manager.py # Escalações + patrimônio (session pattern diferente: manual close)
+src/utils/cache.py         # MemoryCache/RedisCache + CircuitBreaker por fonte
+src/utils/rate_limiter.py  # slowapi rate limiting
+src/scrapers/              # WebScraper (notícias/desfalques)
+scheduler_service.py       # 9 jobs APScheduler (5min-6h)
+
+frontend/src/config/api.ts          # API_ENDPOINTS + apiRequest<T> + cartolaApi helper
+frontend/src/hooks/useCartolaApi.ts  # 22 hooks React Query (18 queries + 3 mutations + 1 combo)
+frontend/src/types/cartola.ts        # Interfaces TS (~625 linhas, espelham Pydantic)
+frontend/src/lib/persistor.ts        # localStorage fallback (5 buckets: dashboard, escalacao, etc.)
+frontend/src/components/ui/          # 48 componentes shadcn/ui
+frontend/src/components/cartola/     # Componentes de domínio (PlayerCard, MatchCard, etc.)
+frontend/src/content/posts.ts        # Posts do blog (array de objetos, sem MDX)
+frontend/src/pages/Blog.tsx          # Lista de posts
+frontend/src/pages/BlogPost.tsx      # Post individual por slug
+```
+
+## Gotchas Conhecidos
+
+- **Tudo síncrono:** `CartolaAPI` usa `requests` (bloqueante), endpoints são `def` (não `async def`). `httpx`/`aiohttp` estão nos requirements mas não são usados.
+- **POST com query params:** `POST /api/previsoes/customizado` recebe params via `Query()`, não body JSON — o frontend envia como query string.
+- **Dois caches separados:** `CartolaAPI._cache` (dict, 5min) vs `src/utils/cache.py` (Memory/Redis). O decorator `@cached` do cache global não é usado nos endpoints.
+- **Sem DI:** Instâncias globais singleton, sem dependency injection ou APIRouter.
+- **Settings singleton:** `from config.settings import settings` — acesso direto ao objeto global.
+- **`strict: false`** no tsconfig do frontend — sem proteção de null checks.

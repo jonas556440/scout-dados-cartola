@@ -106,11 +106,11 @@ export function MatchCard({ match, className, showProbabilities = true }: MatchC
         {match.over25 && match.btts && (
           <div className="mt-2 flex items-center justify-center gap-4 text-xs">
             <div className="px-2 py-1 rounded bg-muted/50">
-              <span className="text-muted-foreground">Over 2.5:</span>
+              <span className="text-muted-foreground">+2.5 gols:</span>
               <span className="ml-1 font-semibold">{match.over25?.toFixed(0)}%</span>
             </div>
             <div className="px-2 py-1 rounded bg-muted/50">
-              <span className="text-muted-foreground">BTTS:</span>
+              <span className="text-muted-foreground">Ambos marcam:</span>
               <span className="ml-1 font-semibold">{match.btts?.toFixed(0)}%</span>
             </div>
           </div>

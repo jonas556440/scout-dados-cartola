@@ -222,7 +222,7 @@ const Mercado = () => {
                     <div className="flex flex-col items-center">
                       <span className="font-bold">
                         {player.pontuacao !== undefined && player.pontuacao > 0 
-                          ? player.pontuacao.toFixed(1) 
+                          ? (player.pontuacao ?? 0).toFixed(1) 
                           : (player.media ?? 0).toFixed(1)}
                       </span>
                       {player.pontuacao !== undefined && player.pontuacao > 0 && (

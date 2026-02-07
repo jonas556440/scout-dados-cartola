@@ -178,8 +178,8 @@ sudo journalctl -u cartolafc-backend.service -f   # Logs
 
 **Frontend (porta 5176):**
 ```bash
-sudo systemctl status cartolafc-frontend.service   # Ver status
-sudo systemctl restart cartolafc-frontend.service  # Reiniciar
+cd frontend && bun run build                       # Build frontend
+/usr/local/lsws/bin/lswsctrl restart               # Reiniciar OpenLiteSpeed
 ```
 
 📚 **Ver guia completo**: [SERVICOS.md](SERVICOS.md) | [docs/EXECUCAO.md](docs/EXECUCAO.md)

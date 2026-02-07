@@ -243,12 +243,13 @@ class MPVCalculator:
         return round(max(0, mpv_ajustado), 2)
     
     def estimar_pontuacao(
-        self, 
+        self,
         media: float,
         scouts_historicos: List[Dict] = None,
         posicao_id: int = 4,
         mandante: bool = True,
-        dificuldade_adversario: str = "medio"
+        dificuldade_adversario: str = "medio",
+        preco: float = 0.0
     ) -> float:
         """
         Estima a pontuação esperada do jogador
@@ -265,6 +266,13 @@ class MPVCalculator:
         if not scouts_historicos:
             # Sem histórico, usar apenas média com ajustes
             base = media
+            # Fallback para R1: sem jogos disputados, média=0
+            if base == 0:
+                # Estimar com base no preço (proxy de qualidade)
+                if preco > 0:
+                    base = preco * 0.5
+                else:
+                    base = 3.0  # Pontuação mínima razoável
         else:
             # Ponderar histórico
             ultimas_pontuacoes = [s.get("pontuacao", 0) for s in scouts_historicos[:5]]
@@ -452,7 +460,7 @@ class MPVCalculator:
         
         # Estimar pontuação
         pontuacao_esperada = self.estimar_pontuacao(
-            media, scouts_historicos, posicao_id, mandante, dificuldade_adversario
+            media, scouts_historicos, posicao_id, mandante, dificuldade_adversario, preco
         )
         
         # Calcular tendência (v8: agora usa preço e posição)

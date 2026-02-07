@@ -17,6 +17,20 @@ export const API_ENDPOINTS = {
     historicoRodadas: '/api/historico/rodadas',
     historicoRodada: '/api/historico/rodada',
     historicoStatus: '/api/historico/status',
+    historicoSalvar: '/api/historico/salvar',
+    // Endpoints órfãos - Fase 1
+    previsaoPlacares: '/api/previsoes/placares',
+    previsaoCustomizado: '/api/previsoes/customizado',
+    noticiasTime: '/api/noticias',
+    noticiasRodada: '/api/noticias/rodada',
+    // Brasileirão - Fase 2
+    brasileiraoClassificacao: '/api/brasileirao/classificacao',
+    brasileiraoRodada: '/api/brasileirao/rodada',
+    brasileiraoAcuracia: '/api/brasileirao/acuracia',
+    // Scouts - Fase 2
+    scoutsDestaques: '/api/scouts/destaques',
+    scoutsJogador: '/api/scouts/jogador',
+    scoutsDesfalques: '/api/scouts/desfalques',
 } as const;
 
 export async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -77,4 +91,78 @@ export const cartolaApi = {
         apiRequest(`${API_ENDPOINTS.historicoRodada}/${rodada}`),
     
     getHistoricoStatus: () => apiRequest(API_ENDPOINTS.historicoStatus),
+    
+    salvarTime: (data: {
+        tipo: string;
+        rodada: number;
+        titulares_ids: number[];
+        capitao_id: number;
+        esquema?: string;
+        cartoletas: number;
+        pontuacaoEsperada?: number;
+    }) => apiRequest(API_ENDPOINTS.historicoSalvar, {
+        method: 'POST',
+        body: JSON.stringify(data),
+    }),
+    
+    // ========== ENDPOINTS ÓRFÃOS - CONECTADOS (FASE 1) ==========
+    
+    // GET /api/previsoes/placares - Previsão de placares da rodada
+    getPrevisaoPlacares: (rodada?: number) => {
+        const query = rodada ? `?rodada=${rodada}` : '';
+        return apiRequest(`${API_ENDPOINTS.previsaoPlacares}${query}`);
+    },
+    
+    // POST /api/previsoes/customizado - Previsão de jogo customizado
+    // Backend usa query params, não body JSON
+    postPrevisaoCustomizada: (data: {
+        mandante: string;
+        visitante: string;
+        forcaMandante?: number;
+        forcaVisitante?: number;
+    }) => {
+        const params = new URLSearchParams({
+            mandante: data.mandante,
+            visitante: data.visitante,
+            forca_mandante: String(data.forcaMandante || 50),
+            forca_visitante: String(data.forcaVisitante || 50),
+        });
+        return apiRequest(`${API_ENDPOINTS.previsaoCustomizado}?${params}`, {
+            method: 'POST',
+        });
+    },
+    
+    // GET /api/noticias/{clube_abrev} - Notícias e desfalques de um time
+    getNoticiasTime: (clubeAbrev: string) => 
+        apiRequest(`${API_ENDPOINTS.noticiasTime}/${clubeAbrev.toUpperCase()}`),
+    
+    // GET /api/noticias/rodada/{rodada} - Desfalques consolidados da rodada
+    getNoticiasRodada: (rodada?: number) => {
+        const query = rodada ? `/${rodada}` : '';
+        return apiRequest(`${API_ENDPOINTS.noticiasRodada}${query}`);
+    },
+
+    // ========== BRASILEIRÃO (FASE 2) ==========
+
+    getClassificacao: () => apiRequest(API_ENDPOINTS.brasileiraoClassificacao),
+
+    getRodadaDetalhada: (rodada: number) =>
+        apiRequest(`${API_ENDPOINTS.brasileiraoRodada}/${rodada}`),
+
+    getAcuracia: () => apiRequest(API_ENDPOINTS.brasileiraoAcuracia),
+
+    // ========== SCOUTS (FASE 2) ==========
+
+    getScoutsDestaques: (rodada?: number, limite?: number) => {
+        const params = new URLSearchParams();
+        if (rodada) params.set('rodada', rodada.toString());
+        if (limite) params.set('limite', limite.toString());
+        const query = params.toString();
+        return apiRequest(`${API_ENDPOINTS.scoutsDestaques}${query ? `?${query}` : ''}`);
+    },
+
+    getScoutJogador: (atletaId: number) =>
+        apiRequest(`${API_ENDPOINTS.scoutsJogador}/${atletaId}`),
+
+    getDesfalques: () => apiRequest(API_ENDPOINTS.scoutsDesfalques),
 };

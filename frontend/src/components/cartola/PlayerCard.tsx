@@ -68,8 +68,8 @@ export function PlayerCard({
           )}>
             <Zap className="w-3 h-3" />
             {(player.pontuacao && player.pontuacao > 0) 
-              ? player.pontuacao.toFixed(1)
-              : (player.media ? player.media.toFixed(1) : '0.0')
+              ? (player.pontuacao ?? 0).toFixed(1)
+              : (player.media ?? 0).toFixed(1)
             }
             <span className="text-[10px] font-normal lowercase opacity-80">
               {(player.pontuacao && player.pontuacao > 0) ? 'pts' : 'méd'}
@@ -92,7 +92,7 @@ export function PlayerCard({
               ) : (
                 <TrendingDown className="w-3 h-3" />
               )}
-              {player.valorizacao > 0 ? '+' : ''}{player.valorizacao.toFixed(1)}%
+              {player.valorizacao > 0 ? '+' : ''}{(player.valorizacao ?? 0).toFixed(1)}%
             </div>
           )}
           
@@ -165,7 +165,7 @@ export function PlayerCard({
               player.pontuacao && player.pontuacao > 0 ? "text-success" : ""
             )}>
               {player.pontuacao !== undefined && player.pontuacao > 0 
-                ? player.pontuacao.toFixed(1) 
+                ? (player.pontuacao ?? 0).toFixed(1) 
                 : (player.media ?? 0).toFixed(1)}
             </div>
             <div className="text-xs text-muted-foreground">

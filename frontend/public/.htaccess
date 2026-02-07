@@ -1,0 +1,13 @@
+# SPA fallback (Apache/OpenLiteSpeed com Auto Load .htaccess)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Não interceptar a API (proxy do OpenLiteSpeed)
+    RewriteCond %{REQUEST_URI} !^/api/
+
+    # Se não existir arquivo/pasta, servir o index.html
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.html [L]
+</IfModule>

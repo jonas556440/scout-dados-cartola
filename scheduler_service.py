@@ -151,6 +151,16 @@ class CartolaScheduler:
         )
         logger.info("✅ Job 'limpar_cache' agendado (a cada 15 min)")
         
+        # Tarefa 10: Regenerar sitemap a cada 6h
+        self.scheduler.add_job(
+            func=self.regenerar_sitemap,
+            trigger=CronTrigger(hour='*/6', minute=15),
+            id='regenerar_sitemap',
+            name='Regenerar Sitemap XML',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'regenerar_sitemap' agendado (a cada 6h)")
+        
         # Iniciar scheduler
         self.scheduler.start()
         logger.info("🟢 Scheduler ATIVO - Monitoramento em execução")
@@ -534,6 +544,24 @@ class CartolaScheduler:
                 
         except Exception as e:
             logger.error(f"❌ Erro ao limpar cache: {e}", exc_info=True)
+
+    def regenerar_sitemap(self):
+        """
+        Regenera o sitemap.xml a cada 6 horas.
+        Executa generate_sitemap.py do projeto.
+        """
+        try:
+            import subprocess
+            result = subprocess.run(
+                [sys.executable, str(Path(__file__).parent / "generate_sitemap.py")],
+                capture_output=True, text=True, timeout=30
+            )
+            if result.returncode == 0:
+                logger.info(f"✅ Sitemap regenerado: {result.stdout.strip()}")
+            else:
+                logger.warning(f"⚠️ Sitemap falhou: {result.stderr.strip()}")
+        except Exception as e:
+            logger.error(f"❌ Erro ao regenerar sitemap: {e}", exc_info=True)
 
 
 def main():

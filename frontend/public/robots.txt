@@ -1,8 +1,19 @@
+# ScoutDados.com.br - Robots
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /api/admin/
+Disallow: /docs
+Disallow: /redoc
+
 User-agent: Googlebot
 Allow: /
+Disallow: /api/
+Allow: /sitemap.xml
 
 User-agent: Bingbot
 Allow: /
+Disallow: /api/
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +21,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+Sitemap: https://scoutdados.com.br/sitemap.xml

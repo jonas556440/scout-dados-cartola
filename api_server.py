@@ -7,6 +7,7 @@ Formato: JSON compatível com src/types/cartola.ts do frontend
 """
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response as FastAPIResponse
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -27,9 +28,11 @@ from src.database.db_manager import DatabaseManager
 from src.database.history_manager import HistoryManager
 from config.settings import settings
 
-# Segurança
+# Segurança e Observabilidade
 from src.utils.rate_limiter import limiter, setup_rate_limiting, RATE_LIMITS
 from src.utils.security_headers import SecurityHeadersMiddleware
+from src.utils.metrics import MetricsMiddleware, metrics
+from src.utils.cache import cache, circuit_breakers
 import os
 
 
@@ -213,6 +216,9 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 # Rate Limiting (proteção contra DDoS/abuso)
 setup_rate_limiting(app)
+
+# Métricas de performance
+app.add_middleware(MetricsMiddleware)
 
 # Instâncias globais
 api = CartolaAPI()
@@ -529,8 +535,8 @@ def get_previsoes_placares(rodada: Optional[int] = None):
     - Placar mais provável
     - Top 5 placares possíveis
     - Probabilidades de vitória/empate/derrota
-    - Over/Under 2.5 gols
-    - BTTS (Ambos marcam)
+    - Probabilidade de mais de 2.5 gols
+    - Probabilidade de ambos marcarem
     """
     try:
         mercado = api.get_mercado()
@@ -689,7 +695,7 @@ def gerar_escalacao(
     esquema: str = "4-4-2",
     cartoletas: float = Query(None, description="Orçamento disponível. Se omitido, usa do histórico.")
 ):
-    """Gera times otimizados (valorização e pontuação)"""
+    """Gera times otimizados (valorização e pontuação) e auto-salva no histórico"""
     try:
         mercado = api.get_mercado()
         status = api.get_status_mercado()
@@ -853,12 +859,27 @@ def gerar_escalacao(
             "esquema": esquema,
             "cartoletas": cartoletas,
             "timeValorizacao": time_para_response(time_valor, "valorizacao"),
-            "timePontuacao": time_para_response(time_pontos, "pontuacao")
+            "timePontuacao": time_para_response(time_pontos, "pontuacao"),
+            "autoSalvo": _auto_salvar_historico(time_valor, time_pontos, rodada, orcamento_uso)
         }
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao gerar escalação: {str(e)}")
+
+
+def _auto_salvar_historico(time_valor, time_pontos, rodada: int, cartoletas: float) -> bool:
+    """Salva automaticamente os times gerados no histórico"""
+    try:
+        hm = HistoryManager()
+        if time_valor:
+            hm.salvar_time_escalado(time_valor, rodada, cartoletas)
+        if time_pontos:
+            hm.salvar_time_escalado(time_pontos, rodada, cartoletas)
+        return True
+    except Exception as e:
+        print(f"[auto-save] Erro ao salvar histórico: {e}")
+        return False
 
 
 @app.get("/api/dashboard", response_model=DashboardStatsResponse)
@@ -1102,6 +1123,89 @@ def get_historico_status():
         raise HTTPException(status_code=500, detail=f"Erro ao buscar status: {str(e)}")
 
 
+@app.post("/api/historico/salvar")
+@limiter.limit(RATE_LIMITS["default"])
+def salvar_time_historico(request: Request, body: SaveTeamRequest):
+    """
+    Salva time manualmente no histórico.
+    Chamado pelo botão Salvar no frontend.
+    """
+    try:
+        mercado = api.get_mercado()
+        if not mercado:
+            raise HTTPException(status_code=503, detail="API Cartola indisponível")
+        
+        atletas_raw = mercado.get("atletas", [])
+        clubes = mercado.get("clubes", {})
+        
+        # Mapear atletas por ID
+        mapa_atletas = {a.get("atleta_id"): a for a in atletas_raw}
+        
+        # Construir titulares como AnaliseJogador simples
+        from src.analysis.mpv_calculator import AnaliseJogador
+        
+        pos_map = {1: "GOL", 2: "LAT", 3: "ZAG", 4: "MEI", 5: "ATA", 6: "TEC"}
+        titulares = []
+        for aid in body.titulares_ids:
+            at = mapa_atletas.get(aid)
+            if at:
+                pos_id = at.get("posicao_id", 4)
+                clube_id = at.get("clube_id", 0)
+                clube_info = clubes.get(str(clube_id), {})
+                titulares.append(AnaliseJogador(
+                    atleta_id=aid,
+                    nome=at.get("nome", ""),
+                    apelido=at.get("apelido", ""),
+                    clube_id=clube_id,
+                    clube_abrev=clube_info.get("abreviacao", "???"),
+                    posicao_abrev=pos_map.get(pos_id, "MEI"),
+                    preco=at.get("preco_num", 0),
+                    media=at.get("media_num", 0),
+                    mpv=0,
+                    tendencia_valorizar=0,
+                    pontuacao_esperada=body.pontuacaoEsperada or 0,
+                    risco="medio",
+                    variacao=at.get("variacao_num", 0),
+                    jogos_num=at.get("jogos_num", 0),
+                ))
+        
+        if not titulares:
+            raise HTTPException(status_code=400, detail="Nenhum jogador válido encontrado")
+        
+        # Construir TimeEscalado
+        capitao = next((t for t in titulares if t.atleta_id == body.capitao_id), titulares[0])
+        custo = sum(t.preco for t in titulares)
+        
+        time_obj = TimeEscalado(
+            tipo=body.tipo,
+            esquema=body.esquema,
+            titulares=titulares,
+            reservas=[],
+            capitao=capitao,
+            custo_total=custo,
+            cartoletas_restantes=body.cartoletas - custo,
+            pontuacao_prevista=body.pontuacaoEsperada or 0,
+            valorizacao_esperada=0,
+            analise_confrontos=body.analiseConfrontos or {},
+        )
+        
+        hm = HistoryManager()
+        hm.salvar_time_escalado(time_obj, body.rodada, body.cartoletas)
+        
+        return {
+            "success": True,
+            "message": f"Time {body.tipo} salvo para rodada {body.rodada}",
+            "rodada": body.rodada,
+            "tipo": body.tipo,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro ao salvar time: {str(e)}")
+
+
 @app.get("/api/noticias/{clube_abrev}")
 def get_noticias_time(clube_abrev: str):
     """
@@ -1338,6 +1442,567 @@ def get_forca_times(rodada: Optional[int] = None):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Erro ao calcular força: {str(e)}")
+
+
+# ============ Brasileirão ============
+
+@app.get("/api/brasileirao/classificacao")
+def get_classificacao():
+    """
+    Retorna classificação do Brasileirão + simulação Monte Carlo.
+    Combina dados reais da API Cartola com simulação de probabilidades.
+    """
+    try:
+        from src.analysis.monte_carlo import MonteCarloSimulator
+        
+        mercado = api.get_mercado()
+        status = api.get_status_mercado()
+        
+        if not mercado:
+            raise HTTPException(status_code=503, detail="API Cartola indisponível")
+        
+        clubes = mercado.get("clubes", {})
+        rodada_atual = status.get("rodada_atual", 1) if status else 1
+        
+        # Buscar partidas para construir a tabela
+        partidas_response = api.get_partidas(rodada_atual)
+        if isinstance(partidas_response, dict):
+            partidas = partidas_response.get("partidas", [])
+        elif isinstance(partidas_response, list):
+            partidas = partidas_response
+        else:
+            partidas = []
+        
+        # Usar MatchAnalyzer para obter estatísticas
+        match_analyzer.carregar_estatisticas_times(clubes, partidas)
+        
+        # Montar classificação atual
+        classificacao = []
+        forca_times = {}
+        
+        for clube_id, stats in match_analyzer.estatisticas_times.items():
+            clube_info = clubes.get(str(clube_id), {})
+            escudo = None
+            if isinstance(clube_info.get("escudo"), dict):
+                escudo = clube_info["escudo"].get("60x60")
+            
+            classificacao.append({
+                "id": clube_id,
+                "nome": stats.nome,
+                "abrev": stats.abreviacao,
+                "escudo": escudo,
+                "posicao": stats.posicao or 0,
+                "pontos": stats.vitorias * 3 + stats.empates,
+                "jogos": stats.jogos,
+                "vitorias": stats.vitorias,
+                "empates": stats.empates,
+                "derrotas": stats.derrotas,
+                "gols_pro": stats.gols_pro,
+                "gols_contra": stats.gols_contra,
+                "saldo_gols": stats.gols_pro - stats.gols_contra,
+                "aproveitamento": round((stats.vitorias * 3 + stats.empates) / max(stats.jogos * 3, 1) * 100, 1),
+                "forma": stats.forma_sequencia,
+            })
+            forca_times[clube_id] = stats.forca_geral
+        
+        # Ordenar por pontos > vitórias > saldo > gols
+        classificacao.sort(
+            key=lambda x: (x["pontos"], x["vitorias"], x["saldo_gols"], x["gols_pro"]),
+            reverse=True
+        )
+        
+        # Atualizar posição
+        for i, time in enumerate(classificacao, 1):
+            time["posicao"] = i
+        
+        # Monte Carlo (500 simulações, sem ScorePredictor para performance)
+        simulacao = None
+        try:
+            mc = MonteCarloSimulator(score_predictor=None, n_simulacoes=500)
+            
+            # Gerar jogos restantes com round-robin simplificado
+            jogos_restantes = []
+            time_ids = [t["id"] for t in classificacao]
+            n_times = len(time_ids)
+            jogos_por_rodada = n_times // 2
+            
+            for rodada in range(rodada_atual + 1, 39):
+                # Rodar os times de forma alternada
+                offset = (rodada - 1) % (n_times - 1) if n_times > 1 else 0
+                rotated = [time_ids[0]] + time_ids[1:]
+                # Rotacionar para criar pareamentos diferentes cada rodada
+                for j in range(offset):
+                    rotated = [rotated[0]] + [rotated[-1]] + rotated[1:-1]
+                
+                for j in range(jogos_por_rodada):
+                    m = rotated[j]
+                    v = rotated[n_times - 1 - j]
+                    # Alternar mando (rodada par = invertido)
+                    if rodada % 2 == 0:
+                        m, v = v, m
+                    jogos_restantes.append({
+                        "mandante_id": m,
+                        "visitante_id": v,
+                        "rodada": rodada,
+                    })
+            
+            if jogos_restantes:
+                resultados = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
+                simulacao = [
+                    {
+                        "id": r.time_id,
+                        "abrev": r.abrev,
+                        "pontosMedio": r.pontos_medio,
+                        "probTitulo": r.prob_titulo,
+                        "probLibertadores": r.prob_libertadores,
+                        "probSulamericana": r.prob_sulamericana,
+                        "probRebaixamento": r.prob_rebaixamento,
+                        "posicaoMedia": r.posicao_media,
+                    }
+                    for r in resultados
+                ]
+        except Exception as e:
+            print(f"[Monte Carlo] Simulação falhou: {e}")
+        
+        return {
+            "rodada": rodada_atual,
+            "classificacao": classificacao,
+            "simulacao": simulacao,
+            "totalTimes": len(classificacao),
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro classificação: {str(e)}")
+
+
+@app.get("/api/brasileirao/rodada/{rodada}")
+def get_rodada_detalhada(rodada: int):
+    """
+    Retorna detalhes de uma rodada: partidas + previsões + resultados reais.
+    Permite comparar previsão vs realidade para rodadas passadas.
+    """
+    try:
+        mercado = api.get_mercado()
+        status = api.get_status_mercado()
+        
+        if not mercado:
+            raise HTTPException(status_code=503, detail="API Cartola indisponível")
+        
+        clubes = mercado.get("clubes", {})
+        rodada_atual = status.get("rodada_atual", 1) if status else 1
+        
+        partidas_response = api.get_partidas(rodada)
+        if isinstance(partidas_response, dict):
+            partidas = partidas_response.get("partidas", [])
+        elif isinstance(partidas_response, list):
+            partidas = partidas_response
+        else:
+            partidas = []
+        
+        if not partidas:
+            return {"rodada": rodada, "partidas": [], "previsoes": []}
+        
+        # Carregar estatísticas
+        match_analyzer.carregar_estatisticas_times(clubes, partidas)
+        predictor = ScorePredictor()
+        
+        jogos = []
+        previsoes = []
+        
+        for p in partidas:
+            mandante_id = p.get("clube_casa_id")
+            visitante_id = p.get("clube_visitante_id")
+            
+            clube_m = clubes.get(str(mandante_id), {})
+            clube_v = clubes.get(str(visitante_id), {})
+            
+            jogo = {
+                "mandanteId": mandante_id,
+                "mandante": clube_m.get("abreviacao", p.get("clube_casa_abrev", "?")),
+                "mandanteNome": clube_m.get("nome", ""),
+                "visitanteId": visitante_id,
+                "visitante": clube_v.get("abreviacao", p.get("clube_visitante_abrev", "?")),
+                "visitanteNome": clube_v.get("nome", ""),
+                "placarMandante": p.get("placar_oficial_mandante"),
+                "placarVisitante": p.get("placar_oficial_visitante"),
+                "local": p.get("local", ""),
+                "dataHora": p.get("partida_data", ""),
+                "realizado": p.get("placar_oficial_mandante") is not None,
+            }
+            jogos.append(jogo)
+            
+            # Gerar previsão
+            stats_m = match_analyzer.estatisticas_times.get(mandante_id)
+            stats_v = match_analyzer.estatisticas_times.get(visitante_id)
+            
+            if stats_m and stats_v:
+                try:
+                    previsao = predictor.prever_confronto(
+                        mandante=jogo["mandante"],
+                        visitante=jogo["visitante"],
+                        mandante_id=mandante_id,
+                        visitante_id=visitante_id,
+                        forca_mandante=stats_m.forca_geral,
+                        forca_visitante=stats_v.forca_geral,
+                        posicao_mandante=stats_m.posicao or 10,
+                        posicao_visitante=stats_v.posicao or 10,
+                    )
+                    previsoes.append({
+                        "mandante": jogo["mandante"],
+                        "visitante": jogo["visitante"],
+                        "placarPrevisto": previsao.placar_provavel,
+                        "placarReal": f"{jogo['placarMandante']}x{jogo['placarVisitante']}" if jogo["realizado"] else None,
+                        "acertou": (previsao.placar_provavel == f"{jogo['placarMandante']}x{jogo['placarVisitante']}") if jogo["realizado"] else None,
+                        "xgMandante": previsao.xg_mandante,
+                        "xgVisitante": previsao.xg_visitante,
+                        "confianca": previsao.confianca,
+                    })
+                except Exception:
+                    pass
+        
+        acuracia = None
+        acertos = [p for p in previsoes if p.get("acertou") is True]
+        realizados = [p for p in previsoes if p.get("acertou") is not None]
+        if realizados:
+            acuracia = round(len(acertos) / len(realizados) * 100, 1)
+        
+        return {
+            "rodada": rodada,
+            "rodadaAtual": rodada_atual,
+            "partidas": jogos,
+            "previsoes": previsoes,
+            "acuracia": acuracia,
+            "totalPartidas": len(jogos),
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro rodada: {str(e)}")
+
+
+@app.get("/api/brasileirao/acuracia")
+def get_acuracia_geral():
+    """
+    Retorna acurácia do modelo de previsão ao longo de todas as rodadas.
+    Compara previsões vs resultados reais para cada rodada concluída.
+    """
+    try:
+        status = api.get_status_mercado()
+        rodada_atual = status.get("rodada_atual", 1) if status else 1
+        
+        resumo_rodadas = []
+        total_acertos = 0
+        total_jogos = 0
+        
+        for rodada in range(1, rodada_atual):
+            try:
+                resultado = get_rodada_detalhada(rodada)
+                if resultado and resultado.get("previsoes"):
+                    realizados = [p for p in resultado["previsoes"] if p.get("acertou") is not None]
+                    acertos = [p for p in realizados if p["acertou"]]
+                    
+                    if realizados:
+                        resumo_rodadas.append({
+                            "rodada": rodada,
+                            "totalPartidas": len(realizados),
+                            "acertos": len(acertos),
+                            "acuracia": round(len(acertos) / len(realizados) * 100, 1),
+                        })
+                        total_acertos += len(acertos)
+                        total_jogos += len(realizados)
+            except Exception:
+                continue
+        
+        return {
+            "rodadaAtual": rodada_atual,
+            "totalRodadas": len(resumo_rodadas),
+            "totalJogos": total_jogos,
+            "totalAcertos": total_acertos,
+            "acuraciaGeral": round(total_acertos / max(total_jogos, 1) * 100, 1),
+            "rodadas": resumo_rodadas,
+            "metodologia": "Poisson V3 + Frequências contextuais",
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro acurácia: {str(e)}")
+
+
+# ============ Scouts ============
+
+@app.get("/api/scouts/destaques")
+def get_scouts_destaques(rodada: Optional[int] = None, limite: int = Query(default=15, le=50)):
+    """
+    Retorna jogadores destaque da rodada baseado em scouts.
+    Inclui maiores pontuadores, artilheiros e assistentes.
+    """
+    try:
+        pontuados = api.get_atletas_pontuados()
+        mercado = api.get_mercado()
+        
+        if not pontuados:
+            return {"rodada": rodada, "destaques": [], "artilheiros": [], "assistentes": []}
+        
+        clubes = mercado.get("clubes", {}) if mercado else {}
+        atletas_dict = pontuados.get("atletas", {})
+        
+        # Montar lista ordenada por pontuação
+        destaques = []
+        artilheiros = []
+        assistentes = []
+        
+        for atleta_id, dados in atletas_dict.items():
+            scouts = dados.get("scout", {})
+            pontos = dados.get("pontuacao", 0)
+            clube_id = dados.get("clube_id", 0)
+            clube_info = clubes.get(str(clube_id), {})
+            
+            jogador = {
+                "id": int(atleta_id),
+                "apelido": dados.get("apelido", ""),
+                "clubeAbrev": clube_info.get("abreviacao", "?"),
+                "clubeNome": clube_info.get("nome", ""),
+                "pontuacao": round(pontos, 2),
+                "scouts": {k: v for k, v in scouts.items() if v and v > 0},
+                "gols": scouts.get("G", 0) or 0,
+                "assistencias": scouts.get("A", 0) or 0,
+                "saldoGols": scouts.get("SG", 0) or 0,
+                "finalizacoesTrave": scouts.get("FT", 0) or 0,
+                "desarmes": scouts.get("DS", 0) or 0,
+            }
+            
+            destaques.append(jogador)
+            if jogador["gols"] > 0:
+                artilheiros.append(jogador)
+            if jogador["assistencias"] > 0:
+                assistentes.append(jogador)
+        
+        destaques.sort(key=lambda x: x["pontuacao"], reverse=True)
+        artilheiros.sort(key=lambda x: x["gols"], reverse=True)
+        assistentes.sort(key=lambda x: x["assistencias"], reverse=True)
+        
+        return {
+            "rodada": rodada,
+            "destaques": destaques[:limite],
+            "artilheiros": artilheiros[:10],
+            "assistentes": assistentes[:10],
+            "totalJogadores": len(destaques),
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro scouts destaques: {str(e)}")
+
+
+@app.get("/api/scouts/jogador/{atleta_id}")
+def get_scout_jogador(atleta_id: int):
+    """
+    Retorna scouts detalhados de um jogador específico.
+    Inclui dados do mercado + scouts da última rodada.
+    """
+    try:
+        mercado = api.get_mercado()
+        pontuados = api.get_atletas_pontuados()
+        
+        if not mercado:
+            raise HTTPException(status_code=503, detail="API Cartola indisponível")
+        
+        atletas = mercado.get("atletas", [])
+        clubes = mercado.get("clubes", {})
+        
+        # Encontrar o atleta
+        atleta = None
+        for a in atletas:
+            if a.get("atleta_id") == atleta_id:
+                atleta = a
+                break
+        
+        if not atleta:
+            raise HTTPException(status_code=404, detail="Jogador não encontrado")
+        
+        clube_id = atleta.get("clube_id", 0)
+        clube_info = clubes.get(str(clube_id), {})
+        
+        pos_map = {1: "GOL", 2: "LAT", 3: "ZAG", 4: "MEI", 5: "ATA", 6: "TEC"}
+        
+        # Scouts da última rodada (se disponível)
+        scouts_rodada = {}
+        pontuacao_rodada = None
+        if pontuados:
+            atleta_pont = pontuados.get("atletas", {}).get(str(atleta_id))
+            if atleta_pont:
+                scouts_rodada = atleta_pont.get("scout", {})
+                pontuacao_rodada = atleta_pont.get("pontuacao")
+        
+        return {
+            "id": atleta_id,
+            "nome": atleta.get("nome", ""),
+            "apelido": atleta.get("apelido", ""),
+            "foto": atleta.get("foto", ""),
+            "posicao": pos_map.get(atleta.get("posicao_id", 0), "?"),
+            "posicaoId": atleta.get("posicao_id", 0),
+            "clubeId": clube_id,
+            "clubeAbrev": clube_info.get("abreviacao", "?"),
+            "clubeNome": clube_info.get("nome", ""),
+            "preco": atleta.get("preco_num", 0),
+            "media": atleta.get("media_num", 0),
+            "pontosTotais": atleta.get("pontos_num", 0),
+            "jogos": atleta.get("jogos_num", 0),
+            "variacao": atleta.get("variacao_num", 0),
+            "minimo": atleta.get("minimo_para_valorizar", 0),
+            "statusId": atleta.get("status_id", 0),
+            "scoutsRodada": {k: v for k, v in scouts_rodada.items() if v},
+            "pontuacaoRodada": pontuacao_rodada,
+            "scoutsAcumulados": atleta.get("scout", {}),
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro scout jogador: {str(e)}")
+
+
+@app.get("/api/scouts/desfalques")
+def get_desfalques_geral():
+    """
+    Retorna desfalques consolidados (lesionados, suspensos, dúvidas) de todos os clubes.
+    Filtro por status_id: 3=Suspenso, 5=Contundido, 2=Dúvida.
+    """
+    try:
+        mercado = api.get_mercado()
+        
+        if not mercado:
+            raise HTTPException(status_code=503, detail="API Cartola indisponível")
+        
+        atletas = mercado.get("atletas", [])
+        clubes = mercado.get("clubes", {})
+        
+        # Agrupar desfalques por clube
+        desfalques_por_clube = {}
+        
+        for atleta in atletas:
+            status_id = atleta.get("status_id", 0)
+            if status_id not in (2, 3, 5):  # Dúvida, Suspenso, Contundido
+                continue
+            
+            clube_id = atleta.get("clube_id", 0)
+            if clube_id not in desfalques_por_clube:
+                clube_info = clubes.get(str(clube_id), {})
+                desfalques_por_clube[clube_id] = {
+                    "clubeId": clube_id,
+                    "clubeNome": clube_info.get("nome", ""),
+                    "clubeAbrev": clube_info.get("abreviacao", "?"),
+                    "lesionados": [],
+                    "suspensos": [],
+                    "duvidas": [],
+                }
+            
+            apelido = atleta.get("apelido", atleta.get("nome", "?"))
+            if status_id == 5:
+                desfalques_por_clube[clube_id]["lesionados"].append(apelido)
+            elif status_id == 3:
+                desfalques_por_clube[clube_id]["suspensos"].append(apelido)
+            elif status_id == 2:
+                desfalques_por_clube[clube_id]["duvidas"].append(apelido)
+        
+        # Montar resposta
+        clubes_lista = list(desfalques_por_clube.values())
+        for c in clubes_lista:
+            c["totalDesfalques"] = len(c["lesionados"]) + len(c["suspensos"]) + len(c["duvidas"])
+        
+        clubes_lista.sort(key=lambda x: x["totalDesfalques"], reverse=True)
+        
+        total_les = sum(len(c["lesionados"]) for c in clubes_lista)
+        total_sus = sum(len(c["suspensos"]) for c in clubes_lista)
+        total_duv = sum(len(c["duvidas"]) for c in clubes_lista)
+        
+        return {
+            "totalClubes": len(clubes_lista),
+            "clubes": clubes_lista,
+            "resumo": {
+                "totalLesionados": total_les,
+                "totalSuspensos": total_sus,
+                "totalDuvidas": total_duv,
+                "totalGeral": total_les + total_sus + total_duv,
+            },
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro desfalques: {str(e)}")
+
+
+# ============ Health, Sitemap, Métricas ============
+
+@app.get("/health")
+async def health_check():
+    """Health check para UptimeRobot/monitoramento."""
+    return {
+        "status": "ok",
+        "timestamp": datetime.now().isoformat(),
+        "cache_backend": cache.backend_name,
+        "version": "3.0.0"
+    }
+
+
+@app.get("/api/admin/metrics")
+async def admin_metrics():
+    """Métricas internas agregadas (últimas 24h)."""
+    data = metrics.get_metrics()
+    data["cache_backend"] = cache.backend_name
+    data["circuit_breakers"] = {
+        name: cb.get_status() for name, cb in circuit_breakers.items()
+    }
+    return data
+
+
+@app.get("/sitemap.xml", response_class=FastAPIResponse)
+async def sitemap_xml():
+    """Sitemap dinâmico para SEO."""
+    base = "https://scoutdados.com.br"
+    
+    # Páginas estáticas
+    static_pages = [
+        {"loc": "/", "changefreq": "daily", "priority": "1.0"},
+        {"loc": "/brasileirao", "changefreq": "daily", "priority": "0.9"},
+        {"loc": "/dashboard", "changefreq": "daily", "priority": "0.8"},
+        {"loc": "/escalacao", "changefreq": "daily", "priority": "0.8"},
+        {"loc": "/confrontos", "changefreq": "daily", "priority": "0.9"},
+        {"loc": "/mercado", "changefreq": "daily", "priority": "0.8"},
+        {"loc": "/scouts", "changefreq": "daily", "priority": "0.8"},
+        {"loc": "/historico", "changefreq": "weekly", "priority": "0.6"},
+        {"loc": "/estatisticas", "changefreq": "daily", "priority": "0.7"},
+        {"loc": "/sobre", "changefreq": "monthly", "priority": "0.3"},
+        {"loc": "/privacidade", "changefreq": "monthly", "priority": "0.2"},
+        {"loc": "/termos", "changefreq": "monthly", "priority": "0.2"},
+    ]
+    
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    urls_xml = ""
+    for page in static_pages:
+        urls_xml += f"""  <url>
+    <loc>{base}{page['loc']}</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>{page['changefreq']}</changefreq>
+    <priority>{page['priority']}</priority>
+  </url>\n"""
+    
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{urls_xml}</urlset>"""
+    
+    return FastAPIResponse(content=xml, media_type="application/xml")
 
 
 # ============ Executar ============

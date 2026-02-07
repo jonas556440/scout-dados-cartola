@@ -1,7 +1,7 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { FormationDisplay } from "@/components/cartola/FormationDisplay";
 import { PlayerCard } from "@/components/cartola/PlayerCard";
-import { useEscalacao, useAtletas, useDashboard, useGerarEscalacao } from "@/hooks/useCartolaApi";
+import { useEscalacao, useAtletas, useDashboard, useGerarEscalacao, useSalvarTime } from "@/hooks/useCartolaApi";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Loader2, AlertCircle, Check } from "lucide-react";
@@ -42,6 +42,7 @@ const Escalacao = () => {
   const { data: escalacaoData, isLoading: loadingEscalacao, refetch } = useEscalacao(esquema, orcamento);
   const { data: atletas, isLoading: loadingAtletas } = useAtletas();
   const gerarEscalacao = useGerarEscalacao();
+  const salvarTimeMutation = useSalvarTime();
 
   const teamData = tipoTime === 'valorizacao' ? escalacaoData?.timeValorizacao : escalacaoData?.timePontuacao;
 
@@ -65,25 +66,45 @@ const Escalacao = () => {
     }
   };
 
-  // Função para salvar time (localStorage)
-  const handleSalvar = () => {
+  // Função para salvar time (backend + localStorage)
+  const handleSalvar = async () => {
     if (!teamData) return;
     
+    // Salvar no localStorage como backup
     const timeSalvar = {
       tipo: tipoTime,
       esquema,
-      jogadores: teamData.jogadores,
+      jogadores: teamData.titulares,
       capitao: teamData.capitao,
       dataSalvo: new Date().toISOString(),
     };
-    
     localStorage.setItem(`cartola_time_${tipoTime}`, JSON.stringify(timeSalvar));
-    setTimeSalvo(true);
     
-    toast({
-      title: "Time salvo!",
-      description: `Time ${isVal ? 'Valorização' : 'Pontuação'} salvo com sucesso.`,
-    });
+    // Salvar no backend
+    try {
+      await salvarTimeMutation.mutateAsync({
+        tipo: tipoTime,
+        rodada: escalacaoData?.rodada || 1,
+        titulares_ids: teamData.titulares.map((j: any) => j.id),
+        capitao_id: teamData.capitao?.id || teamData.titulares[0]?.id,
+        esquema,
+        cartoletas: orcamento,
+        pontuacaoEsperada: teamData.pontuacaoEsperada || teamData.pontuacaoPrevista || 0,
+      });
+      setTimeSalvo(true);
+      toast({
+        title: "Time salvo!",
+        description: `Time ${isVal ? 'Valorização' : 'Pontuação'} salvo no histórico.`,
+      });
+    } catch {
+      // Se falhar no backend, pelo menos salvou no localStorage
+      setTimeSalvo(true);
+      toast({
+        title: "Salvo localmente",
+        description: "Time salvo localmente. Sincronização com servidor pendente.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Filtrar jogadores

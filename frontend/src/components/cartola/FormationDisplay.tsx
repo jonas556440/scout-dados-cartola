@@ -108,7 +108,7 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
       )}>
         {/* Linhas do campo */}
         <div className={cn(
-          "absolute inset-4 border-2 rounded-lg",
+          "absolute inset-2 sm:inset-4 border-2 rounded-lg",
           isVal ? "border-white/20" : "border-white/15"
         )}>
           {/* Linha do meio */}
@@ -147,7 +147,7 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
               )}>
                 {/* Círculo do jogador com escudo dentro - tamanho reduzido */}
                 <div className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all relative overflow-hidden",
+                  "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all relative overflow-hidden",
                   POSITION_COLORS[pos.posicao],
                   isCaptain && "ring-2 ring-secondary ring-offset-1 ring-offset-green-900"
                 )}>
@@ -156,7 +156,7 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
                     <img 
                       src={player.clubeEscudo} 
                       alt={player.clubeAbrev} 
-                      className="w-6 h-6 object-contain"
+                      className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
                     />
                   ) : (
                     <span>{player.apelido.substring(0, 2).toUpperCase()}</span>
@@ -171,30 +171,30 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
                 )}
                 
                 {/* Nome e preço - compacto */}
-                <div className="mt-0.5 text-center">
-                  <div className="text-[10px] font-semibold text-white drop-shadow-lg whitespace-nowrap leading-tight">
-                    {player.apelido.length > 8 ? player.apelido.substring(0, 8) + '.' : player.apelido}
+                <div className="mt-0.5 text-center max-w-[60px] sm:max-w-none">
+                  <div className="text-[9px] sm:text-[10px] font-semibold text-white drop-shadow-lg whitespace-nowrap leading-tight overflow-hidden text-ellipsis">
+                    {player.apelido.length > 7 ? player.apelido.substring(0, 7) + '.' : player.apelido}
                   </div>
                   <div className={cn(
-                    "text-[9px] font-bold leading-tight",
+                    "text-[8px] sm:text-[9px] font-bold leading-tight",
                     isVal ? "text-green-400" : "text-blue-400"
                   )}>
                     C${(player.preco ?? 0).toFixed(1)}
                   </div>
-                  {/* Pontuação/Valorização atual - NOVO */}
+                  {/* Pontuação/Valorização atual - hidden on very small screens */}
                   {player.pontuacao !== undefined && player.pontuacao > 0 && (
-                    <div className="text-[9px] text-secondary font-bold leading-tight bg-secondary/20 px-1 rounded mt-0.5">
-                      {player.pontuacao.toFixed(1)} pts
+                    <div className="hidden sm:block text-[9px] text-secondary font-bold leading-tight bg-secondary/20 px-1 rounded mt-0.5">
+                      {(player.pontuacao ?? 0).toFixed(1)} pts
                     </div>
                   )}
                   {player.valorizacao !== undefined && player.valorizacao !== 0 && (
                     <div className={cn(
-                      "text-[9px] font-bold leading-tight px-1 rounded mt-0.5",
+                      "hidden sm:block text-[9px] font-bold leading-tight px-1 rounded mt-0.5",
                       player.valorizacao > 0 
                         ? "text-green-400 bg-green-400/20" 
                         : "text-red-400 bg-red-400/20"
                     )}>
-                      {player.valorizacao > 0 ? '+' : ''}{player.valorizacao.toFixed(1)}%
+                      {player.valorizacao > 0 ? '+' : ''}{(player.valorizacao ?? 0).toFixed(1)}%
                     </div>
                   )}
                 </div>
@@ -223,7 +223,7 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
               {/* Pontuação atual - NOVO */}
               {player.pontuacao !== undefined && player.pontuacao > 0 && (
                 <span className="text-xs text-secondary font-bold bg-secondary/20 px-1 rounded">
-                  {player.pontuacao.toFixed(1)}pts
+                  {(player.pontuacao ?? 0).toFixed(1)}pts
                 </span>
               )}
               {/* Valorização atual - NOVO */}
@@ -234,7 +234,7 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
                     ? "text-green-400 bg-green-400/20" 
                     : "text-red-400 bg-red-400/20"
                 )}>
-                  {player.valorizacao > 0 ? '+' : ''}{player.valorizacao.toFixed(1)}%
+                  {player.valorizacao > 0 ? '+' : ''}{(player.valorizacao ?? 0).toFixed(1)}%
                 </span>
               )}
             </div>

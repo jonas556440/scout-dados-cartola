@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     DATA_DIR: Path = BASE_DIR / "data"
     BACKUP_DIR: Path = DATA_DIR / "backups"
     
+    # Environment
+    ENV: str = Field(default="development", description="Ambiente: development | production")
+    DEBUG: bool = Field(default=False, description="Modo debug")
+    
     # Banco de dados
     DATABASE_URL: str = Field(
         default="sqlite:///data/cartola.db",
@@ -89,9 +93,18 @@ class Settings(BaseSettings):
     PRECO_MAXIMO_VALORIZACAO: float = 10.0
     MEDIA_MINIMA_PONTUACAO: float = 3.0
     
+    # Variáveis opcionais de produção (podem estar no .env)
+    ALLOWED_ORIGINS: str = ""
+    SECRET_KEY: str = "dev-secret-key"
+    ALLOWED_HOSTS: str = "*"
+    FRONTEND_URL: str = ""
+    LOG_LEVEL: str = "INFO"
+    LOG_FILE: str = "logs/api.log"
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"  # Ignorar variáveis extras do .env
 
 
 # Instância global de configurações
