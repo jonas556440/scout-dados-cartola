@@ -59,6 +59,10 @@ export function Sidebar() {
   const statusMercado = dashboardData?.mercado?.status === 'aberto' ? 'Mercado Aberto' : 'Mercado Fechado';
   const patrimonio = dashboardData?.patrimonio ?? 100.0;
 
+  // Rotas do Cartola FC (onde faz sentido mostrar rodada/patrimônio)
+  const cartolaRoutes = ['/', '/escalacao', '/mercado', '/historico'];
+  const isCartolaRoute = cartolaRoutes.includes(location.pathname);
+
   return (
     <>
       {/* Mobile Toggle */}
@@ -154,21 +158,25 @@ export function Sidebar() {
               <FileText className="w-3 h-3" />Termos
             </Link>
           </div>
-          <div className="glass-card p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-primary" />
+          
+          {/* Rodada/Patrimônio: só em rotas do Cartola FC */}
+          {isCartolaRoute && (
+            <div className="glass-card p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold">Rodada {rodada}</div>
+                  <div className="text-xs text-muted-foreground">{statusMercado}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-sm font-semibold">Rodada {rodada}</div>
-                <div className="text-xs text-muted-foreground">{statusMercado}</div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Patrimônio</span>
+                <span className="font-bold text-primary">C${patrimonio.toFixed(1)}</span>
               </div>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Patrimônio</span>
-              <span className="font-bold text-primary">C${patrimonio.toFixed(1)}</span>
-            </div>
-          </div>
+          )}
         </div>
       </aside>
     </>
