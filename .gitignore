@@ -38,6 +38,12 @@ dist/
 frontend/dist/
 frontend/node_modules/
 
+# ⚠️ IMPORTANTE: OLS serve frontend/dist/ diretamente
+# NÃO commitar cópias de assets/index.html no root
+/index.html
+/assets/
+*.OLD
+
 # IDEs
 .vscode/
 .idea/
