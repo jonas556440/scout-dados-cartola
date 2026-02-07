@@ -461,6 +461,10 @@ const ABREV_TO_SLUG: Record<string, string> = {
   SPO: "sport",
   VAS: "vasco",
   VIT: "vitoria",
+  RBB: "red-bull-bragantino",
+  CHA: "chapecoense",
+  CFC: "coritiba",
+  REM: "remo",
 };
 
 function slugFromAbrev(abrev: string): string {

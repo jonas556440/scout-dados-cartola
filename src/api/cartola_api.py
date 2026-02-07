@@ -33,9 +33,9 @@ class CartolaAPI:
     
     def __init__(self):
         self.base_url = settings.CARTOLA_API_BASE_URL
-        self.timeout = 15  # Reduzido de 30s para 15s
-        self.max_retries = 3
-        self.retry_delay = 1  # segundos entre tentativas
+        self.timeout = 8  # Reduzido de 15s para 8s (mais agressivo)
+        self.max_retries = 2  # Reduzido de 3 para 2 tentativas
+        self.retry_delay = 0.5  # Reduzido de 1s para 0.5s
         self.session = requests.Session()
         self.session.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -43,7 +43,7 @@ class CartolaAPI:
             "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8"
         })
         self._cache = {}
-        self._cache_timeout = 300  # 5 minutos
+        self._cache_timeout = 600  # Aumentado de 300s (5min) para 600s (10min)
     
     def _make_request(self, endpoint: str, use_cache: bool = True) -> Optional[Dict[str, Any]]:
         """

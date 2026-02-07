@@ -1843,6 +1843,11 @@ TEAM_SLUGS = {
     "fluminense": "FLU", "fortaleza": "FOR", "gremio": "GRE", "internacional": "INT",
     "juventude": "JUV", "mirassol": "MIR", "palmeiras": "PAL", "santos": "SAN",
     "sao-paulo": "SAO", "sport": "SPO", "vasco": "VAS", "vitoria": "VIT",
+    # Times adicionais da classificação atual
+    "red-bull-bragantino": "RBB", "bragantino": "RBB",
+    "chapecoense": "CHA",
+    "coritiba": "CFC",
+    "remo": "REM",
 }
 
 
@@ -1937,13 +1942,23 @@ def get_time_detalhado(slug: str):
         except Exception:
             pass
 
-        # Próximos jogos com previsão
+        # Próximos jogos com previsão (com limite de tempo)
         sp = ScorePredictor()
         proximos = []
+        max_tentativas = 3  # Limitar a 3 rodadas para evitar timeout
+        tentativas_falhadas = 0
+        
         for r in range(rodada_atual, min(rodada_atual + 5, 39)):
+            if tentativas_falhadas >= 2:  # Se 2 rodadas falharem, desistir
+                break
             try:
                 pd = api.get_partidas(r)
-                ps = pd.get("partidas", []) if isinstance(pd, dict) else pd or []
+                if not pd or not isinstance(pd, dict):  # API retornou None ou não-dict
+                    tentativas_falhadas += 1
+                    continue
+                    
+                ps = pd.get("partidas", [])
+                jogo_encontrado = False
                 for p in ps:
                     casa = p.get("clube_casa_id", 0)
                     fora = p.get("clube_visitante_id", 0)
@@ -1969,8 +1984,13 @@ def get_time_detalhado(slug: str):
                             "xgTime": round(prev.xg_mandante if eh_casa else prev.xg_visitante, 2),
                             "xgAdversario": round(prev.xg_visitante if eh_casa else prev.xg_mandante, 2),
                         })
+                        jogo_encontrado = True
                         break
+                        
+                if not jogo_encontrado:
+                    tentativas_falhadas += 1
             except Exception:
+                tentativas_falhadas += 1
                 continue
 
         clube_info = clubes.get(str(time_id), {})

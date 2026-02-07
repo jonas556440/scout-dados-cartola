@@ -18,6 +18,7 @@ const ABREV_TO_SLUG: Record<string, string> = {
   FLU: "fluminense", FOR: "fortaleza", GRE: "gremio", INT: "internacional",
   JUV: "juventude", MIR: "mirassol", PAL: "palmeiras", SAN: "santos",
   SAO: "sao-paulo", SPO: "sport", VAS: "vasco", VIT: "vitoria",
+  RBB: "red-bull-bragantino", CHA: "chapecoense", CFC: "coritiba", REM: "remo",
 };
 
 const Brasileirao = () => {

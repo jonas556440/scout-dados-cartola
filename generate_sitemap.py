@@ -59,13 +59,14 @@ def _get_auto_blog_posts() -> list:
 def _get_team_pages() -> list:
     """Gera URLs de páginas por time a partir dos times conhecidos."""
     teams_file = PROJECT_ROOT / "data" / "blog_posts"
-    # Slugs dos 20 times do Brasileirão 2026
+    # Slugs dos 24 times do Brasileirão 2026 (atual classificação)
     team_slugs = [
         "atletico-mg", "athletico-pr", "bahia", "botafogo",
         "corinthians", "cruzeiro", "cuiaba", "flamengo",
         "fluminense", "fortaleza", "gremio", "internacional",
         "juventude", "mirassol", "palmeiras", "santos",
         "sao-paulo", "sport", "vasco", "vitoria",
+        "red-bull-bragantino", "chapecoense", "coritiba", "remo",
     ]
     return [{"slug": s} for s in team_slugs]
 

@@ -308,6 +308,12 @@ TIMES_MAP = {
     "sport": {"nome": "Sport", "abrev": "SPO"},
     "vasco": {"nome": "Vasco", "abrev": "VAS"},
     "vitoria": {"nome": "Vitória", "abrev": "VIT"},
+    # Times adicionais da classificação atual
+    "red-bull-bragantino": {"nome": "Red Bull Bragantino", "abrev": "RBB"},
+    "bragantino": {"nome": "Red Bull Bragantino", "abrev": "RBB"},  # Alias
+    "chapecoense": {"nome": "Chapecoense", "abrev": "CHA"},
+    "coritiba": {"nome": "Coritiba", "abrev": "CFC"},
+    "remo": {"nome": "Remo", "abrev": "REM"},
 }
 
 
