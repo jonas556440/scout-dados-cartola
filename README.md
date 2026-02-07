@@ -1,25 +1,39 @@
-# 🏆 Cartola FC 2026 - Sistema de Escalação Inteligente
+# 🏆 ScoutDados - Brasileirão 2026 + Cartola FC
 
-Sistema completo para análise e geração de escalações otimizadas do Cartola FC 2026.
+Portal completo de estatísticas do Brasileirão 2026 e ferramentas inteligentes para Cartola FC.
+
+**Site:** https://scoutdados.com.br
 
 ## 📋 Funcionalidades
 
-### 🎯 Dois Times por Rodada
-1. **Time Valorização** - Foco em jogadores baratos que vão valorizar
-2. **Time Pontuação** - Foco em maximizar pontos da rodada
+### 🏆 Brasileirão 2026
+- **Classificação com Monte Carlo**: Probabilidades de título, G4, Sula e rebaixamento calculadas por 200 simulações
+- **Previsão de placares**: Modelo Poisson V3 com top 5 placares mais prováveis
+- **Scouts por posição**: Estatísticas detalhadas de todos os jogadores
+- **Análise de confrontos**: Força ofensiva/defensiva, mando de campo, expectativa de gols
 
-### ⚽ NOVO v3: Análise de Confrontos (como sites especializados!)
+### ⚽ Cartola FC 2026
+
+#### 🎯 Dois Times por Rodada
+1. **Time Valorização** - Jogadores baratos (C$3-6) com potencial de subir de preço
+2. **Time Pontuação** - Maximização de pontos da rodada
+
+#### 💰 Sistema de Patrimônio
+- Acompanhamento de cartoletas por rodada
+- Evolução separada para cada tipo de time
+- Histórico completo de escalações e resultados
+
+#### 📊 Análise de Confrontos
 - **Adversário da rodada**: Força ofensiva/defensiva de cada time
 - **Mando de campo**: Casa vs Fora (times em casa pontuam ~30% mais)
 - **Chance de SG**: Probabilidade de não sofrer gols (importante para defensores)
 - **Expectativa de gols**: Quantos gols o time deve fazer (importante para atacantes)
 - **Forma recente**: Últimos 5 jogos do time
 
-### 💰 Sistema de Patrimônio
-- Acompanhamento de cartoletas por rodada
-- Evolução separada para cada tipo de time
-- Histórico completo de escalações e resultados
-- A cada rodada, usa as cartoletas disponíveis (ganhos de valorização!)
+### 📝 Blog
+- Artigos sobre estatísticas, modelos e estratégias de futebol
+- xG, Monte Carlo, Poisson, análise de dados
+- 100% educacional (não promove apostas)
 
 ### 📊 Fontes de Dados
 - **API Oficial Cartola FC**: `https://api.cartola.globo.com`
@@ -231,14 +245,56 @@ Baseado nas dicas oficiais do Gato Mestre:
 | I     | -0.1   | Impedimento |
 | PI    | -0.1   | Passe Incompleto |
 
+## 🚀 Produção
+
+### Site: https://scoutdados.com.br
+
+**Stack de Produção:**
+- **Frontend:** React 18 + Vite + Tailwind CSS + shadcn/ui + TanStack Query
+- **Backend:** FastAPI + Uvicorn (porta 8000)
+- **Servidor:** OpenLiteSpeed (serve `frontend/dist/` diretamente)
+- **Banco:** SQLite com WAL mode
+- **Scheduler:** APScheduler (atualização automática)
+- **OS:** Ubuntu + systemd
+
+### Deploy
+```bash
+# Deploy só frontend (build + restart OpenLiteSpeed)
+bash deploy.sh
+
+# Deploy completo (git pull + build + restart backend + OLS)
+bash deploy.sh --full
+```
+
+**Workflow interno:**
+1. `bun install --frozen-lockfile`
+2. `bun run build` → gera `frontend/dist/`
+3. OpenLiteSpeed serve `dist/` diretamente (**sem cópia**)
+4. (Opcional) Reinicia backend + scheduler
+
+**Ver status completo:** `STATUS_PRODUCAO.md`
+
+---
+
 ## 🛠️ Tecnologias
 
+### Backend
 - Python 3.10+
+- FastAPI + Uvicorn
 - SQLAlchemy (ORM)
 - Requests (HTTP)
 - Pandas (Análise de dados)
-- Schedule (Agendamento)
+- APScheduler (Jobs)
 - Rich (Interface CLI)
+
+### Frontend
+- React 18
+- Vite (build tool)
+- Tailwind CSS + shadcn/ui
+- TanStack Query (data fetching)
+- React Router
+- Framer Motion (animações)
+- Recharts (gráficos)
 
 ## 📄 Licença
 
