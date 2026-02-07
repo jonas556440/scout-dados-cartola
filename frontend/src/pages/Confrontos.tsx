@@ -2,6 +2,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { MatchCard } from "@/components/cartola/MatchCard";
 import { Disclaimer } from "@/components/Disclaimer";
 import { useConfrontos, useForcaTimes, usePrevisaoPlacares, useNoticiasRodada, usePrevisaoCustomizada } from "@/hooks/useCartolaApi";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Swords, Calendar, MapPin, TrendingUp, Shield, Loader2, AlertCircle, Target, Award, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -139,7 +140,9 @@ const Confrontos = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <MatchCard match={match} />
+            <Link to={`/brasileirao/jogo/${match.id}`} className="block hover:scale-[1.02] transition-transform">
+              <MatchCard match={match} />
+            </Link>
           </motion.div>
         ))}
       </div>

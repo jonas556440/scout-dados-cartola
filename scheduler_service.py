@@ -184,6 +184,16 @@ class CartolaScheduler:
         )
         logger.info("✅ Job 'gerar_blog_times' agendado (06:00)")
         
+        # Tarefa 13: Salvar snapshot Monte Carlo por rodada (a cada 4h)
+        self.scheduler.add_job(
+            func=self.salvar_snapshot_monte_carlo,
+            trigger=CronTrigger(hour='2,6,10,14,18,22', minute=30),
+            id='snapshot_monte_carlo',
+            name='Salvar Snapshot Monte Carlo',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'snapshot_monte_carlo' agendado (a cada 4h)")
+        
         # Iniciar scheduler
         self.scheduler.start()
         logger.info("🟢 Scheduler ATIVO - Monitoramento em execução")
@@ -434,6 +444,86 @@ class CartolaScheduler:
                 
         except Exception as e:
             logger.error(f"❌ Erro ao coletar pontuações: {e}", exc_info=True)
+    
+    # ==================== MONTE CARLO SNAPSHOT ====================
+    
+    def salvar_snapshot_monte_carlo(self):
+        """
+        Salva snapshot das simulações Monte Carlo + previsões de placar
+        para a rodada atual em data/monte_carlo/rodada_N.json
+        """
+        try:
+            import json
+            from src.analysis.score_predictor import ScorePredictor
+            from src.analysis.monte_carlo import MonteCarloSimulator
+            
+            if not self.rodada_atual:
+                logger.info("⏳ Monte Carlo: sem rodada definida, pulando snapshot")
+                return
+            
+            snapshot_dir = Path("data/monte_carlo")
+            snapshot_dir.mkdir(parents=True, exist_ok=True)
+            snapshot_file = snapshot_dir / f"rodada_{self.rodada_atual}.json"
+            
+            logger.info(f"🎲 Gerando snapshot Monte Carlo para rodada {self.rodada_atual}...")
+            
+            # 1) Previsões de placar via ScorePredictor
+            previsoes_data = []
+            try:
+                predictor = ScorePredictor()
+                previsoes = predictor.prever_rodada(self.rodada_atual)
+                for p in previsoes:
+                    previsoes_data.append({
+                        "mandante": p.mandante,
+                        "visitante": p.visitante,
+                        "xg_mandante": round(p.xg_mandante, 2),
+                        "xg_visitante": round(p.xg_visitante, 2),
+                        "placar_provavel": p.placar_provavel,
+                        "prob_placar": round(p.probabilidade_placar, 1),
+                        "prob_casa": round(p.prob_vitoria_casa, 1),
+                        "prob_empate": round(p.prob_empate, 1),
+                        "prob_fora": round(p.prob_vitoria_fora, 1),
+                        "over25": round(p.prob_over_2_5, 1),
+                        "btts": round(p.prob_btts, 1),
+                        "confianca": round(p.confianca, 2),
+                    })
+            except Exception as e:
+                logger.warning(f"⚠️  Erro ao gerar previsões de placar: {e}")
+            
+            # 2) Simulação Monte Carlo do campeonato
+            simulacao_data = []
+            try:
+                simulator = MonteCarloSimulator(score_predictor=None, n_simulacoes=1000)
+                resultados = simulator.simular_campeonato()
+                for r in resultados:
+                    simulacao_data.append({
+                        "time": r.nome,
+                        "abrev": r.abrev,
+                        "pontos_medio": round(r.pontos_medio, 1),
+                        "posicao_media": round(r.posicao_media, 1),
+                        "prob_titulo": round(r.prob_titulo, 1),
+                        "prob_libertadores": round(r.prob_libertadores, 1),
+                        "prob_sulamericana": round(r.prob_sulamericana, 1),
+                        "prob_rebaixamento": round(r.prob_rebaixamento, 1),
+                    })
+            except Exception as e:
+                logger.warning(f"⚠️  Erro na simulação Monte Carlo: {e}")
+            
+            snapshot = {
+                "rodada": self.rodada_atual,
+                "timestamp": datetime.now().isoformat(),
+                "previsoes_placar": previsoes_data,
+                "simulacao_campeonato": simulacao_data,
+            }
+            
+            with open(snapshot_file, "w", encoding="utf-8") as f:
+                json.dump(snapshot, f, ensure_ascii=False, indent=2)
+            
+            logger.info(f"✅ Snapshot Monte Carlo salvo: {snapshot_file.name} "
+                        f"({len(previsoes_data)} previsões, {len(simulacao_data)} times)")
+                
+        except Exception as e:
+            logger.error(f"❌ Erro ao salvar snapshot Monte Carlo: {e}", exc_info=True)
     
     # ==================== BACKUP ====================
     

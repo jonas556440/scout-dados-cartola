@@ -3,7 +3,7 @@ import { PatrimonyChart } from "@/components/cartola/PatrimonyChart";
 import { useHistoricoRodadas, useHistoricoStatus, useHistoricoRodada, useDashboard } from "@/hooks/useCartolaApi";
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { History, Calendar, Loader2, AlertCircle, Wallet, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { History, Calendar, Loader2, AlertCircle, Wallet, Users, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { SEO } from "@/components/SEO";
@@ -210,6 +210,22 @@ const Historico = () => {
   const patrimonioAtual = dashboardData?.patrimonio ?? 100;
   const temHistorico = historicoRodadas && historicoRodadas.length > 0;
 
+  // Construir timeline completa: todas as rodadas de 1 até a atual, 
+  // marcando quais têm dados e quais não
+  const timelineCompleta = useMemo(() => {
+    const items = [];
+    for (let r = 1; r <= rodadaAtual; r++) {
+      const historicoItem = historicoRodadas?.find(h => h.rodada === r);
+      items.push({
+        rodada: r,
+        temDados: !!historicoItem,
+        dados: historicoItem || null,
+        isAtual: r === rodadaAtual,
+      });
+    }
+    return items.reverse(); // Mais recente primeiro
+  }, [historicoRodadas, rodadaAtual]);
+
   return (
     <MainLayout>
       <SEO title="Histórico de Rodadas" description="Acompanhe seu histórico no Cartola FC 2026. Evolução patrimonial, pontuação por rodada e análise de desempenho." path="/historico" />
@@ -228,7 +244,7 @@ const Historico = () => {
               Histórico <span className="text-sm px-2 py-1 bg-red-500 text-white rounded-md ml-2">🔴 AO VIVO - API REAL</span>
             </h1>
             <p className="text-muted-foreground">
-              Acompanhe seu desempenho ao longo do campeonato
+              Escalações salvas automaticamente a cada rodada
             </p>
           </div>
         </div>
@@ -281,99 +297,113 @@ const Historico = () => {
         <h2 className="font-display text-xl font-bold mb-6">Timeline de Rodadas</h2>
         
         <div className="space-y-4">
-          {temHistorico ? (
-            historicoRodadas.map((item, index) => (
+          {timelineCompleta.length > 0 ? (
+            timelineCompleta.map((item, index) => (
               <motion.div
                 key={item.rodada}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.05 }}
                 className="relative pl-8 pb-8 border-l-2 border-border last:border-l-0 last:pb-0"
               >
                 {/* Timeline Dot */}
                 <div className={cn(
                   "absolute left-0 top-0 -translate-x-1/2 w-4 h-4 rounded-full border-2",
-                  item.times_salvos > 0 ? "bg-success border-success" : "bg-primary border-primary"
+                  item.isAtual ? "bg-primary border-primary animate-pulse" :
+                  item.temDados ? "bg-success border-success" : "bg-muted-foreground/30 border-muted-foreground/30"
                 )} />
 
                 {/* Content */}
                 <div className="ml-4">
-                  <div 
-                    className="glass-card p-4 cursor-pointer hover:bg-accent/50 transition-colors"
-                    onClick={() => setRodadaExpandida(rodadaExpandida === item.rodada ? null : item.rodada)}
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          <span>Rodada {item.rodada}</span>
+                  {item.temDados && item.dados ? (
+                    /* Rodada COM dados */
+                    <>
+                      <div 
+                        className="glass-card p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                        onClick={() => setRodadaExpandida(rodadaExpandida === item.rodada ? null : item.rodada)}
+                      >
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Calendar className="w-4 h-4" />
+                              <span>Rodada {item.rodada}</span>
+                            </div>
+                            {item.dados.tipos.map((tipo: string) => (
+                              <span key={tipo} className={cn(
+                                "px-2 py-0.5 text-xs font-bold rounded-full",
+                                tipo === 'valorizacao' ? "bg-primary/20 text-primary" : "bg-secondary/20 text-secondary"
+                              )}>
+                                {tipo === 'valorizacao' ? 'Valorização' : 'Pontuação'}
+                              </span>
+                            ))}
+                          </div>
+                          
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span>{item.dados.times_salvos} time(s)</span>
+                              {item.dados.data_criacao && (
+                                <span>{new Date(item.dados.data_criacao).toLocaleDateString('pt-BR')}</span>
+                              )}
+                            </div>
+                            {rodadaExpandida === item.rodada ? (
+                              <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
                         </div>
-                        {item.tipos.map((tipo) => (
-                          <span key={tipo} className={cn(
-                            "px-2 py-0.5 text-xs font-bold rounded-full",
-                            tipo === 'valorizacao' ? "bg-primary/20 text-primary" : "bg-secondary/20 text-secondary"
-                          )}>
-                            {tipo === 'valorizacao' ? 'Valorização' : 'Pontuação'}
-                          </span>
-                        ))}
                       </div>
                       
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{item.times_salvos} time(s)</span>
-                          {item.data_criacao && (
-                            <span>{new Date(item.data_criacao).toLocaleDateString('pt-BR')}</span>
-                          )}
-                        </div>
-                        {rodadaExpandida === item.rodada ? (
-                          <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                      {/* Detalhes Expandidos */}
+                      <AnimatePresence>
+                        {rodadaExpandida === item.rodada && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <RodadaDetalhes rodada={item.rodada} />
+                          </motion.div>
                         )}
+                      </AnimatePresence>
+                    </>
+                  ) : item.isAtual ? (
+                    /* Rodada ATUAL sem dados */
+                    <div className="glass-card p-4">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Rodada {item.rodada}</span>
+                        <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-yellow-500/20 text-yellow-600">
+                          Em andamento
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        O time será salvo automaticamente antes do fechamento do mercado.
+                      </p>
+                    </div>
+                  ) : (
+                    /* Rodada PASSADA sem dados */
+                    <div className="glass-card p-4 opacity-60">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Rodada {item.rodada}</span>
+                        <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-muted text-muted-foreground">
+                          Sem dados
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-start gap-2">
+                        <Info className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                        <p className="text-xs text-muted-foreground">
+                          Dados indisponíveis — a coleta automática não estava ativa nesta rodada.
+                        </p>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Detalhes Expandidos */}
-                  <AnimatePresence>
-                    {rodadaExpandida === item.rodada && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <RodadaDetalhes rodada={item.rodada} />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  )}
                 </div>
               </motion.div>
             ))
           ) : (
-            // Mostrar rodada atual mesmo sem histórico
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="relative pl-8 pb-8 border-l-2 border-border"
-            >
-              <div className="absolute left-0 top-0 -translate-x-1/2 w-4 h-4 rounded-full border-2 bg-primary border-primary" />
-              <div className="glass-card p-4 ml-4">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Rodada {rodadaAtual}</span>
-                  <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-yellow-500/20 text-yellow-600">
-                    Em andamento
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Escale seu time na aba "Escalação" e salve para registrar no histórico.
-                </p>
-              </div>
-            </motion.div>
-          )}
-
-          {!temHistorico && rodadaAtual === 1 && (
             <div className="text-center py-8 text-muted-foreground">
               <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>Nenhuma rodada concluída ainda.</p>

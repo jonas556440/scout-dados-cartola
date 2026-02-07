@@ -1,10 +1,10 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { FormationDisplay } from "@/components/cartola/FormationDisplay";
 import { PlayerCard } from "@/components/cartola/PlayerCard";
-import { useEscalacao, useAtletas, useDashboard, useGerarEscalacao, useSalvarTime } from "@/hooks/useCartolaApi";
+import { useEscalacao, useAtletas, useDashboard, useGerarEscalacao } from "@/hooks/useCartolaApi";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Loader2, AlertCircle, Check } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   Users, 
   RefreshCw, 
-  Save, 
   Search,
   Star,
   TrendingUp,
@@ -33,7 +32,6 @@ const Escalacao = () => {
   const [filtroPos, setFiltroPos] = useState<Position | 'TODOS'>('TODOS');
   const [busca, setBusca] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [timeSalvo, setTimeSalvo] = useState(false);
   const { toast } = useToast();
 
   // Obter orçamento atual
@@ -43,7 +41,6 @@ const Escalacao = () => {
   const { data: escalacaoData, isLoading: loadingEscalacao, refetch } = useEscalacao(esquema, orcamento);
   const { data: atletas, isLoading: loadingAtletas } = useAtletas();
   const gerarEscalacao = useGerarEscalacao();
-  const salvarTimeMutation = useSalvarTime();
 
   const teamData = tipoTime === 'valorizacao' ? escalacaoData?.timeValorizacao : escalacaoData?.timePontuacao;
 
@@ -57,52 +54,10 @@ const Escalacao = () => {
         title: "Time regenerado!",
         description: `Nova escalação ${esquema} gerada com sucesso.`,
       });
-      setTimeSalvo(false);
     } catch (error) {
       toast({
         title: "Erro ao regenerar",
         description: "Não foi possível gerar nova escalação. Tente novamente.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Função para salvar time (backend + localStorage)
-  const handleSalvar = async () => {
-    if (!teamData) return;
-    
-    // Salvar no localStorage como backup
-    const timeSalvar = {
-      tipo: tipoTime,
-      esquema,
-      jogadores: teamData.titulares,
-      capitao: teamData.capitao,
-      dataSalvo: new Date().toISOString(),
-    };
-    localStorage.setItem(`cartola_time_${tipoTime}`, JSON.stringify(timeSalvar));
-    
-    // Salvar no backend
-    try {
-      await salvarTimeMutation.mutateAsync({
-        tipo: tipoTime,
-        rodada: escalacaoData?.rodada || 1,
-        titulares_ids: teamData.titulares.map((j: any) => j.id),
-        capitao_id: teamData.capitao?.id || teamData.titulares[0]?.id,
-        esquema,
-        cartoletas: orcamento,
-        pontuacaoEsperada: teamData.pontuacaoEsperada || teamData.pontuacaoPrevista || 0,
-      });
-      setTimeSalvo(true);
-      toast({
-        title: "Time salvo!",
-        description: `Time ${isVal ? 'Valorização' : 'Pontuação'} salvo no histórico.`,
-      });
-    } catch {
-      // Se falhar no backend, pelo menos salvou no localStorage
-      setTimeSalvo(true);
-      toast({
-        title: "Salvo localmente",
-        description: "Time salvo localmente. Sincronização com servidor pendente.",
         variant: "destructive",
       });
     }
@@ -170,18 +125,6 @@ const Escalacao = () => {
               <RefreshCw className={cn("w-4 h-4", gerarEscalacao.isPending && "animate-spin")} />
               {gerarEscalacao.isPending ? 'Gerando...' : 'Regenerar'}
             </Button>
-            
-            <Button 
-              className={cn(
-                "gap-2 text-white",
-                isVal ? "valorizacao-gradient" : "pontuacao-gradient"
-              )}
-              onClick={handleSalvar}
-              disabled={!teamData || timeSalvo}
-            >
-              {timeSalvo ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-              {timeSalvo ? 'Salvo!' : 'Salvar'}
-            </Button>
           </div>
         </div>
       </motion.div>
@@ -189,7 +132,7 @@ const Escalacao = () => {
       {/* Strategy Selector - Cards visuais */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <button
-          onClick={() => { setTipoTime('valorizacao'); setTimeSalvo(false); }}
+          onClick={() => { setTipoTime('valorizacao'); }}
           className={cn(
             "rounded-xl p-4 text-left transition-all border-2",
             tipoTime === 'valorizacao'
@@ -221,7 +164,7 @@ const Escalacao = () => {
         </button>
 
         <button
-          onClick={() => { setTipoTime('pontuacao'); setTimeSalvo(false); }}
+          onClick={() => { setTipoTime('pontuacao'); }}
           className={cn(
             "rounded-xl p-4 text-left transition-all border-2",
             tipoTime === 'pontuacao'

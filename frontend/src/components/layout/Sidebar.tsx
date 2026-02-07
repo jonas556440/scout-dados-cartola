@@ -27,7 +27,6 @@ const navSections = [
     items: [
       { icon: Trophy, label: 'Classificação', href: '/brasileirao' },
       { icon: Swords, label: 'Confrontos', href: '/confrontos' },
-      { icon: Star, label: 'Scouts', href: '/scouts' },
     ],
   },
   {
@@ -37,6 +36,7 @@ const navSections = [
       { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
       { icon: Users, label: 'Escalação', href: '/escalacao' },
       { icon: TrendingUp, label: 'Mercado', href: '/mercado' },
+      { icon: Star, label: 'Scouts', href: '/scouts' },
       { icon: History, label: 'Histórico', href: '/historico' },
     ],
   },
