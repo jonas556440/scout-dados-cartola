@@ -179,6 +179,22 @@ class MatchAnalyzer:
             "REM": 40,  # Remo - recém-promovido, menor estrutura
         }
         
+        # v9: Rankings SEPARADOS para ataque e defesa
+        # Ataque: baseado em potencial ofensivo (artilharia, criação)
+        RANKING_ATAQUE = {
+            "FLA": 97, "PAL": 92, "BOT": 88, "INT": 82, "CAM": 80, "FLU": 78,
+            "SAO": 82, "COR": 75, "GRE": 74, "CRU": 70, "SAN": 68,
+            "BAH": 72, "VAS": 65, "RBB": 68, "CAP": 62, "VIT": 52,
+            "MIR": 48, "CFC": 45, "CHA": 42, "REM": 35,
+        }
+        # Defesa: baseado em solidez defensiva (pouco gol sofrido)
+        RANKING_DEFESA = {
+            "FLA": 90, "PAL": 94, "BOT": 92, "INT": 88, "CAM": 78, "FLU": 85,
+            "SAO": 78, "COR": 80, "GRE": 78, "CRU": 72, "SAN": 70,
+            "BAH": 68, "VAS": 70, "RBB": 64, "CAP": 66, "VIT": 55,
+            "MIR": 55, "CFC": 52, "CHA": 50, "REM": 42,
+        }
+        
         estatisticas = {}
         
         # Extrair posições reais das partidas
@@ -227,8 +243,10 @@ class MatchAnalyzer:
             clube_id = int(clube_id_str)
             abrev = clube_info.get("abreviacao", "???")
             
-            # 1. Força do RANKING HISTÓRICO
+            # 1. Força do RANKING HISTÓRICO (geral + ataque + defesa)
             forca_historico = RANKING_HISTORICO.get(abrev, 50)
+            forca_hist_ataque = RANKING_ATAQUE.get(abrev, forca_historico)
+            forca_hist_defesa = RANKING_DEFESA.get(abrev, forca_historico)
             
             # 2. Força da POSIÇÃO ATUAL
             posicao = posicoes_reais.get(clube_id)
@@ -240,6 +258,8 @@ class MatchAnalyzer:
             
             # 3. Força PONDERADA (ranking histórico + posição atual)
             forca_base = (forca_historico * peso_historico) + (forca_posicao * peso_posicao)
+            forca_base_ataque = (forca_hist_ataque * peso_historico) + (forca_posicao * peso_posicao)
+            forca_base_defesa = (forca_hist_defesa * peso_historico) + (forca_posicao * peso_posicao)
             
             # 4. Bônus de FORMA RECENTE (últimos 5 jogos) - até ±10 pontos
             aprov = aproveitamentos.get(clube_id, [])
@@ -253,22 +273,35 @@ class MatchAnalyzer:
             
             # 5. Força final = base + forma
             forca_final = min(100, max(20, forca_base + forma_bonus))
+            # v9: Forças SEPARADAS para ataque e defesa
+            forca_final_ataque = min(100, max(20, forca_base_ataque + forma_bonus))
+            forca_final_defesa = min(100, max(20, forca_base_defesa + forma_bonus))
             
             # Calcular jogos totais a partir do aproveitamento
             jogos_totais = vitorias + empates + derrotas
             pontos_totais = (vitorias * 3) + empates
             
             # Estimar gols baseado na força do time e resultados
-            # Times fortes marcam mais gols, times fracos sofrem mais
             gols_estimados_pro = 0
             gols_estimados_contra = 0
             
             if jogos_totais > 0:
-                # Estimativa simples: vitória = ~2 gols pró, derrota = ~1 gol pró e ~2 contra
+                # v9: Estimativa melhorada com dados reais de gols
                 gols_estimados_pro = (vitorias * 2) + empates + (derrotas * 1)
                 gols_estimados_contra = (derrotas * 2) + empates + (vitorias * 0.5)
                 gols_estimados_pro = int(gols_estimados_pro)
                 gols_estimados_contra = int(gols_estimados_contra)
+                
+                # v9: Ajustar ataque/defesa com dados reais de gols
+                if jogos_totais >= 2:
+                    media_gols_pro = gols_estimados_pro / jogos_totais
+                    media_gols_contra = gols_estimados_contra / jogos_totais
+                    # Ajustar ataque: muitos gols = ataque forte
+                    ajuste_ataque = min(8, max(-8, (media_gols_pro - 1.2) * 6))
+                    forca_final_ataque = min(100, max(20, forca_final_ataque + ajuste_ataque))
+                    # Ajustar defesa: poucos gols sofridos = defesa forte
+                    ajuste_defesa = min(8, max(-8, (1.2 - media_gols_contra) * 6))
+                    forca_final_defesa = min(100, max(20, forca_final_defesa + ajuste_defesa))
             
             stats = EstatisticasTime(
                 clube_id=clube_id,
@@ -283,8 +316,8 @@ class MatchAnalyzer:
                 gols_pro=gols_estimados_pro,
                 gols_contra=gols_estimados_contra,
                 saldo_gols=gols_estimados_pro - gols_estimados_contra,
-                forca_ataque=forca_final,
-                forca_defesa=forca_final,
+                forca_ataque=forca_final_ataque,
+                forca_defesa=forca_final_defesa,
                 forca_geral=forca_final,
                 # Salvar forma
                 forma_pontos=forma_bonus,
@@ -572,40 +605,59 @@ class MatchAnalyzer:
             expect_gols = confronto.expectativa_gols_visitante
             chance_sg = confronto.chance_sg_visitante
         
-        # Ajustar por posição (MAIOR IMPACTO v3)
+        # v9: Usar força DIFERENCIADA do adversário por posição
+        # Defensores se importam com ataque do adversário
+        # Ofensivos se importam com defesa do adversário
+        if is_mandante:
+            stats_adversario = confronto.visitante_stats
+        else:
+            stats_adversario = confronto.mandante_stats
+        
         if posicao in ["GOL", "ZAG", "LAT"]:
-            # Defensores: bônus/penalidade maior por chance de SG
+            # Defensores: bônus/penalidade por chance de SG
+            # v9: Usar forca_ataque do adversário (ataque fraco = mais SG)
             if chance_sg > 70:
-                bonus *= 1.20  # Excelente chance de SG
+                bonus *= 1.20
             elif chance_sg > 50:
                 bonus *= 1.10
             elif chance_sg < 40:
-                bonus *= 0.80  # Alta chance de sofrer gol
+                bonus *= 0.80
             elif chance_sg < 30:
-                bonus *= 0.70  # Muito alta chance de sofrer gol
+                bonus *= 0.70
+            
+            # v9: Penalidade extra se adversário tem ataque forte
+            if stats_adversario and stats_adversario.forca_ataque > 80:
+                bonus *= 0.90  # Adversário com ataque forte = menos SG
+            elif stats_adversario and stats_adversario.forca_ataque < 45:
+                bonus *= 1.10  # Adversário com ataque fraco = mais SG
         
         elif posicao in ["MEI", "ATA"]:
-            # Ofensivos: bônus maior por expectativa de gols
+            # Ofensivos: bônus por expectativa de gols
+            # v9: Usar forca_defesa do adversário (defesa fraca = mais gols)
             if expect_gols > 1.5:
-                bonus *= 1.20  # Excelente para atacar
+                bonus *= 1.20
             elif expect_gols > 1.0:
                 bonus *= 1.10
             elif expect_gols < 0.7:
-                bonus *= 0.80  # Difícil marcar gol
+                bonus *= 0.80
             elif expect_gols < 0.5:
-                bonus *= 0.70  # Muito difícil marcar gol
+                bonus *= 0.70
+            
+            # v9: Bônus extra se adversário tem defesa fraca
+            if stats_adversario and stats_adversario.forca_defesa < 45:
+                bonus *= 1.10  # Defesa fraca = mais gols
+            elif stats_adversario and stats_adversario.forca_defesa > 85:
+                bonus *= 0.90  # Defesa forte = menos gols
         
-        # Ajustar por dificuldade geral (MAIOR IMPACTO v3)
-        # Confronto fácil (dificuldade < 45) = bônus grande
-        # Confronto difícil (dificuldade > 65) = penalidade grande
+        # Ajustar por dificuldade geral
         if dificuldade < 45:
-            bonus *= 1.20  # Confronto muito fácil
+            bonus *= 1.20
         elif dificuldade < 60:
-            bonus *= 1.10  # Confronto fácil
+            bonus *= 1.10
         elif dificuldade > 75:
-            bonus *= 0.70  # Confronto muito difícil
+            bonus *= 0.70
         elif dificuldade > 65:
-            bonus *= 0.80  # Confronto difícil
+            bonus *= 0.80
         
         return round(bonus, 2)
     

@@ -218,149 +218,193 @@ class TeamSelector:
         """
         Calcula score de potencial para TIME DE PONTUAÇÃO
         
-        VERSÃO v3 - Com análise de confrontos!
+        VERSÃO v9 — Calibrado com dados reais + estratégia R4+
         
         Fatores (com pesos):
-        1. Qualidade do jogador (30%): média, preço, tendência
-        2. NOVO: Confronto da rodada (35%): adversário, mando, SG
-        3. Posição ofensiva (15%): ATA/MEI pontuam mais
-        4. Risco (20%): histórico de cartões, contusões
+        1. Projeção − MPV (35 pts) — métrica-chave: só escalar quem supera o MPV
+        2. Qualidade ajustada por preço (25 pts) — custo-benefício real
+        3. Confronto da rodada (25 pts) — adversário, mando, SG
+        4. Risco + Histórico (15 pts) — jogos, tendência, status
         
-        NÃO é baseado apenas em preço!
+        REGRAS:
+        - CORTE HARD: media < 1.5 na R2+ com jogos >= 1 → score = 0
+        - Penalidade forte: preco > 10 e media < 4 → -20
+        - Confronto NÃO pode salvar jogador com projeção negativa
         """
         score = 0.0
         
-        # v7: Detectar rodada usando rodada GLOBAL (não per-jogador)
         is_rodada_1 = self.rodada_atual <= 1
         jogador_sem_dados = atleta.media == 0 and atleta.jogos_num == 0
         
-        # === FATOR 1: QUALIDADE DO JOGADOR (30 pontos máx) ===
+        # === CORTE HARD: jogador com média < 1.5 na R2+ é lixo para pontuação ===
+        if not is_rodada_1 and atleta.jogos_num >= 1 and atleta.media < 1.5:
+            return 0  # Excluído completamente
+        
+        # === FATOR 1: PROJEÇÃO − MPV (35 pontos máx) ===
+        # Métrica-chave R4+: "Score = projeção − MPV"
+        # Prioriza jogadores que superam o MPV com folga
+        mpv_real = atleta.mpv
+        
         if is_rodada_1:
-            # Na rodada 1, usar preço como proxy de qualidade
-            # Jogadores mais caros tendem a ser melhores
-            score += min(30, atleta.preco * 1.2)
+            # R1: sem histórico, usar preço como proxy
+            score += min(25, atleta.preco * 1.0)
         elif jogador_sem_dados:
-            # v7: R2+ mas jogador NUNCA jogou = PENALIDADE FORTE
-            # Não é "rodada 1", é jogador sem histórico — risco altíssimo
-            score += max(0, atleta.preco * 0.4 - 5)  # Máx ~5pts para caros, ~0 para baratos
+            # R2+: nunca jogou = risco altíssimo
+            score += max(0, atleta.preco * 0.3 - 3)
         else:
-            # Com histórico: usar média real
-            # Média 10 = 30 pontos
-            score += min(30, atleta.media * 3)
+            margem = atleta.media - mpv_real
+            
+            if margem >= 5.0:
+                score += 35  # Supera MPV com folga enorme
+            elif margem >= 3.0:
+                score += 30  # Supera muito bem
+            elif margem >= 1.5:
+                score += 25  # Supera com boa margem
+            elif margem >= 0.5:
+                score += 20  # Ligeiramente acima
+            elif margem >= 0:
+                score += 15  # Exatamente no MPV
+            elif margem >= -1.5:
+                score += 8   # Abaixo, mas perto
+            elif margem >= -3.0:
+                score += 2   # Bem abaixo
+            else:
+                score -= 10  # Muito abaixo — péssimo
         
-        # v7: PENALIDADE por poucos jogos na R2+ (suplentes/reservas)
-        if not is_rodada_1 and atleta.jogos_num >= 1 and atleta.jogos_num < 3:
-            if atleta.media < 3.0:
-                score -= 15  # Jogou pouco E mal
+        # === FATOR 2: QUALIDADE AJUSTADA POR PREÇO (25 pontos máx) ===
+        # v9: custo-benefício = media / preco (normalizado)
+        # Hulk 2.4/13.6=0.18 → quase zero
+        # Danielzinho 6.2/8.9=0.70 → muito bom
+        if is_rodada_1:
+            score += min(20, atleta.preco * 0.8)  # Proxy preço
+        elif jogador_sem_dados:
+            score += 2  # Mínimo para desconhecidos
+        else:
+            custo_beneficio = atleta.media / atleta.preco if atleta.preco > 0 else 0
+            
+            if custo_beneficio >= 1.0:
+                score += 25  # Média >= preço (gol, tec barato)
+            elif custo_beneficio >= 0.7:
+                score += 22  # Excelente custo-benefício
+            elif custo_beneficio >= 0.5:
+                score += 18  # Bom
+            elif custo_beneficio >= 0.35:
+                score += 12  # Razoável
+            elif custo_beneficio >= 0.2:
+                score += 5   # Caro pra o que entrega
+            else:
+                score -= 5   # Péssimo custo-benefício
+            
+            # Bônus extra: média alta absoluta (>= 5 pts)
+            if atleta.media >= 8.0:
+                score += 8
+            elif atleta.media >= 5.0:
+                score += 4
+            
+            # v9: Penalidade forte para caros que entregam pouco
+            if atleta.preco > 12.0 and atleta.media < 4.0:
+                score -= 20  # Ex: Hulk C$13.6 média 2.4
+            elif atleta.preco > 10.0 and atleta.media < 3.5:
+                score -= 15  # Caro E ruim
+            elif atleta.preco > 8.0 and atleta.media < 2.5:
+                score -= 10  # Moderadamente caro e ruim
         
-        # === FATOR 2: ANÁLISE DO CONFRONTO (35 pontos máx) === NOVO v3!
+        # === FATOR 3: CONFRONTO DA RODADA (25 pontos máx) ===
+        # v9: peso REDUZIDO de 35→25 — confronto NÃO salva jogador ruim
         if self.confrontos_rodada:
-            # Calcular bônus de confronto
             bonus_confronto = self.match_analyzer.calcular_bonus_confronto(
                 atleta.clube_id,
                 self.confrontos_rodada,
                 atleta.posicao_abrev
             )
             
-            # Converter bônus multiplicador em pontos
-            # 1.0 = neutro (17.5pts), 1.3 = excelente (35pts), 0.7 = ruim (0pts)
-            pontos_confronto = (bonus_confronto - 0.7) / 0.6 * 35
-            score += max(0, min(35, pontos_confronto))
+            # Converter: 1.0 = neutro (12.5pts), 1.3+ = excelente (25pts), 0.7 = ruim (0pts)
+            pontos_confronto = (bonus_confronto - 0.7) / 0.6 * 25
+            score += max(0, min(25, pontos_confronto))
             
-            # Bônus extra para confrontos muito favoráveis
             resumo = self.match_analyzer.get_resumo_confronto(
                 atleta.clube_id, self.confrontos_rodada
             )
             if resumo and "erro" not in resumo:
-                # Bônus para jogo em casa
+                # Bônus mando de campo
                 if resumo.get("local") == "CASA":
-                    score += 5
+                    score += 4
+                elif resumo.get("local") == "FORA":
+                    score -= 3
                 
-                # Bônus/penalidade por dificuldade
+                # Dificuldade do adversário
                 dificuldade = resumo.get("dificuldade", "MÉDIO")
                 if dificuldade == "FÁCIL":
-                    score += 10
+                    score += 5
+                elif dificuldade == "DIFÍCIL":
+                    score -= 5
                 elif dificuldade == "MUITO DIFÍCIL":
-                    score -= 10
+                    score -= 8
                 
-                # Para defensores: bônus por chance de SG
+                # Defensores: chance SG
                 if atleta.posicao_abrev in ["GOL", "ZAG", "LAT"]:
                     chance_sg = resumo.get("chance_sg", 50)
-                    if chance_sg > 60:
-                        score += 8
+                    if chance_sg > 65:
+                        score += 6
                     elif chance_sg < 30:
-                        score -= 5
+                        score -= 4
                 
-                # PENALIDADE EXTRA: Times fracos (força < 55)
-                # Para PONTUAÇÃO, times fracos pontuam muito menos
-                if resumo.get("dificuldade_score", 100) < 100:
-                    # Buscar força do próprio time
-                    stats = self.match_analyzer.estatisticas_times.get(atleta.clube_id)
-                    if stats:
-                        forca_time = stats.forca_geral
-                        if forca_time < 50:
-                            # PENALIDADE MÁXIMA para times muito fracos (< 50)
-                            score -= 60  # Aumentado de 30 para 60
-                            if atleta.posicao_abrev in ["ATA", "MEI"]:
-                                score -= 20  # Extra para atacantes
-                            
-                            # Se for visitante, penalidade TRIPLA
-                            if resumo.get("local") == "FORA":
-                                score -= 30  # Visitante muito fraco pontua quase zero
-                        elif forca_time < 60:
-                            # PENALIDADE FORTE para times fracos (50-60)
-                            score -= 40  # Aumentado de 30 para 40
-                            if atleta.posicao_abrev in ["ATA", "MEI"]:
-                                score -= 15  # Extra para atacantes
-                            
-                            # Se for visitante, penalidade DOBRADA
-                            if resumo.get("local") == "FORA":
-                                score -= 25  # Visitante fraco pontua muito pouco
-                        elif forca_time < 70:
-                            # Penalidade moderada para times abaixo da média
-                            score -= 20  # Aumentado de 15 para 20
-                            if resumo.get("local") == "FORA":
-                                score -= 15  # Aumentado de 10 para 15
-                
-                # Para atacantes: bônus por expectativa de gols
+                # Atacantes: expectativa de gols
                 if atleta.posicao_abrev in ["ATA", "MEI"]:
                     expect_gols = resumo.get("expectativa_gols", 1.0)
                     if expect_gols > 1.5:
-                        score += 8
+                        score += 5
                     elif expect_gols < 0.7:
-                        score -= 5
+                        score -= 4
+                
+                # Penalidade por time fraco
+                stats = self.match_analyzer.estatisticas_times.get(atleta.clube_id)
+                if stats:
+                    forca_time = stats.forca_geral
+                    if forca_time < 45:
+                        score -= 40  # Time péssimo
+                        if resumo.get("local") == "FORA":
+                            score -= 20  # Visitante péssimo
+                    elif forca_time < 55:
+                        score -= 25  # Time fraco
+                        if resumo.get("local") == "FORA":
+                            score -= 15
+                    elif forca_time < 65:
+                        score -= 10  # Time abaixo da média
+                        if resumo.get("local") == "FORA":
+                            score -= 8
         else:
-            # Sem dados de confronto, usar bônus neutro
-            score += 17.5
+            score += 12.5  # Neutro
         
-        # === FATOR 3: BÔNUS POR POSIÇÃO (15 pontos máx) ===
+        # === FATOR 4: RISCO + HISTÓRICO (15 pontos máx) ===
+        # Posição ofensiva: ATA/MEI pontuam mais
         if atleta.posicao_abrev == "ATA":
-            score += 15  # Atacantes pontuam mais
-        elif atleta.posicao_abrev == "MEI":
-            score += 12
-        elif atleta.posicao_abrev == "LAT":
-            score += 8  # Laterais com assistências
-        elif atleta.posicao_abrev == "ZAG":
-            score += 5
-        elif atleta.posicao_abrev == "GOL":
-            score += 7  # Goleiros com defesas difíceis
-        
-        # === FATOR 4: RISCO E TENDÊNCIA (20 pontos máx) ===
-        if atleta.risco == "baixo":
-            score += 15
-        elif atleta.risco == "medio":
             score += 8
+        elif atleta.posicao_abrev == "MEI":
+            score += 6
+        elif atleta.posicao_abrev == "GOL":
+            score += 5  # Goleiros com defesas difíceis
+        elif atleta.posicao_abrev == "LAT":
+            score += 4
+        elif atleta.posicao_abrev == "ZAG":
+            score += 3
+        
+        # Risco
+        if atleta.risco == "baixo":
+            score += 7
+        elif atleta.risco == "medio":
+            score += 3
         else:
             score -= 5
         
-        # Tendência de valorizar (indica bom momento)
+        # Penalidade por poucos jogos na R2+
         if not is_rodada_1:
-            if atleta.tendencia_valorizar > 0.7:
-                score += 5
-            elif atleta.tendencia_valorizar < 0.3:
-                score -= 3
+            if atleta.jogos_num == 0:
+                score -= 15  # Nunca jogou
+            elif atleta.jogos_num == 1 and atleta.media < 3.0:
+                score -= 8  # Jogou 1x e mal
         
-        return max(0, score)  # Nunca retornar score negativo
+        return max(0, score)
     
     def _calcular_score_valorizacao(self, atleta: AnaliseJogador) -> float:
         """
@@ -608,6 +652,16 @@ class TeamSelector:
                 if stats and stats.forca_geral < 45:
                     continue  # Time muito fraco não valoriza
             
+            # v9: Na R2+, filtrar jogadores com media < 30% do MPV (impossível valorizar)
+            # Ex: Dudu avg 0.5 vs MPV 3.4 = 15% — excluído
+            if not is_rodada_1 and a.jogos_num >= 1 and a.mpv > 0:
+                if a.media < (a.mpv * 0.3):
+                    continue
+            
+            # v9: Na R2+, média mínima de 1.0 — abaixo disso é suplente/fraco demais
+            if not is_rodada_1 and a.jogos_num >= 1 and a.media < 1.0:
+                continue
+            
             # v7: Na R2+, filtrar jogadores que nunca jogaram E são baratos (suplentes)
             if not is_rodada_1 and a.jogos_num == 0 and a.preco < 3.0:
                 continue  # Suplente barato = não vai jogar
@@ -629,11 +683,11 @@ class TeamSelector:
             ]
         
         # Ordenar por critérios de valorização usando SCORE calculado!
-        # MUDANÇA v4.2: Usar _calcular_score_valorizacao ao invés de ordenar apenas por preço
+        # v9: Desempate por preço (mais barato = MPV menor = mais fácil valorizar)
         elegiveis_com_score = [
             (a, self._calcular_score_valorizacao(a)) for a in elegiveis
         ]
-        elegiveis_com_score.sort(key=lambda x: x[1], reverse=True)
+        elegiveis_com_score.sort(key=lambda x: (x[1], -x[0].preco), reverse=True)
         elegiveis = [a for a, score in elegiveis_com_score]
         
         return self._montar_time(
@@ -674,13 +728,16 @@ class TeamSelector:
         atletas_filtrados = []
         for a in atletas_analisados:
             # v7.1: Na R2+, filtrar jogadores que NUNCA jogaram
-            # Se nunca entrou em campo, não tem como prever pontuação
             if not is_rodada_1 and a.jogos_num == 0:
                 continue
             
-            # v7.1: Na R2+, filtrar jogadores com média negativa ou muito baixa
-            # Não faz sentido escalar alguém que pontua negativo
-            if not is_rodada_1 and a.media < 0.5 and a.jogos_num >= 1:
+            # v9: Filtro de média mínima — ninguém com media < 2.0 no time de pontuação
+            # Elimina jogadores tipo Dudu (0.5), Camilo (0.7), Carvalheira (1.4)
+            if not is_rodada_1 and a.media < 2.0 and a.jogos_num >= 1:
+                continue
+            
+            # v7.1: Na R2+, filtrar jogadores com média negativa
+            if not is_rodada_1 and a.media < 0 and a.jogos_num >= 1:
                 continue
             
             # Buscar força do time
@@ -697,15 +754,19 @@ class TeamSelector:
                 if forca_time < 40:
                     continue
                 
-                # Filtro 3: Verificar se é visitante muito fraco
+                # v9: Filtro visitante fraco — CFC FORA em CHA não deveria entrar
                 eh_visitante = False
                 for c in self.confrontos_rodada:
                     if c.clube_visitante_id == a.clube_id:
                         eh_visitante = True
                         break
                 
-                # Visitante muito fraco (< 50) com jogador barato (< 3.0) - evitar
-                if eh_visitante and forca_time < 50 and a.preco < 3.0:
+                # Visitante de time fraco (< 55) = evitar para pontuação
+                if eh_visitante and forca_time < 55:
+                    continue
+                
+                # Visitante com jogador barato de time médio fraco
+                if eh_visitante and forca_time < 62 and a.preco < 3.0:
                     continue
             
             atletas_filtrados.append(a)
@@ -722,8 +783,8 @@ class TeamSelector:
             por_posicao[atleta.posicao_abrev].append((atleta, score))
         
         for pos in por_posicao:
-            # Ordenar por score decrescente
-            por_posicao[pos].sort(key=lambda x: x[1], reverse=True)
+            # v9: Ordenar por score decrescente, desempate por preço (mais barato = melhor)
+            por_posicao[pos].sort(key=lambda x: (x[1], -x[0].preco), reverse=True)
         
         # === FASE 1: Montar time inicial com melhores por posição ===
         # Que cabem no orçamento usando algoritmo guloso inteligente
@@ -756,6 +817,9 @@ class TeamSelector:
         # Ordenar posições por importância ofensiva (ATA/MEI primeiro)
         ordem_posicoes = ["ATA", "MEI", "LAT", "ZAG", "GOL", "TEC"]
         
+        # v9: Limite de concentração por clube para times fracos
+        MAX_CLUBE_FRACO = 3  # Máx 3 jogadores de times com força < 60
+        
         for pos in ordem_posicoes:
             qtd_necessaria = necessidades.get(pos, 0)
             if qtd_necessaria == 0:
@@ -773,6 +837,12 @@ class TeamSelector:
                 
                 if contagem_clubes[atleta.clube_abrev] >= self.MAX_POR_CLUBE:
                     continue
+                
+                # v9: Limite de concentração para times fracos
+                stats_clube = self.match_analyzer.estatisticas_times.get(atleta.clube_id)
+                if stats_clube and stats_clube.forca_geral < 60:
+                    if contagem_clubes[atleta.clube_abrev] >= MAX_CLUBE_FRACO:
+                        continue
                 
                 # Verificar conflito tático (Defesa x Ataque)
                 if evitar_conflitos and self._verificar_conflito(atleta, titulares):
@@ -980,6 +1050,12 @@ class TeamSelector:
             if contagem_clubes[atleta.clube_abrev] >= self.MAX_POR_CLUBE:
                 continue
             
+            # v9: Limite de concentração para times fracos (máx 3)
+            stats_clube = self.match_analyzer.estatisticas_times.get(atleta.clube_id)
+            if stats_clube and stats_clube.forca_geral < 60:
+                if contagem_clubes[atleta.clube_abrev] >= 3:
+                    continue
+            
             # Verificar orçamento
             if custo_total + atleta.preco > self.orcamento:
                 continue
@@ -1170,23 +1246,18 @@ class TeamSelector:
         
         custo_referencia = time_valor.custo_total if time_valor else 85.0
         
-        # Lista de multiplicadores para tentar: 
-        # 1.15 (Muito restrito, pedido do usuário)
-        # 1.25 (Um pouco mais folgado)
-        # 1.35 (Razoável)
-        # 2.00 (Usa o que tiver até o limite do usuário)
-        multiplicadores = [1.15, 1.25, 1.35, 2.0]
+        # v9: Multiplicadores mais generosos — time de pontuação precisa de jogadores melhores
+        # Antes: [1.15, 1.25, 1.35, 2.0] — muito restritivo, forçava jogadores ruins baratos
+        # Agora: [1.4, 1.6, 1.8, 2.5] — permite investir em qualidade
+        multiplicadores = [1.4, 1.6, 1.8, 2.5]
         
         time_pontos = None
         
         for mult in multiplicadores:
-            # Calcular orçamento teto para esta tentativa
+            # v9: Piso mínimo de C$95 para pontuação — nunca menos que isso
             if self.orcamento < 110:
-                # Se o user já é pobre, tenta restringir
-                orcamento_tentativa = min(orcamento_original, custo_referencia * mult)
+                orcamento_tentativa = min(orcamento_original, max(custo_referencia * mult, 95.0))
             else:
-                # Se o user é rico, o "1.15" é pra evitar gastar 180 qdo o time de valor custa 80
-                # Mas se precisar gastar mais pra fechar o time, gasta.
                 orcamento_tentativa = min(orcamento_original, max(custo_referencia * mult, 100.0))
             
             self.orcamento = orcamento_tentativa
