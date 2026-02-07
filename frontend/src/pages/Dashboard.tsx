@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SEO } from "@/components/SEO";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TermTooltip } from "@/components/ui/term-tooltip";
 
 const Dashboard = () => {
   // Usar dados da API real (com dataUpdatedAt para cache info)
@@ -150,10 +152,19 @@ const Dashboard = () => {
             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
               mercado.status === 'aberto' ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'
             }`}>
-              <Clock className="w-4 h-4" />
-              <span className="font-semibold">
-                {mercado.status === 'aberto' ? `Fecha em ${calcularTempoFechamento()}` : 'Mercado Fechado'}
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-help">
+                    <Clock className="w-4 h-4" />
+                    <span className="font-semibold">
+                      {mercado.status === 'aberto' ? `Fecha em ${calcularTempoFechamento()}` : 'Mercado Fechado'}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="text-sm">O mercado fecha antes do início da rodada. Faça sua escalação antes deste horário!</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             
             <Link to="/escalacao">

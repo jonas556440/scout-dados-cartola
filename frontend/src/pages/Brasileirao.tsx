@@ -6,10 +6,15 @@ import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { Disclaimer } from "@/components/Disclaimer";
+import { ColorLegend } from "@/components/ui/color-legend";
+import { TermTooltip } from "@/components/ui/term-tooltip";
+import { HelpSection } from "@/components/ui/help-section";
+import { IconWithTooltip } from "@/components/ui/icon-with-tooltip";
 
 // Mapeamento abreviação → slug para links clicáveis
 const ABREV_TO_SLUG: Record<string, string> = {
@@ -98,16 +103,29 @@ const Brasileirao = () => {
         </div>
       </motion.div>
 
+      {/* Legenda de cores e dica de interação */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="mb-6"
+      >
+        <ColorLegend />
+      </motion.div>
+
       <Tabs defaultValue="classificacao" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="classificacao">
-            <Shield className="w-4 h-4 mr-2" /> Classificação
+            <IconWithTooltip icon={<Shield className="w-4 h-4 mr-2" />} tooltip="Tabela de classificação atualizada" side="bottom" />
+            Classificação
           </TabsTrigger>
           <TabsTrigger value="simulacao">
-            <BarChart3 className="w-4 h-4 mr-2" /> Monte Carlo
+            <IconWithTooltip icon={<BarChart3 className="w-4 h-4 mr-2" />} tooltip="Simulação de probabilidades do campeonato" side="bottom" />
+            <TermTooltip term="monte-carlo">Monte Carlo</TermTooltip>
           </TabsTrigger>
           <TabsTrigger value="acuracia">
-            <Target className="w-4 h-4 mr-2" /> Acurácia
+            <IconWithTooltip icon={<Target className="w-4 h-4 mr-2" />} tooltip="Precisão das previsões por rodada" side="bottom" />
+            Acurácia
           </TabsTrigger>
         </TabsList>
 
@@ -124,16 +142,22 @@ const Brasileirao = () => {
                   <tr>
                     <th className="text-left">#</th>
                     <th className="text-left">Time</th>
-                    <th className="text-center">P</th>
-                    <th className="text-center">J</th>
-                    <th className="text-center">V</th>
-                    <th className="text-center">E</th>
-                    <th className="text-center">D</th>
-                    <th className="text-center">GP</th>
-                    <th className="text-center">GC</th>
-                    <th className="text-center">SG</th>
-                    <th className="text-center">%</th>
-                    <th className="text-center">Forma</th>
+                    <th className="text-center" title="Pontos">P</th>
+                    <th className="text-center" title="Jogos">J</th>
+                    <th className="text-center" title="Vitórias">V</th>
+                    <th className="text-center" title="Empates">E</th>
+                    <th className="text-center" title="Derrotas">D</th>
+                    <th className="text-center" title="Gols Pró">GP</th>
+                    <th className="text-center" title="Gols Contra">GC</th>
+                    <th className="text-center">
+                      <TermTooltip term="sg">SG</TermTooltip>
+                    </th>
+                    <th className="text-center">
+                      <TermTooltip term="aproveitamento">%</TermTooltip>
+                    </th>
+                    <th className="text-center">
+                      <TermTooltip term="forma">Forma</TermTooltip>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -163,18 +187,26 @@ const Brasileirao = () => {
                         </span>
                       </td>
                       <td>
-                        <Link
-                          to={`/brasileirao/time/${ABREV_TO_SLUG[time.abrev] || time.abrev.toLowerCase()}`}
-                          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                        >
-                          {time.escudo && (
-                            <img src={time.escudo} alt={time.abrev} className="w-6 h-6" />
-                          )}
-                          <div>
-                            <div className="font-semibold text-sm hover:underline">{time.nome || time.abrev}</div>
-                            <div className="text-xs text-muted-foreground">{time.abrev}</div>
-                          </div>
-                        </Link>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link
+                              to={`/brasileirao/time/${ABREV_TO_SLUG[time.abrev] || time.abrev.toLowerCase()}`}
+                              className="flex items-center gap-2 group transition-all"
+                            >
+                              {time.escudo && (
+                                <img src={time.escudo} alt={time.abrev} className="w-6 h-6" />
+                              )}
+                              <div>
+                                <div className="font-semibold text-sm text-primary group-hover:text-primary/80 underline decoration-dotted decoration-1 underline-offset-2 cursor-pointer transition-colors">{time.nome || time.abrev}</div>
+                                <div className="text-xs text-muted-foreground">{time.abrev}</div>
+                              </div>
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            <p className="text-sm font-semibold mb-1">Ver análise completa</p>
+                            <p className="text-xs text-muted-foreground">Probabilidades • Próximos jogos • Estatísticas</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </td>
                       <td className="text-center font-bold text-lg">{time.pontos}</td>
                       <td className="text-center">{time.jogos}</td>
@@ -241,12 +273,24 @@ const Brasileirao = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary" />
-                <h2 className="font-display text-xl font-bold">Simulação Monte Carlo</h2>
+                <IconWithTooltip 
+                  icon={<BarChart3 className="w-5 h-5 text-primary" />} 
+                  tooltip="Análise probabilística do campeonato"
+                />
+                <h2 className="font-display text-xl font-bold">
+                  <TermTooltip term="monte-carlo">Simulação Monte Carlo</TermTooltip>
+                </h2>
               </div>
-              <span className="text-xs px-3 py-1 rounded-full bg-primary/20 text-primary font-semibold">
-                200 simulações • Poisson V3
-              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-xs px-3 py-1 rounded-full bg-primary/20 text-primary font-semibold cursor-help">
+                    200 simulações • Poisson V3
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="text-sm">Cada cenário simula o restante do campeonato com variações realistas baseadas na força dos times.</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             {classificacaoData?.simulacao ? (
@@ -448,6 +492,40 @@ const Brasileirao = () => {
           </motion.div>
         </TabsContent>
       </Tabs>
+
+      {/* Seção de ajuda */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mt-8"
+      >
+        <HelpSection
+          title="❓ Como interpretar os dados"
+          items={[
+            {
+              term: "Faixas de Classificação",
+              definition: "G-4 (1º a 4º): Vaga direta na fase de grupos da Libertadores. G-6 (5º e 6º): Vaga nas pré-eliminatórias da Libertadores. G-12 (7º a 12º): Vaga na Sul-Americana. Z-4 (17º a 20º): Rebaixamento para a Série B."
+            },
+            {
+              term: "Simulação Monte Carlo",
+              definition: "Algoritmo que simula o restante do campeonato 1000 vezes com variações aleatórias realistas. As probabilidades mostradas são a porcentagem de cenários em que cada time conquistou o título, vaga na Libertadores, Sul-Americana ou foi rebaixado."
+            },
+            {
+              term: "Forma Recente",
+              definition: "Mostra os últimos 5 jogos do time: V (Vitória), E (Empate), D (Derrota). Times com muitos 'V' estão em boa fase; muitos 'D' indicam má fase."
+            },
+            {
+              term: "Aproveitamento (%)",
+              definition: "Percentual de pontos conquistados em relação ao total possível. Fórmula: (Pontos ÷ (Jogos × 3)) × 100%. Campeões costumam ter 70%+ de aproveitamento."
+            },
+            {
+              term: "Clique nos times",
+              definition: "Clique no nome de qualquer time (links em azul sublinhado) para ver análise detalhada com probabilidades individuais, próximos 5 jogos com previsões, forma recente e estatísticas completas."
+            }
+          ]}
+        />
+      </motion.div>
 
       {/* Disclaimer */}
       <Disclaimer />
