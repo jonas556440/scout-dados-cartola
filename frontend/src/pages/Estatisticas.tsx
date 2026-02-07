@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart3, 
   TrendingUp, 
-  Target, 
   Users,
   Shield,
   Zap,
@@ -38,7 +37,7 @@ import { Disclaimer } from "@/components/Disclaimer";
 
 const Estatisticas = () => {
   const { data: atletas, isLoading, error } = useAtletas({ limite: 500 });
-  const { data: forcaTimesData, isLoading: isLoadingForca } = useForcaTimes();
+  const { data: forcaTimesData } = useForcaTimes();
   const { data: xgData, isLoading: isLoadingXG } = useTimesXG();
 
   // Dados por posição
@@ -130,17 +129,16 @@ const Estatisticas = () => {
               Estatísticas
             </h1>
             <p className="text-muted-foreground">
-              Análise detalhada do mercado, times e xG
+              Mercado Cartola e ranking xG dos times
             </p>
           </div>
         </div>
       </motion.div>
 
       <Tabs defaultValue="visao-geral" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-md">
+        <TabsList className="grid w-full grid-cols-2 max-w-sm">
           <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
           <TabsTrigger value="xg">xG (Expected Goals)</TabsTrigger>
-          <TabsTrigger value="forca">Força dos Times</TabsTrigger>
         </TabsList>
 
         {/* ====== TAB: VISÃO GERAL ====== */}
@@ -317,64 +315,6 @@ const Estatisticas = () => {
           </div>
         ) : xgData ? (
           <>
-            {/* Próximos Jogos com xG */}
-            {xgData.proximosJogos.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="chart-container"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="w-5 h-5 text-primary" />
-                  <h2 className="font-display text-xl font-bold">xG: Próximos Jogos da Rodada</h2>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="text-left p-3 text-sm font-medium text-muted-foreground">Jogo</th>
-                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">xG Casa</th>
-                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">xG Fora</th>
-                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">Total</th>
-                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">Placar</th>
-                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">Over 2.5</th>
-                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">BTTS</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {xgData.proximosJogos.map((jogo, i) => (
-                        <tr key={i} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
-                          <td className="p-3 font-medium">{jogo.mandante} x {jogo.visitante}</td>
-                          <td className="p-3 text-center">
-                            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-primary/20 text-primary font-semibold text-sm">
-                              {jogo.xgMandante.toFixed(2)}
-                            </span>
-                          </td>
-                          <td className="p-3 text-center">
-                            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-blue-500/20 text-blue-400 font-semibold text-sm">
-                              {jogo.xgVisitante.toFixed(2)}
-                            </span>
-                          </td>
-                          <td className="p-3 text-center font-semibold">{jogo.totalXg.toFixed(2)}</td>
-                          <td className="p-3 text-center font-bold text-primary">{jogo.placarProvavel}</td>
-                          <td className="p-3 text-center">
-                            <span className={`text-sm font-medium ${jogo.over25 > 50 ? 'text-green-400' : 'text-red-400'}`}>
-                              {jogo.over25}%
-                            </span>
-                          </td>
-                          <td className="p-3 text-center">
-                            <span className={`text-sm font-medium ${jogo.btts > 50 ? 'text-green-400' : 'text-red-400'}`}>
-                              {jogo.btts}%
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </motion.div>
-            )}
-
             {/* Ranking xG por Time */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -443,93 +383,6 @@ const Estatisticas = () => {
             Sem dados de xG disponíveis
           </div>
         )}
-      </TabsContent>
-
-      {/* ====== TAB: FORÇA DOS TIMES ====== */}
-      <TabsContent value="forca" className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="chart-container mb-8"
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-primary" />
-            <h2 className="font-display text-xl font-bold">Força dos Times</h2>
-          </div>
-          {forcaTimesData && (
-            <span className="text-xs text-muted-foreground">
-              {forcaTimesData.metodologia}
-            </span>
-          )}
-        </div>
-
-        {isLoadingForca ? (
-          <div className="space-y-2">
-            {[...Array(20)].map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </div>
-        ) : forcaTimesData && forcaTimesData.times ? (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground"></th>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Time</th>
-                  <th className="text-center p-3 text-sm font-medium text-muted-foreground">Pos</th>
-                  <th className="text-center p-3 text-sm font-medium text-muted-foreground">J</th>
-                  <th className="text-center p-3 text-sm font-medium text-muted-foreground">V</th>
-                  <th className="text-center p-3 text-sm font-medium text-muted-foreground">E</th>
-                  <th className="text-center p-3 text-sm font-medium text-muted-foreground">D</th>
-                  <th className="text-center p-3 text-sm font-medium text-muted-foreground">Força Casa</th>
-                  <th className="text-center p-3 text-sm font-medium text-muted-foreground">Força Fora</th>
-                </tr>
-              </thead>
-              <tbody>
-                {forcaTimesData.times.map((time, index) => (
-                  <tr 
-                    key={time.id} 
-                    className="border-b border-border/50 hover:bg-accent/50 transition-colors"
-                  >
-                    <td className="p-3 text-sm font-medium text-muted-foreground">
-                      {index + 1}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
-                          <span className="text-xs font-bold">{time.abrev}</span>
-                        </div>
-                        <span className="font-medium">{time.abrev}</span>
-                      </div>
-                    </td>
-                    <td className="p-3 text-center text-sm">{time.posicao}º</td>
-                    <td className="p-3 text-center text-sm">{time.jogos}</td>
-                    <td className="p-3 text-center text-sm">{time.vitorias}</td>
-                    <td className="p-3 text-center text-sm">{time.empates}</td>
-                    <td className="p-3 text-center text-sm">{time.derrotas}</td>
-                    <td className="p-3 text-center">
-                      <span className="inline-flex items-center justify-center px-2 py-1 rounded-md bg-primary/20 text-primary font-semibold">
-                        {(time.forcaCasa ?? 0).toFixed(0)}
-                      </span>
-                    </td>
-                    <td className="p-3 text-center">
-                      <span className="inline-flex items-center justify-center px-2 py-1 rounded-md bg-secondary/20 text-secondary font-semibold">
-                        {(time.forcaFora ?? 0).toFixed(0)}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            Sem dados disponíveis
-          </div>
-        )}
-      </motion.div>
       </TabsContent>
 
       </Tabs>
