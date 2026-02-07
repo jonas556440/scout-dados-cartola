@@ -1,10 +1,11 @@
 import { MainLayout } from "@/components/layout/MainLayout";
-import { useAtletas, useForcaTimes } from "@/hooks/useCartolaApi";
+import { useAtletas, useForcaTimes, useTimesXG } from "@/hooks/useCartolaApi";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart3, 
   TrendingUp, 
@@ -32,10 +33,13 @@ import {
 } from "recharts";
 import type { Position } from "@/types/cartola";
 import { POSITION_NAMES } from "@/types/cartola";
+import { SEO } from "@/components/SEO";
+import { Disclaimer } from "@/components/Disclaimer";
 
 const Estatisticas = () => {
   const { data: atletas, isLoading, error } = useAtletas({ limite: 500 });
   const { data: forcaTimesData, isLoading: isLoadingForca } = useForcaTimes();
+  const { data: xgData, isLoading: isLoadingXG } = useTimesXG();
 
   // Dados por posição
   const dadosPorPosicao = useMemo(() => {
@@ -109,6 +113,8 @@ const Estatisticas = () => {
 
   return (
     <MainLayout>
+      <SEO title="Estatísticas" description="Estatísticas completas do mercado Cartola FC e xG do Brasileirão 2026." path="/estatisticas" />
+      
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -121,16 +127,24 @@ const Estatisticas = () => {
           </div>
           <div>
             <h1 className="font-display text-3xl md:text-4xl font-bold">
-              Estatísticas <span className="text-sm px-2 py-1 bg-red-500 text-white rounded-md ml-2">🔴 AO VIVO - API REAL</span>
+              Estatísticas
             </h1>
             <p className="text-muted-foreground">
-              Análise detalhada do mercado e times
+              Análise detalhada do mercado, times e xG
             </p>
           </div>
         </div>
       </motion.div>
 
-      {/* Charts Grid */}
+      <Tabs defaultValue="visao-geral" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
+          <TabsTrigger value="xg">xG (Expected Goals)</TabsTrigger>
+          <TabsTrigger value="forca">Força dos Times</TabsTrigger>
+        </TabsList>
+
+        {/* ====== TAB: VISÃO GERAL ====== */}
+        <TabsContent value="visao-geral" className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Jogadores por Posição */}
         <motion.div
@@ -291,6 +305,148 @@ const Estatisticas = () => {
       </div>
 
       {/* Tabela Completa de Força dos Times */}
+      </TabsContent>
+
+      {/* ====== TAB: xG (EXPECTED GOALS) ====== */}
+      <TabsContent value="xg" className="space-y-6">
+        {isLoadingXG ? (
+          <div className="space-y-2">
+            {[...Array(10)].map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        ) : xgData ? (
+          <>
+            {/* Próximos Jogos com xG */}
+            {xgData.proximosJogos.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="chart-container"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="w-5 h-5 text-primary" />
+                  <h2 className="font-display text-xl font-bold">xG: Próximos Jogos da Rodada</h2>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left p-3 text-sm font-medium text-muted-foreground">Jogo</th>
+                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">xG Casa</th>
+                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">xG Fora</th>
+                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">Total</th>
+                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">Placar</th>
+                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">Over 2.5</th>
+                        <th className="text-center p-3 text-sm font-medium text-muted-foreground">BTTS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {xgData.proximosJogos.map((jogo, i) => (
+                        <tr key={i} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
+                          <td className="p-3 font-medium">{jogo.mandante} x {jogo.visitante}</td>
+                          <td className="p-3 text-center">
+                            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-primary/20 text-primary font-semibold text-sm">
+                              {jogo.xgMandante.toFixed(2)}
+                            </span>
+                          </td>
+                          <td className="p-3 text-center">
+                            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-blue-500/20 text-blue-400 font-semibold text-sm">
+                              {jogo.xgVisitante.toFixed(2)}
+                            </span>
+                          </td>
+                          <td className="p-3 text-center font-semibold">{jogo.totalXg.toFixed(2)}</td>
+                          <td className="p-3 text-center font-bold text-primary">{jogo.placarProvavel}</td>
+                          <td className="p-3 text-center">
+                            <span className={`text-sm font-medium ${jogo.over25 > 50 ? 'text-green-400' : 'text-red-400'}`}>
+                              {jogo.over25}%
+                            </span>
+                          </td>
+                          <td className="p-3 text-center">
+                            <span className={`text-sm font-medium ${jogo.btts > 50 ? 'text-green-400' : 'text-red-400'}`}>
+                              {jogo.btts}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Ranking xG por Time */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="chart-container"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <Zap className="w-5 h-5 text-primary" />
+                <h2 className="font-display text-xl font-bold">xG por Time — Geral / Casa / Fora</h2>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">#</th>
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">Time</th>
+                      <th className="text-center p-3 text-sm font-medium text-muted-foreground">xG Geral</th>
+                      <th className="text-center p-3 text-sm font-medium text-muted-foreground">xG Casa</th>
+                      <th className="text-center p-3 text-sm font-medium text-muted-foreground">xG Fora</th>
+                      <th className="text-center p-3 text-sm font-medium text-muted-foreground">xGA Geral</th>
+                      <th className="text-center p-3 text-sm font-medium text-muted-foreground">GP</th>
+                      <th className="text-center p-3 text-sm font-medium text-muted-foreground">GC</th>
+                      <th className="text-center p-3 text-sm font-medium text-muted-foreground">Força</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {xgData.rankingXG.map((time, index) => (
+                      <tr key={time.id} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
+                        <td className="p-3 text-sm text-muted-foreground">{index + 1}</td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center">
+                              <span className="text-[10px] font-bold">{time.abrev}</span>
+                            </div>
+                            <span className="font-medium text-sm">{time.abrev}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className="inline-flex items-center justify-center px-2 py-1 rounded-md bg-green-500/20 text-green-400 font-bold text-sm">
+                            {time.xgGeral.toFixed(2)}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center text-sm">{time.xgCasa.toFixed(2)}</td>
+                        <td className="p-3 text-center text-sm">{time.xgFora.toFixed(2)}</td>
+                        <td className="p-3 text-center">
+                          <span className="inline-flex items-center justify-center px-2 py-1 rounded-md bg-red-500/20 text-red-400 font-bold text-sm">
+                            {time.xgaGeral.toFixed(2)}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center text-sm">{time.golsPro}</td>
+                        <td className="p-3 text-center text-sm">{time.golsContra}</td>
+                        <td className="p-3 text-center text-sm">{time.forcaGeral.toFixed(0)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                {xgData.metodologia}
+              </p>
+            </motion.div>
+          </>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            Sem dados de xG disponíveis
+          </div>
+        )}
+      </TabsContent>
+
+      {/* ====== TAB: FORÇA DOS TIMES ====== */}
+      <TabsContent value="forca" className="space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -374,6 +530,11 @@ const Estatisticas = () => {
           </div>
         )}
       </motion.div>
+      </TabsContent>
+
+      </Tabs>
+
+      <Disclaimer />
     </MainLayout>
   );
 };

@@ -7,8 +7,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { Disclaimer } from "@/components/Disclaimer";
+
+// Mapeamento abreviação → slug para links clicáveis
+const ABREV_TO_SLUG: Record<string, string> = {
+  CAM: "atletico-mg", CAP: "athletico-pr", BAH: "bahia", BOT: "botafogo",
+  COR: "corinthians", CRU: "cruzeiro", CUI: "cuiaba", FLA: "flamengo",
+  FLU: "fluminense", FOR: "fortaleza", GRE: "gremio", INT: "internacional",
+  JUV: "juventude", MIR: "mirassol", PAL: "palmeiras", SAN: "santos",
+  SAO: "sao-paulo", SPO: "sport", VAS: "vasco", VIT: "vitoria",
+};
 
 const Brasileirao = () => {
   const { data: classificacaoData, isLoading, error } = useClassificacao();
@@ -152,15 +162,18 @@ const Brasileirao = () => {
                         </span>
                       </td>
                       <td>
-                        <div className="flex items-center gap-2">
+                        <Link
+                          to={`/brasileirao/time/${ABREV_TO_SLUG[time.abrev] || time.abrev.toLowerCase()}`}
+                          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                        >
                           {time.escudo && (
                             <img src={time.escudo} alt={time.abrev} className="w-6 h-6" />
                           )}
                           <div>
-                            <div className="font-semibold text-sm">{time.nome || time.abrev}</div>
+                            <div className="font-semibold text-sm hover:underline">{time.nome || time.abrev}</div>
                             <div className="text-xs text-muted-foreground">{time.abrev}</div>
                           </div>
-                        </div>
+                        </Link>
                       </td>
                       <td className="text-center font-bold text-lg">{time.pontos}</td>
                       <td className="text-center">{time.jogos}</td>

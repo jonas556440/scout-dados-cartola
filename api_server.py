@@ -1444,6 +1444,105 @@ def get_forca_times(rodada: Optional[int] = None):
         raise HTTPException(status_code=500, detail=f"Erro ao calcular força: {str(e)}")
 
 
+@app.get("/api/times/xg")
+def get_xg_por_time(rodada: Optional[int] = None):
+    """
+    Retorna tabela de xG (Expected Goals) por time, estilo FootyStats.
+    Inclui xG geral, casa, fora, xGA (contra) e próximos jogos com xG.
+    """
+    try:
+        mercado = api.get_mercado()
+        status = api.get_status_mercado()
+        
+        if not mercado:
+            raise HTTPException(status_code=503, detail="API Cartola indisponível")
+        
+        clubes = mercado.get("clubes", {})
+        rodada_atual = status.get("rodada_atual", 1) if status else 1
+        rodada = rodada or rodada_atual
+        
+        # Carregar estatísticas
+        partidas_response = api.get_partidas(rodada)
+        if isinstance(partidas_response, dict):
+            partidas = partidas_response.get("partidas", [])
+        elif isinstance(partidas_response, list):
+            partidas = partidas_response
+        else:
+            partidas = []
+        
+        match_analyzer.carregar_estatisticas_times(clubes, partidas)
+        score_predictor_inst = ScorePredictor()
+        
+        # Calcular xG para cada jogo da rodada
+        previsoes = score_predictor_inst.prever_rodada(partidas, match_analyzer.estatisticas_times)
+        
+        # Montar tabela xG por time
+        times_xg = {}
+        for clube_id, stats in match_analyzer.estatisticas_times.items():
+            clube_info = clubes.get(str(clube_id), {})
+            escudo = None
+            if isinstance(clube_info.get("escudo"), dict):
+                escudo = clube_info["escudo"].get("60x60")
+            
+            # Calcular xG base com forças relativas
+            forca_ataque = stats.forca_geral / 50 if stats.forca_geral else 1.0
+            forca_defesa_norm = max(0.5, min(1.5, (100 - stats.forca_geral) / 50 + 0.5))
+            
+            xg_base = score_predictor_inst.MEDIA_GOLS_MANDANTE * forca_ataque
+            xga_base = score_predictor_inst.MEDIA_GOLS_VISITANTE * forca_defesa_norm
+            
+            times_xg[stats.abreviacao] = {
+                "id": clube_id,
+                "nome": stats.nome,
+                "abrev": stats.abreviacao,
+                "escudo": escudo,
+                "posicao": stats.posicao or 0,
+                "jogos": stats.jogos,
+                "golsPro": stats.gols_pro,
+                "golsContra": stats.gols_contra,
+                "xgGeral": round(xg_base, 2),
+                "xgCasa": round(xg_base * 1.15, 2),
+                "xgFora": round(xg_base * 0.85, 2),
+                "xgaGeral": round(xga_base, 2),
+                "xgaCasa": round(xga_base * 0.85, 2),
+                "xgaFora": round(xga_base * 1.15, 2),
+                "forcaGeral": round(stats.forca_geral, 1),
+            }
+        
+        # Próximos jogos com xG
+        proximos_jogos = []
+        for prev in previsoes:
+            proximos_jogos.append({
+                "mandante": prev.mandante,
+                "visitante": prev.visitante,
+                "xgMandante": round(prev.xg_mandante, 2),
+                "xgVisitante": round(prev.xg_visitante, 2),
+                "totalXg": round(prev.xg_mandante + prev.xg_visitante, 2),
+                "placarProvavel": prev.placar_provavel,
+                "over25": round(prev.prob_over_2_5 * 100, 1),
+                "btts": round(prev.prob_btts * 100, 1),
+            })
+        
+        # Ordenar times por xG geral
+        ranking_xg = sorted(times_xg.values(), key=lambda x: x["xgGeral"], reverse=True)
+        ranking_xga = sorted(times_xg.values(), key=lambda x: x["xgaGeral"])
+        
+        return {
+            "rodada": rodada,
+            "rankingXG": ranking_xg,
+            "rankingXGA": ranking_xga,
+            "proximosJogos": proximos_jogos,
+            "metodologia": "xG calculado via modelo Poisson com forças ofensivas/defensivas relativas",
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro ao calcular xG: {str(e)}")
+
+
 # ============ Brasileirão ============
 
 @app.get("/api/brasileirao/classificacao")
@@ -1736,6 +1835,316 @@ def get_acuracia_geral():
         raise HTTPException(status_code=500, detail=f"Erro acurácia: {str(e)}")
 
 
+# ============ Página por Time ============
+
+TEAM_SLUGS = {
+    "atletico-mg": "CAM", "athletico-pr": "CAP", "bahia": "BAH", "botafogo": "BOT",
+    "corinthians": "COR", "cruzeiro": "CRU", "cuiaba": "CUI", "flamengo": "FLA",
+    "fluminense": "FLU", "fortaleza": "FOR", "gremio": "GRE", "internacional": "INT",
+    "juventude": "JUV", "mirassol": "MIR", "palmeiras": "PAL", "santos": "SAN",
+    "sao-paulo": "SAO", "sport": "SPO", "vasco": "VAS", "vitoria": "VIT",
+}
+
+
+@app.get("/api/brasileirao/time/{slug}")
+def get_time_detalhado(slug: str):
+    """
+    Retorna dados completos de um time: posição, probabilidades Monte Carlo,
+    forma, próximos jogos com previsão, e estatísticas gerais.
+    """
+    slug = slug.lower()
+    abrev = TEAM_SLUGS.get(slug)
+    if not abrev:
+        raise HTTPException(status_code=404, detail=f"Time '{slug}' não encontrado")
+
+    try:
+        from src.analysis.monte_carlo import MonteCarloSimulator
+
+        mercado = api.get_mercado()
+        status = api.get_status_mercado()
+        if not mercado:
+            raise HTTPException(status_code=503, detail="API Cartola indisponível")
+
+        clubes = mercado.get("clubes", {})
+        rodada_atual = status.get("rodada_atual", 1) if status else 1
+
+        # Encontrar time_id
+        time_id = None
+        for cid, c in clubes.items():
+            if c.get("abreviacao", "").upper() == abrev:
+                time_id = int(cid)
+                break
+        if not time_id:
+            raise HTTPException(status_code=404, detail=f"Time {abrev} não encontrado na API")
+
+        # Carregar estatísticas
+        partidas_response = api.get_partidas(rodada_atual)
+        partidas = partidas_response.get("partidas", []) if isinstance(partidas_response, dict) else partidas_response or []
+        match_analyzer.carregar_estatisticas_times(clubes, partidas)
+
+        stats = match_analyzer.estatisticas_times.get(time_id)
+        if not stats:
+            raise HTTPException(status_code=404, detail="Estatísticas não disponíveis")
+
+        # Classificação + forças
+        classificacao = []
+        forca_times = {}
+        for cid, s in match_analyzer.estatisticas_times.items():
+            classificacao.append({
+                "id": cid, "nome": s.nome, "abrev": s.abreviacao,
+                "pontos": s.vitorias * 3 + s.empates,
+                "jogos": s.jogos, "vitorias": s.vitorias,
+                "empates": s.empates, "derrotas": s.derrotas,
+                "gols_pro": s.gols_pro, "gols_contra": s.gols_contra,
+            })
+            forca_times[cid] = s.forca_geral
+
+        classificacao.sort(
+            key=lambda x: (x["pontos"], x["vitorias"],
+                           x["gols_pro"] - x["gols_contra"], x["gols_pro"]),
+            reverse=True,
+        )
+        posicao = next((i + 1 for i, t in enumerate(classificacao) if t["id"] == time_id), 0)
+
+        # Monte Carlo
+        prob = {"titulo": 0, "libertadores": 0, "sulamericana": 0, "rebaixamento": 0, "posicaoMedia": 10}
+        try:
+            mc = MonteCarloSimulator(score_predictor=None, n_simulacoes=1000)
+            time_ids = [t["id"] for t in classificacao]
+            n = len(time_ids)
+            jogos_restantes = []
+            for r in range(rodada_atual + 1, 39):
+                offset = (r - 1) % max(n - 1, 1)
+                rotated = [time_ids[0]] + time_ids[1:]
+                for _ in range(offset):
+                    rotated = [rotated[0]] + [rotated[-1]] + rotated[1:-1]
+                for j in range(n // 2):
+                    m, v = rotated[j], rotated[n - 1 - j]
+                    if r % 2 == 0: m, v = v, m
+                    jogos_restantes.append({"mandante_id": m, "visitante_id": v, "rodada": r})
+            if jogos_restantes:
+                resultados = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
+                for res in resultados:
+                    if res.time_id == time_id:
+                        prob = {
+                            "titulo": res.prob_titulo,
+                            "libertadores": res.prob_libertadores,
+                            "sulamericana": res.prob_sulamericana,
+                            "rebaixamento": res.prob_rebaixamento,
+                            "posicaoMedia": res.posicao_media,
+                        }
+                        break
+        except Exception:
+            pass
+
+        # Próximos jogos com previsão
+        sp = ScorePredictor()
+        proximos = []
+        for r in range(rodada_atual, min(rodada_atual + 5, 39)):
+            try:
+                pd = api.get_partidas(r)
+                ps = pd.get("partidas", []) if isinstance(pd, dict) else pd or []
+                for p in ps:
+                    casa = p.get("clube_casa_id", 0)
+                    fora = p.get("clube_visitante_id", 0)
+                    if time_id in (casa, fora):
+                        c_info, f_info = clubes.get(str(casa), {}), clubes.get(str(fora), {})
+                        prev = sp.prever_confronto(
+                            mandante=c_info.get("nome", "?"), visitante=f_info.get("nome", "?"),
+                            mandante_id=casa, visitante_id=fora,
+                            forca_mandante=forca_times.get(casa, 50),
+                            forca_visitante=forca_times.get(fora, 50),
+                            rodada=r,
+                        )
+                        eh_casa = casa == time_id
+                        proximos.append({
+                            "rodada": r,
+                            "adversario": f_info.get("abreviacao", "?") if eh_casa else c_info.get("abreviacao", "?"),
+                            "adversarioNome": f_info.get("nome", "?") if eh_casa else c_info.get("nome", "?"),
+                            "local": "Casa" if eh_casa else "Fora",
+                            "placarProvavel": prev.placar_provavel,
+                            "probVitoria": round(prev.prob_vitoria_casa if eh_casa else prev.prob_vitoria_fora, 1),
+                            "probEmpate": round(prev.prob_empate, 1),
+                            "probDerrota": round(prev.prob_vitoria_fora if eh_casa else prev.prob_vitoria_casa, 1),
+                            "xgTime": round(prev.xg_mandante if eh_casa else prev.xg_visitante, 2),
+                            "xgAdversario": round(prev.xg_visitante if eh_casa else prev.xg_mandante, 2),
+                        })
+                        break
+            except Exception:
+                continue
+
+        clube_info = clubes.get(str(time_id), {})
+        escudo = None
+        if isinstance(clube_info.get("escudo"), dict):
+            escudo = clube_info["escudo"].get("60x60")
+
+        return {
+            "slug": slug,
+            "id": time_id,
+            "nome": stats.nome,
+            "abrev": stats.abreviacao,
+            "escudo": escudo,
+            "posicao": posicao,
+            "pontos": stats.vitorias * 3 + stats.empates,
+            "jogos": stats.jogos,
+            "vitorias": stats.vitorias,
+            "empates": stats.empates,
+            "derrotas": stats.derrotas,
+            "golsPro": stats.gols_pro,
+            "golsContra": stats.gols_contra,
+            "saldoGols": stats.gols_pro - stats.gols_contra,
+            "aproveitamento": round((stats.vitorias * 3 + stats.empates) / max(stats.jogos * 3, 1) * 100, 1),
+            "forma": getattr(stats, "forma_sequencia", ""),
+            "forcaCasa": getattr(stats, "forca_casa", 50),
+            "forcaFora": getattr(stats, "forca_fora", 50),
+            "forcaGeral": stats.forca_geral,
+            "probabilidades": prob,
+            "proximosJogos": proximos,
+            "rodadaAtual": rodada_atual,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro time: {str(e)}")
+
+
+@app.get("/api/brasileirao/jogo/{partida_id}")
+def get_jogo_detalhado(partida_id: int):
+    """
+    Retorna análise completa de um jogo: 1X2, Over/Under, placares, xG, forma.
+    """
+    try:
+        status = api.get_status_mercado()
+        mercado = api.get_mercado()
+        if not mercado:
+            raise HTTPException(status_code=503, detail="API Cartola indisponível")
+
+        clubes = mercado.get("clubes", {})
+        rodada_atual = status.get("rodada_atual", 1) if status else 1
+
+        # Buscar a partida em rodadas próximas
+        partida_encontrada = None
+        rodada_partida = None
+        for r in range(max(1, rodada_atual - 2), min(rodada_atual + 3, 39)):
+            pd = api.get_partidas(r)
+            ps = pd.get("partidas", []) if isinstance(pd, dict) else pd or []
+            for p in ps:
+                if p.get("partida_id") == partida_id:
+                    partida_encontrada = p
+                    rodada_partida = r
+                    break
+            if partida_encontrada:
+                break
+
+        if not partida_encontrada:
+            raise HTTPException(status_code=404, detail="Partida não encontrada")
+
+        casa_id = partida_encontrada.get("clube_casa_id", 0)
+        fora_id = partida_encontrada.get("clube_visitante_id", 0)
+        casa_info = clubes.get(str(casa_id), {})
+        fora_info = clubes.get(str(fora_id), {})
+
+        casa_nome = casa_info.get("nome", "Time A")
+        fora_nome = fora_info.get("nome", "Time B")
+        casa_abrev = casa_info.get("abreviacao", "???")
+        fora_abrev = fora_info.get("abreviacao", "???")
+
+        # Carregar estatísticas
+        partidas_rodada = api.get_partidas(rodada_atual)
+        partidas_list = partidas_rodada.get("partidas", []) if isinstance(partidas_rodada, dict) else partidas_rodada or []
+        match_analyzer.carregar_estatisticas_times(clubes, partidas_list)
+
+        forca_casa = match_analyzer.estatisticas_times.get(casa_id)
+        forca_fora = match_analyzer.estatisticas_times.get(fora_id)
+
+        # Previsão completa
+        sp = ScorePredictor()
+        prev = sp.prever_confronto(
+            mandante=casa_nome, visitante=fora_nome,
+            mandante_id=casa_id, visitante_id=fora_id,
+            forca_mandante=forca_casa.forca_geral if forca_casa else 50,
+            forca_visitante=forca_fora.forca_geral if forca_fora else 50,
+            rodada=rodada_partida or rodada_atual,
+        )
+
+        # Escudos
+        def get_escudo(info):
+            if isinstance(info.get("escudo"), dict):
+                return info["escudo"].get("60x60")
+            return None
+
+        # Forma dos times
+        def get_forma(stats):
+            if not stats:
+                return {"forma": "", "jogos": 0, "vitorias": 0, "empates": 0, "derrotas": 0, "golsPro": 0, "golsContra": 0}
+            return {
+                "forma": getattr(stats, "forma_sequencia", ""),
+                "jogos": stats.jogos,
+                "vitorias": stats.vitorias,
+                "empates": stats.empates,
+                "derrotas": stats.derrotas,
+                "golsPro": stats.gols_pro,
+                "golsContra": stats.gols_contra,
+                "forcaCasa": getattr(stats, "forca_casa", 50),
+                "forcaFora": getattr(stats, "forca_fora", 50),
+            }
+
+        # Resultado real (se já jogou)
+        resultado_real = None
+        placar_casa = partida_encontrada.get("placar_oficial_mandante")
+        placar_fora = partida_encontrada.get("placar_oficial_visitante")
+        if placar_casa is not None and placar_fora is not None:
+            resultado_real = {"casa": placar_casa, "fora": placar_fora}
+
+        return {
+            "partidaId": partida_id,
+            "rodada": rodada_partida,
+            "mandante": {
+                "id": casa_id,
+                "nome": casa_nome,
+                "abrev": casa_abrev,
+                "escudo": get_escudo(casa_info),
+                "stats": get_forma(forca_casa),
+            },
+            "visitante": {
+                "id": fora_id,
+                "nome": fora_nome,
+                "abrev": fora_abrev,
+                "escudo": get_escudo(fora_info),
+                "stats": get_forma(forca_fora),
+            },
+            "previsao": {
+                "placarProvavel": prev.placar_provavel,
+                "probVitoriaCasa": round(prev.prob_vitoria_casa, 1),
+                "probEmpate": round(prev.prob_empate, 1),
+                "probVitoriaFora": round(prev.prob_vitoria_fora, 1),
+                "xgCasa": round(prev.xg_mandante, 2),
+                "xgFora": round(prev.xg_visitante, 2),
+                "over15": round(prev.prob_over_1_5, 1),
+                "over25": round(prev.prob_over_2_5, 1),
+                "over35": round(prev.prob_over_3_5, 1),
+                "btts": round(prev.prob_btts, 1),
+                "topPlacares": [{"placar": p, "prob": round(pr, 1)} for p, pr in prev.top_placares[:5]],
+                "confianca": round(prev.confianca, 1),
+                "contexto": prev.contexto,
+                "modo": prev.modo_previsao,
+            },
+            "resultadoReal": resultado_real,
+            "local": partida_encontrada.get("local", ""),
+            "data": partida_encontrada.get("partida_data", ""),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro jogo: {str(e)}")
+
+
 # ============ Scouts ============
 
 @app.get("/api/scouts/destaques")
@@ -1743,12 +2152,40 @@ def get_scouts_destaques(rodada: Optional[int] = None, limite: int = Query(defau
     """
     Retorna jogadores destaque da rodada baseado em scouts.
     Inclui maiores pontuadores, artilheiros e assistentes.
+    Fallback: usa cache JSON salvo pelo scheduler quando API ao vivo não disponível.
     """
     try:
         pontuados = api.get_atletas_pontuados()
         mercado = api.get_mercado()
         
-        if not pontuados:
+        if not pontuados or not pontuados.get("atletas"):
+            # Fallback: carregar do cache JSON (salvo pelo scheduler)
+            import json
+            from pathlib import Path
+            
+            cache_dir = Path("data")
+            target_rodada = rodada
+            if not target_rodada:
+                status = api.get_status_mercado()
+                target_rodada = status.get("rodada_atual", 1) if status else 1
+            
+            cache_file = cache_dir / f"scouts_rodada_{target_rodada}.json"
+            # Tentar rodada atual, se não houver tentar a anterior
+            if not cache_file.exists() and target_rodada > 1:
+                cache_file = cache_dir / f"scouts_rodada_{target_rodada - 1}.json"
+            
+            if cache_file.exists():
+                with open(cache_file, "r", encoding="utf-8") as f:
+                    cached = json.load(f)
+                return {
+                    "rodada": cached.get("rodada"),
+                    "destaques": cached.get("destaques", [])[:limite],
+                    "artilheiros": cached.get("artilheiros", [])[:10],
+                    "assistentes": cached.get("assistentes", [])[:10],
+                    "totalJogadores": cached.get("totalJogadores", 0),
+                    "fonte": "cache",
+                }
+            
             return {"rodada": rodada, "destaques": [], "artilheiros": [], "assistentes": []}
         
         clubes = mercado.get("clubes", {}) if mercado else {}
@@ -2003,6 +2440,52 @@ async def sitemap_xml():
 {urls_xml}</urlset>"""
     
     return FastAPIResponse(content=xml, media_type="application/xml")
+
+
+# ============ Blog API (Posts Automáticos) ============
+
+@app.get("/api/blog/posts")
+def get_blog_posts():
+    """
+    Lista todos os posts de blog — estáticos + gerados automaticamente.
+    Posts automáticos de análise de rodada vêm de data/blog_posts/.
+    """
+    try:
+        from src.analysis.blog_generator import listar_posts_gerados
+        auto_posts = listar_posts_gerados()
+        return {"posts": auto_posts, "total": len(auto_posts)}
+    except Exception as e:
+        return {"posts": [], "total": 0, "error": str(e)}
+
+
+@app.get("/api/blog/post/{slug}")
+def get_blog_post(slug: str):
+    """Retorna um post automático completo pelo slug."""
+    try:
+        from src.analysis.blog_generator import get_post_by_slug
+        post = get_post_by_slug(slug)
+        if not post:
+            raise HTTPException(status_code=404, detail="Post não encontrado")
+        return post
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar post: {str(e)}")
+
+
+@app.post("/api/blog/gerar/{rodada}")
+def gerar_blog_post(rodada: int):
+    """Gera manualmente um post de análise para uma rodada específica."""
+    try:
+        from src.analysis.blog_generator import gerar_post_rodada
+        post = gerar_post_rodada(rodada, api)
+        if not post:
+            raise HTTPException(status_code=404, detail="Sem dados para gerar post desta rodada")
+        return {"status": "ok", "slug": post["slug"], "title": post["title"]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar post: {str(e)}")
 
 
 # ============ Executar ============

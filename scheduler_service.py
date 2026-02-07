@@ -31,12 +31,15 @@ from src.database.history_manager import HistoryManager
 from src.database.db_manager import DatabaseManager
 from config.settings import settings
 
-# Configurar logging
+# Configurar logging — escrever em logs/ (permitido pelo systemd ProtectSystem)
+_log_dir = Path(__file__).parent / "logs"
+_log_dir.mkdir(exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('scheduler.log'),
+        logging.FileHandler(_log_dir / 'scheduler.log'),
         logging.StreamHandler()
     ]
 )
@@ -160,6 +163,26 @@ class CartolaScheduler:
             replace_existing=True
         )
         logger.info("✅ Job 'regenerar_sitemap' agendado (a cada 6h)")
+        
+        # Tarefa 11: Gerar post de blog automático (a cada 12h)
+        self.scheduler.add_job(
+            func=self.gerar_post_blog_rodada,
+            trigger=CronTrigger(hour='8,20', minute=0),
+            id='gerar_blog_post',
+            name='Gerar Post de Blog da Rodada',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'gerar_blog_post' agendado (08:00 e 20:00)")
+        
+        # Tarefa 12: Gerar posts de blog por time (1x/dia às 06:00)
+        self.scheduler.add_job(
+            func=self.gerar_posts_blog_times,
+            trigger=CronTrigger(hour=6, minute=0),
+            id='gerar_blog_times',
+            name='Gerar Posts de Blog por Time',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'gerar_blog_times' agendado (06:00)")
         
         # Iniciar scheduler
         self.scheduler.start()
@@ -350,7 +373,8 @@ class CartolaScheduler:
     
     def coletar_pontuacoes_rodada(self):
         """
-        Coleta pontuações dos atletas após rodada encerrar
+        Coleta pontuações e scouts dos atletas e persiste no banco.
+        Funciona durante/após a rodada (mercado fechado).
         """
         try:
             if not self.rodada_atual:
@@ -358,23 +382,55 @@ class CartolaScheduler:
             
             logger.info(f"📊 Coletando pontuações da rodada {self.rodada_atual}...")
             
-            mercado = self.api.get_mercado()
-            if not mercado:
+            pontuados = self.api.get_atletas_pontuados()
+            if not pontuados:
+                logger.info("⏳ Sem dados de pontuação (mercado aberto ou rodada não iniciou)")
                 return
             
-            atletas = mercado.get("atletas", [])
+            atletas_pont = pontuados.get("atletas", {})
+            if not atletas_pont:
+                logger.info("⏳ Nenhum atleta pontuou ainda")
+                return
             
-            # Contar quantos já pontuaram
-            pontuadores = [a for a in atletas if a.get("pontos_num", 0) != 0]
+            # Persistir scouts no banco de dados
+            count = self.db.sync_scouts(atletas_pont, self.rodada_atual)
+            logger.info(f"✅ {count} scouts salvos no banco (rodada {self.rodada_atual})")
             
-            if pontuadores:
-                logger.info(f"✅ {len(pontuadores)} atletas já pontuaram")
-                
-                # Atualizar pontuações dos times salvos
-                # TODO: Implementar atualização no banco
-                
-            else:
-                logger.info("⏳ Rodada ainda não iniciou ou sem pontuações")
+            # Salvar também em JSON como cache rápido
+            import json
+            cache_dir = Path("data")
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            cache_file = cache_dir / f"scouts_rodada_{self.rodada_atual}.json"
+            
+            # Montar resumo para cache
+            destaques = []
+            for atleta_id, dados in atletas_pont.items():
+                scouts = dados.get("scout", {})
+                destaques.append({
+                    "id": int(atleta_id),
+                    "apelido": dados.get("apelido", ""),
+                    "clube_id": dados.get("clube_id", 0),
+                    "pontuacao": dados.get("pontuacao", 0),
+                    "scouts": {k: v for k, v in scouts.items() if v},
+                    "gols": scouts.get("G", 0) or 0,
+                    "assistencias": scouts.get("A", 0) or 0,
+                })
+            
+            destaques.sort(key=lambda x: x["pontuacao"], reverse=True)
+            
+            cache_data = {
+                "rodada": self.rodada_atual,
+                "timestamp": datetime.now().isoformat(),
+                "totalJogadores": len(destaques),
+                "destaques": destaques[:30],
+                "artilheiros": sorted([d for d in destaques if d["gols"] > 0], key=lambda x: x["gols"], reverse=True)[:15],
+                "assistentes": sorted([d for d in destaques if d["assistencias"] > 0], key=lambda x: x["assistencias"], reverse=True)[:15],
+            }
+            
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump(cache_data, f, ensure_ascii=False)
+            
+            logger.info(f"💾 Cache de scouts salvo: {cache_file.name}")
                 
         except Exception as e:
             logger.error(f"❌ Erro ao coletar pontuações: {e}", exc_info=True)
@@ -562,6 +618,57 @@ class CartolaScheduler:
                 logger.warning(f"⚠️ Sitemap falhou: {result.stderr.strip()}")
         except Exception as e:
             logger.error(f"❌ Erro ao regenerar sitemap: {e}", exc_info=True)
+
+    def gerar_post_blog_rodada(self):
+        """
+        Gera automaticamente um post de blog com análise de confrontos da rodada.
+        Usa o ScorePredictor para gerar previsões de placar + xG.
+        """
+        try:
+            if not self.rodada_atual:
+                logger.info("ℹ️  Sem rodada definida, pulando geração de blog")
+                return
+            
+            logger.info(f"📝 Gerando post de blog para rodada {self.rodada_atual}...")
+            
+            from src.analysis.blog_generator import gerar_post_rodada, POSTS_DIR
+            
+            # Verificar se já existe post para esta rodada
+            slug = f"analise-rodada-{self.rodada_atual}-brasileirao-2026"
+            existing = POSTS_DIR / f"{slug}.json"
+            if existing.exists():
+                logger.info(f"ℹ️  Post da rodada {self.rodada_atual} já existe, atualizando...")
+            
+            post = gerar_post_rodada(self.rodada_atual, self.api)
+            if post:
+                logger.info(f"✅ Post gerado: {post['title']} ({len(post.get('jogos', []))} jogos)")
+                # Regenerar sitemap após novo post
+                self.regenerar_sitemap()
+            else:
+                logger.warning("⚠️ Não foi possível gerar post (sem dados)")
+                
+        except Exception as e:
+            logger.error(f"❌ Erro ao gerar post de blog: {e}", exc_info=True)
+
+    def gerar_posts_blog_times(self):
+        """
+        Gera posts de blog com análise por time (20 times do Brasileirão).
+        Atualiza dados de cada time com Monte Carlo e próximos jogos.
+        """
+        try:
+            logger.info("📝 Gerando posts de blog por time...")
+            from src.analysis.blog_generator import gerar_todos_posts_times
+            
+            resultados = gerar_todos_posts_times()
+            sucesso = sum(1 for r in resultados if r is not None)
+            logger.info(f"✅ Posts por time gerados: {sucesso}/{len(resultados)}")
+            
+            # Regenerar sitemap após novos posts
+            if sucesso > 0:
+                self.regenerar_sitemap()
+                
+        except Exception as e:
+            logger.error(f"❌ Erro ao gerar posts por time: {e}", exc_info=True)
 
 
 def main():

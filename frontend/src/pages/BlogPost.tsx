@@ -1,16 +1,37 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, Clock, Tag } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Tag, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { getPostBySlug } from "@/content/posts";
+import { useAutoBlogPost } from "@/hooks/useCartolaApi";
 import ReactMarkdown from "react-markdown";
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
-  const post = slug ? getPostBySlug(slug) : undefined;
+  
+  // Tentar buscar do conteúdo estático primeiro
+  const staticPost = slug ? getPostBySlug(slug) : undefined;
+  
+  // Se não encontrou no estático, buscar da API (posts automáticos)
+  const { data: autoPost, isLoading } = useAutoBlogPost(
+    !staticPost && slug ? slug : ""
+  );
+  
+  const post = staticPost || autoPost;
+
+  if (isLoading && !staticPost) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center py-20 gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Carregando artigo...</span>
+        </div>
+      </MainLayout>
+    );
+  }
 
   if (!post) {
     return (
@@ -38,6 +59,9 @@ export default function BlogPost() {
         title={post.title}
         description={post.excerpt}
         path={`/blog/${post.slug}`}
+        type="article"
+        publishedTime={post.date}
+        tags={post.tags}
       />
 
       <motion.article

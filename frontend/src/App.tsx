@@ -20,6 +20,8 @@ import Brasileirao from "./pages/Brasileirao";
 import Scouts from "./pages/Scouts";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import TimePage from "./pages/TimePage";
+import JogoPage from "./pages/JogoPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,8 @@ const App = () => (
             <Route path="/historico" element={<Historico />} />
             <Route path="/estatisticas" element={<Estatisticas />} />
             <Route path="/brasileirao" element={<Brasileirao />} />
+            <Route path="/brasileirao/time/:slug" element={<TimePage />} />
+            <Route path="/brasileirao/jogo/:id" element={<JogoPage />} />
             <Route path="/scouts" element={<Scouts />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />

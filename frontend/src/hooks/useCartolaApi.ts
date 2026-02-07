@@ -395,6 +395,208 @@ export function useDesfalques() {
     });
 }
 
+// ============ Blog Automático ============
+
+export interface AutoBlogPost {
+    slug: string;
+    title: string;
+    date: string;
+    excerpt: string;
+    content?: string;
+    tags: string[];
+    readTime: number;
+    tipo?: string;
+    jogos?: any[];
+}
+
+export function useAutoBlogPosts() {
+    return useQuery({
+        queryKey: ['blog-posts-auto'],
+        queryFn: () => cartolaApi.getBlogPosts() as Promise<{ posts: AutoBlogPost[]; total: number }>,
+        staleTime: 1000 * 60 * 30, // 30 minutos
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 1,
+    });
+}
+
+export function useAutoBlogPost(slug: string) {
+    return useQuery({
+        queryKey: ['blog-post-auto', slug],
+        queryFn: () => cartolaApi.getBlogPost(slug) as Promise<AutoBlogPost>,
+        staleTime: 1000 * 60 * 30,
+        gcTime: 24 * 60 * 60 * 1000,
+        enabled: !!slug,
+        retry: 1,
+    });
+}
+
+// ============ xG por Time ============
+
+export interface TimexG {
+    id: number;
+    nome: string;
+    abrev: string;
+    escudo?: string;
+    posicao: number;
+    jogos: number;
+    golsPro: number;
+    golsContra: number;
+    xgGeral: number;
+    xgCasa: number;
+    xgFora: number;
+    xgaGeral: number;
+    xgaCasa: number;
+    xgaFora: number;
+    forcaGeral: number;
+}
+
+export interface ProximoJogoXG {
+    mandante: string;
+    visitante: string;
+    xgMandante: number;
+    xgVisitante: number;
+    totalXg: number;
+    placarProvavel: string;
+    over25: number;
+    btts: number;
+}
+
+export interface XGResponse {
+    rodada: number;
+    rankingXG: TimexG[];
+    rankingXGA: TimexG[];
+    proximosJogos: ProximoJogoXG[];
+    metodologia: string;
+}
+
+export function useTimesXG(rodada?: number) {
+    return useQuery({
+        queryKey: ['times-xg', rodada],
+        queryFn: () => cartolaApi.getTimesXG(rodada) as Promise<XGResponse>,
+        staleTime: 1000 * 60 * 15,
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 2,
+    });
+}
+
+// ============ Página por Time ============
+
+export interface ProximoJogoTime {
+    rodada: number;
+    adversario: string;
+    adversarioNome: string;
+    local: string;
+    placarProvavel: string;
+    probVitoria: number;
+    probEmpate: number;
+    probDerrota: number;
+    xgTime: number;
+    xgAdversario: number;
+}
+
+export interface TimeDetalhadoResponse {
+    slug: string;
+    id: number;
+    nome: string;
+    abrev: string;
+    escudo: string | null;
+    posicao: number;
+    pontos: number;
+    jogos: number;
+    vitorias: number;
+    empates: number;
+    derrotas: number;
+    golsPro: number;
+    golsContra: number;
+    saldoGols: number;
+    aproveitamento: number;
+    forma: string;
+    forcaCasa: number;
+    forcaFora: number;
+    forcaGeral: number;
+    probabilidades: {
+        titulo: number;
+        libertadores: number;
+        sulamericana: number;
+        rebaixamento: number;
+        posicaoMedia: number;
+    };
+    proximosJogos: ProximoJogoTime[];
+    rodadaAtual: number;
+}
+
+export function useTimeDetalhado(slug: string) {
+    return useQuery({
+        queryKey: ['time-detalhado', slug],
+        queryFn: () => cartolaApi.getTimeDetalhado(slug) as Promise<TimeDetalhadoResponse>,
+        staleTime: 1000 * 60 * 15,
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 2,
+        enabled: !!slug,
+    });
+}
+
+// ============ Página por Jogo ============
+
+export interface JogoTimeStats {
+    forma: string;
+    jogos: number;
+    vitorias: number;
+    empates: number;
+    derrotas: number;
+    golsPro: number;
+    golsContra: number;
+    forcaCasa?: number;
+    forcaFora?: number;
+}
+
+export interface JogoTimeInfo {
+    id: number;
+    nome: string;
+    abrev: string;
+    escudo: string | null;
+    stats: JogoTimeStats;
+}
+
+export interface JogoPrevisao {
+    placarProvavel: string;
+    probVitoriaCasa: number;
+    probEmpate: number;
+    probVitoriaFora: number;
+    xgCasa: number;
+    xgFora: number;
+    over15: number;
+    over25: number;
+    over35: number;
+    btts: number;
+    topPlacares: Array<{ placar: string; prob: number }>;
+    confianca: number;
+    contexto: string;
+    modo: string;
+}
+
+export interface JogoDetalhadoResponse {
+    partidaId: number;
+    rodada: number;
+    mandante: JogoTimeInfo;
+    visitante: JogoTimeInfo;
+    previsao: JogoPrevisao;
+    resultadoReal: { casa: number; fora: number } | null;
+    local: string;
+    data: string;
+}
+
+export function useJogoDetalhado(partidaId: number | string) {
+    return useQuery({
+        queryKey: ['jogo-detalhado', partidaId],
+        queryFn: () => cartolaApi.getJogoDetalhado(Number(partidaId)) as Promise<JogoDetalhadoResponse>,
+        staleTime: 1000 * 60 * 15,
+        gcTime: 24 * 60 * 60 * 1000,
+        retry: 2,
+        enabled: !!partidaId,
+    });
+}
+
 // ============ Provider de dados ============
 
 // Hook combinado para páginas que precisam de múltiplos dados

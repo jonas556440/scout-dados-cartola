@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { History, Calendar, Loader2, AlertCircle, Wallet, Users, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { SEO } from "@/components/SEO";
 
 // Componente para exibir os detalhes de uma rodada expandida
 const RodadaDetalhes = ({ rodada }: { rodada: number }) => {
@@ -211,6 +212,7 @@ const Historico = () => {
 
   return (
     <MainLayout>
+      <SEO title="Histórico de Rodadas" description="Acompanhe seu histórico no Cartola FC 2026. Evolução patrimonial, pontuação por rodada e análise de desempenho." path="/historico" />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

@@ -21,6 +21,7 @@ import {
 import type { Player, Position } from "@/types/cartola";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { SEO } from "@/components/SEO";
 
 const POSITIONS: Position[] = ['GOL', 'ZAG', 'LAT', 'MEI', 'ATA', 'TEC'];
 
@@ -65,6 +66,7 @@ const Mercado = () => {
 
   return (
     <MainLayout>
+      <SEO title="Mercado Cartola FC" description="Explore o mercado do Cartola FC 2026. Filtre jogadores por posição, preço e potencial de valorização." path="/mercado" />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

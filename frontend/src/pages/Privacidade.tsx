@@ -1,9 +1,11 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Shield, Cookie, Eye, Database, Lock, ExternalLink } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 const Privacidade = () => {
   return (
     <MainLayout>
+      <SEO title="Política de Privacidade" description="Política de privacidade do ScoutDados. Saiba como tratamos seus dados em conformidade com a LGPD." path="/privacidade" />
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <div className="p-2 hero-gradient rounded-lg">

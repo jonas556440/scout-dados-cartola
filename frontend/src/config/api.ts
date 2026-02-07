@@ -31,6 +31,14 @@ export const API_ENDPOINTS = {
     scoutsDestaques: '/api/scouts/destaques',
     scoutsJogador: '/api/scouts/jogador',
     scoutsDesfalques: '/api/scouts/desfalques',
+    // Blog automático
+    blogPosts: '/api/blog/posts',
+    blogPost: '/api/blog/post',
+    // xG por time
+    timesXG: '/api/times/xg',
+    // Páginas por time e jogo
+    brasileiraoTime: '/api/brasileirao/time',
+    brasileiraoJogo: '/api/brasileirao/jogo',
 } as const;
 
 export async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -165,4 +173,26 @@ export const cartolaApi = {
         apiRequest(`${API_ENDPOINTS.scoutsJogador}/${atletaId}`),
 
     getDesfalques: () => apiRequest(API_ENDPOINTS.scoutsDesfalques),
+
+    // ========== BLOG AUTOMÁTICO ==========
+
+    getBlogPosts: () => apiRequest(API_ENDPOINTS.blogPosts),
+
+    getBlogPost: (slug: string) =>
+        apiRequest(`${API_ENDPOINTS.blogPost}/${slug}`),
+
+    // ========== xG POR TIME ==========
+
+    getTimesXG: (rodada?: number) => {
+        const query = rodada ? `?rodada=${rodada}` : '';
+        return apiRequest(`${API_ENDPOINTS.timesXG}${query}`);
+    },
+
+    // ========== PÁGINAS POR TIME / JOGO ==========
+
+    getTimeDetalhado: (slug: string) =>
+        apiRequest(`${API_ENDPOINTS.brasileiraoTime}/${slug}`),
+
+    getJogoDetalhado: (partidaId: number) =>
+        apiRequest(`${API_ENDPOINTS.brasileiraoJogo}/${partidaId}`),
 };

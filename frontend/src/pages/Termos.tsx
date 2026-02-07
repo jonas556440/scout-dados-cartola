@@ -1,9 +1,11 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { FileText, AlertTriangle, Scale, Code, Server, Shield } from "lucide-react";
+import { SEO } from "@/components/SEO";
 
 const Termos = () => {
   return (
     <MainLayout>
+      <SEO title="Termos de Uso" description="Termos de uso do ScoutDados. Condições de utilização da plataforma de estatísticas do Brasileirão e Cartola FC." path="/termos" />
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <div className="p-2 hero-gradient rounded-lg">

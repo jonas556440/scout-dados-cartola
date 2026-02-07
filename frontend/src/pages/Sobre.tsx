@@ -14,6 +14,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { SEO } from "@/components/SEO";
 
 export default function Sobre() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function Sobre() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Sobre" description="Conheça o ScoutDados: plataforma gratuita de estatísticas do Brasileirão e Cartola FC com modelos Poisson e Monte Carlo." path="/sobre" />
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">

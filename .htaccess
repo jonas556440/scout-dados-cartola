@@ -1,19 +1,12 @@
-# Bloquear arquivos sensíveis
-<FilesMatch "\.(py|pyc|db|sqlite|sql|md|service|sh|json|log)$">
-    Require all denied
-</FilesMatch>
-
-# Bloquear pastas sensíveis
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteRule ^(config|src|data|logs|frontend|cartolafc2026|__pycache__|\.git)/ - [F,L]
-</IfModule>
-
-# SPA - Todas rotas vão para index.html
+# SPA fallback (Apache/OpenLiteSpeed com Auto Load .htaccess)
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
+
+    # Não interceptar a API (proxy do OpenLiteSpeed)
     RewriteCond %{REQUEST_URI} !^/api/
+
+    # Se não existir arquivo/pasta, servir o index.html
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . /index.html [L]

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import type { Player, Position } from "@/types/cartola";
 import { cn } from "@/lib/utils";
+import { SEO } from "@/components/SEO";
 
 const POSITIONS: Position[] = ['GOL', 'ZAG', 'LAT', 'MEI', 'ATA', 'TEC'];
 const FORMATIONS = ['4-4-2', '3-5-2', '4-3-3', '4-5-1', '3-4-3'];
@@ -131,6 +132,7 @@ const Escalacao = () => {
 
   return (
     <MainLayout>
+      <SEO title="Escalação Inteligente" description="Monte sua escalação ideal para o Cartola FC 2026. Otimização por valorização ou pontuação com análise estatística." path="/escalacao" />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
