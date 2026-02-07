@@ -14,7 +14,7 @@ Portal de estatísticas de futebol (Cartola FC + Brasileirão). Monolito FastAPI
 
 **Fluxo de dados:** API Cartola Globo → `src/api/cartola_api.py` (requests síncrono, cache 5min, retry 3x) → `src/analysis/` (MPV, TeamSelector, ScorePredictor) → `api_server.py` (endpoints `/api/*`) → Frontend (proxy Vite `/api` → `:8000`)
 
-**Produção:** OpenLiteSpeed serve estáticos (`frontend/dist/`), 2 serviços systemd (`cartolafc-backend`, `cartolafc-scheduler`).
+**Produção:** OpenLiteSpeed serve estáticos do docroot (`/www/wwwroot/scoutdados.com.br/`). O build de `frontend/dist/` é copiado para o docroot via `deploy.sh`. 2 serviços systemd (`cartolafc-backend`, `cartolafc-scheduler`).
 
 ## Convenções Obrigatórias
 
@@ -109,12 +109,23 @@ pytest tests/ -m smoke          # smoke tests (aceita 200 ou 503)
 pytest tests/ -v                # todos
 cd frontend && bun run test     # vitest
 
-# Produção
-sudo systemctl restart cartolafc-backend cartolafc-scheduler  # backend + scheduler
-cd frontend && bun run build  # rebuild do frontend
-/usr/local/lsws/bin/lswsctrl restart  # OpenLiteSpeed serve dist/
+# Deploy produção (SEMPRE usar o script — nunca copiar manualmente)
+bash deploy.sh          # só frontend: build + copia dist→docroot + restart OLS
+bash deploy.sh --full   # completo: git pull + build + deploy + restart backend
+
+# Comandos avulsos (usar só se souber o que está fazendo)
+sudo systemctl restart cartolafc-backend cartolafc-scheduler
 sudo journalctl -u cartolafc-backend -f
 ```
+
+### Deploy — Como funciona
+O OpenLiteSpeed serve o docroot `/www/wwwroot/scoutdados.com.br/` (index.html + assets/ na raiz).
+O Vite builda em `frontend/dist/`. O script `deploy.sh` faz a ponte:
+1. `bun install` + `bun run build` → gera `frontend/dist/`
+2. Copia `dist/index.html` → `./index.html` e `dist/assets/` → `./assets/`
+3. Copia estáticos (favicon, og-image, .htaccess, robots.txt)
+4. Reinicia OpenLiteSpeed
+**Nunca editar `./index.html` ou `./assets/` manualmente** — são sobrescritos a cada deploy.
 
 ## Regras de Negócio Cartola
 
