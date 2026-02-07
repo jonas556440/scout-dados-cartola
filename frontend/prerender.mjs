@@ -37,13 +37,13 @@ const DEFAULT_TITLE = 'ScoutDados - Brasileirão 2026, Previsões e Cartola';
 const STATIC_ROUTES = [
   '/',
   '/brasileirao',
-  '/confrontos',
-  '/dashboard',
+  // '/confrontos',    // ❌ Dados mudam muito (desabilitado)
+  // '/dashboard',     // ❌ Tempo real (desabilitado)
   '/escalacao',
-  '/mercado',
+  // '/mercado',       // ❌ Tempo real (desabilitado)
   '/scouts',
-  '/historico',
-  '/estatisticas',
+  // '/historico',     // ❌ Causa erro React #310 (desabilitado)
+  // '/estatisticas',  // ❌ Dados dinâmicos (desabilitado)
   '/blog',
   '/sobre',
   '/privacidade',
