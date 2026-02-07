@@ -30,6 +30,7 @@ const Scouts = () => {
   if (error) {
     return (
       <MainLayout>
+        <SEO title="Scouts & Destaques" description="Scouts detalhados, artilheiros, assistentes e desfalques da rodada do Cartola FC 2026." path="/scouts" />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -43,6 +44,7 @@ const Scouts = () => {
   if (isLoading) {
     return (
       <MainLayout>
+        <SEO title="Scouts & Destaques" description="Scouts detalhados, artilheiros, assistentes e desfalques da rodada do Cartola FC 2026." path="/scouts" />
         <div className="space-y-6">
           <div className="flex items-center gap-2">
             <Loader2 className="h-6 w-6 animate-spin" />

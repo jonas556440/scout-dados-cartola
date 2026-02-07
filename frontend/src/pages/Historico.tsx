@@ -182,6 +182,7 @@ const Historico = () => {
   if (isLoading) {
     return (
       <MainLayout>
+        <SEO title="Histórico de Rodadas" description="Acompanhe seu histórico no Cartola FC 2026. Evolução patrimonial, pontuação por rodada e análise de desempenho." path="/historico" />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
@@ -195,6 +196,7 @@ const Historico = () => {
   if (error) {
     return (
       <MainLayout>
+        <SEO title="Histórico de Rodadas" description="Acompanhe seu histórico no Cartola FC 2026. Evolução patrimonial, pontuação por rodada e análise de desempenho." path="/historico" />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Erro ao carregar histórico</AlertTitle>

@@ -37,12 +37,42 @@ if [[ "$1" == "--full" ]]; then
     log "Código atualizado"
 fi
 
-# ── 1. Instalar deps + Build frontend
+# ── 1. Garantir que backend está rodando (necessário para SSG prerender)
+step "Verificando backend (necessário para prerender SSG)"
+if curl -sf http://localhost:8000/api/status > /dev/null 2>&1; then
+    log "Backend respondendo em localhost:8000"
+else
+    warn "Backend não respondeu — reiniciando cartolafc-backend"
+    systemctl restart cartolafc-backend 2>/dev/null || true
+    sleep 3
+    if curl -sf http://localhost:8000/api/status > /dev/null 2>&1; then
+        log "Backend online após restart"
+    else
+        warn "Backend não disponível — build continuará sem prerender"
+        export PRERENDER=false
+    fi
+fi
+
+# ── 2. Instalar deps + Build frontend (com SSG prerender)
 step "Build do frontend (Bun + Vite)"
 cd "$FRONTEND_DIR"
+export PATH="$PATH:/snap/bin"
 bun install --frozen-lockfile 2>/dev/null || bun install
 bun run build
 log "Build concluído → $DIST_DIR"
+
+# ── 2b. SSG Pre-render (gera HTML estático com dados para SEO)
+if [[ "$PRERENDER" != "false" ]]; then
+    step "SSG Pre-render (Puppeteer + Chromium)"
+    if node prerender.mjs; then
+        PRERENDER_COUNT=$(find "$DIST_DIR" -name "index.html" | wc -l)
+        log "Páginas pré-renderizadas: $PRERENDER_COUNT"
+    else
+        warn "Prerender falhou — site funciona como SPA normal"
+    fi
+else
+    warn "Prerender desabilitado (backend offline)"
+fi
 
 # ── 2. Verificar artefatos
 step "Verificando artefatos do build"

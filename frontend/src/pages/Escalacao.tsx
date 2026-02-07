@@ -75,6 +75,7 @@ const Escalacao = () => {
   if (loadingEscalacao) {
     return (
       <MainLayout>
+        <SEO title="Escalação Inteligente" description="Monte sua escalação ideal para o Cartola FC 2026. Otimização por valorização ou pontuação com análise estatística." path="/escalacao" />
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
             <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
