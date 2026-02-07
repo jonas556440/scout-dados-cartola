@@ -114,6 +114,8 @@ class MatchResponse(BaseModel):
     xgVisitante: Optional[float] = None
     over25: Optional[float] = None
     btts: Optional[float] = None
+    topPlacares: Optional[List[dict]] = None
+    confianca: Optional[float] = None
 
 
 class TeamResponse(BaseModel):
@@ -510,6 +512,12 @@ def get_confrontos(rodada: Optional[int] = None):
                 response.xgVisitante = prev.xg_visitante
                 response.over25 = prev.prob_over_2_5
                 response.btts = prev.prob_btts
+                response.confianca = prev.confianca
+                if prev.top_placares:
+                    response.topPlacares = [
+                        {"placar": p[0], "probabilidade": round(p[1], 1)}
+                        for p in prev.top_placares[:4]
+                    ]
             
             responses.append(response)
         

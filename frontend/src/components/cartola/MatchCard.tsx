@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { Match } from "@/types/cartola";
 import { motion } from "framer-motion";
-import { MapPin, Calendar, ArrowRight, TrendingUp, Home, Plane } from "lucide-react";
+import { MapPin, Calendar, ArrowRight, TrendingUp, Home, Plane, Activity } from "lucide-react";
 
 interface MatchCardProps {
   match: Match;
@@ -144,6 +144,30 @@ export function MatchCard({ match, className, showProbabilities = true }: MatchC
               <span>Mandante</span>
               <span>Empate</span>
               <span>Visitante</span>
+            </div>
+          </div>
+        )}
+
+        {/* Placares Alternativos + Confiança */}
+        {match.topPlacares && match.topPlacares.length > 1 && (
+          <div className="mt-3 pt-3 border-t border-border/50">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-1.5 flex-wrap">
+                {match.topPlacares.slice(1, 4).map((p, i) => (
+                  <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                    {p.placar} <span className="font-semibold">({p.probabilidade.toFixed(1)}%)</span>
+                  </span>
+                ))}
+              </div>
+              {match.confianca != null && (
+                <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                  <Activity className="w-3 h-3 text-muted-foreground" />
+                  <div className="w-12 h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full" style={{ width: `${match.confianca}%` }} />
+                  </div>
+                  <span className="text-[10px] font-bold text-primary">{match.confianca.toFixed(0)}%</span>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -105,6 +105,8 @@ export interface Match {
   xgVisitante?: number;
   over25?: number;
   btts?: number;
+  topPlacares?: TopPlacar[];
+  confianca?: number;
 }
 
 export interface RoundStatus {
