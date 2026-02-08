@@ -53,6 +53,8 @@ class MatchInsights:
         descanso_m: Optional[int] = None,
         descanso_v: Optional[int] = None,
         rodada: Optional[int] = None,
+        mandante_api_id: Optional[int] = None,
+        visitante_api_id: Optional[int] = None,
     ) -> List[str]:
         """
         Gera lista de frases factuais sobre o jogo.
@@ -80,7 +82,9 @@ class MatchInsights:
 
         # 3. CONFRONTO DIRETO (H2H)
         insights.extend(
-            self._insights_h2h(mandante, visitante, h2h)
+            self._insights_h2h(mandante, visitante, h2h,
+                               mandante_api_id=mandante_api_id,
+                               visitante_api_id=visitante_api_id)
         )
 
         # 4. GOLS
@@ -224,6 +228,8 @@ class MatchInsights:
         mandante: str,
         visitante: str,
         h2h: Optional[Dict],
+        mandante_api_id: Optional[int] = None,
+        visitante_api_id: Optional[int] = None,
     ) -> List[str]:
         """Confrontos diretos históricos."""
         insights = []
@@ -235,38 +241,52 @@ class MatchInsights:
             return insights
 
         # Determinar vitórias de cada lado
+        # w_mandante = vitórias do mandante, w_visitante = vitórias do visitante
+        w_mandante = 0
+        w_visitante = 0
+        draws = 0
+
         # Formato StatsEnricher
         stats = h2h.get("stats", {})
         if stats:
             t1_id = h2h.get("team1_id")
             t2_id = h2h.get("team2_id")
-            w1 = stats.get("team1_wins", 0)
-            w2 = stats.get("team2_wins", 0)
+            t1_wins = stats.get("team1_wins", 0)
+            t2_wins = stats.get("team2_wins", 0)
             draws = stats.get("draws", 0)
+            # Remapear: quem é team1? Usar API IDs para determinar
+            if mandante_api_id is not None and t1_id is not None:
+                if t1_id == mandante_api_id:
+                    w_mandante, w_visitante = t1_wins, t2_wins
+                else:
+                    w_mandante, w_visitante = t2_wins, t1_wins
+            else:
+                # Fallback sem IDs: team1=mandante (pode estar errado)
+                w_mandante, w_visitante = t1_wins, t2_wins
         # Formato FootballDataClient
         elif "vitorias_casa" in h2h:
-            w1 = h2h.get("vitorias_casa", 0)  
-            w2 = h2h.get("vitorias_fora", 0)
+            w_mandante = h2h.get("vitorias_casa", 0)
+            w_visitante = h2h.get("vitorias_fora", 0)
             draws = h2h.get("empates", 0)
         else:
             return insights
 
         if total >= 5:
             # Domínio claro
-            if w1 >= w2 * 2 and w1 >= 3:
+            if w_mandante >= w_visitante * 2 and w_mandante >= 3:
                 insights.append(
-                    f"No confronto direto, {mandante} domina com {w1} vitórias "
-                    f"contra {w2} do {visitante} em {total} jogos."
+                    f"No histórico geral de confrontos, {mandante} domina com {w_mandante} vitórias "
+                    f"contra {w_visitante} do {visitante} nos últimos {total} jogos."
                 )
-            elif w2 >= w1 * 2 and w2 >= 3:
+            elif w_visitante >= w_mandante * 2 and w_visitante >= 3:
                 insights.append(
-                    f"No confronto direto, {visitante} domina com {w2} vitórias "
-                    f"contra {w1} do {mandante} em {total} jogos."
+                    f"No histórico geral de confrontos, {visitante} domina com {w_visitante} vitórias "
+                    f"contra {w_mandante} do {mandante} nos últimos {total} jogos."
                 )
-            elif abs(w1 - w2) <= 2:
+            elif abs(w_mandante - w_visitante) <= 2:
                 insights.append(
-                    f"Confronto equilibrado: {w1} vitórias do {mandante}, "
-                    f"{draws} empates e {w2} do {visitante} nos últimos {total} jogos."
+                    f"Histórico equilibrado: {w_mandante} vitórias do {mandante}, "
+                    f"{draws} empates e {w_visitante} do {visitante} nos últimos {total} jogos."
                 )
 
         # Último jogo

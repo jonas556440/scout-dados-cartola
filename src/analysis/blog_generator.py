@@ -304,14 +304,16 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
         if gols_m.get("jogos", 0) > 0 or gols_v.get("jogos", 0) > 0:
             md_lines.append("**Dados reais no campeonato:**\n")
             if gols_m.get("jogos", 0) > 0:
+                media_m = gols_m.get('media_pro', 0) or (gols_m.get('gols_pro', 0) / gols_m['jogos'] if gols_m['jogos'] > 0 else 0)
                 md_lines.append(
                     f"- {j['mandante_abrev']}: {gols_m.get('gols_pro', 0)} gols em "
-                    f"{gols_m['jogos']} jogos (média {gols_m.get('media_gp', 0):.1f})"
+                    f"{gols_m['jogos']} jogos (média {media_m:.1f})"
                 )
             if gols_v.get("jogos", 0) > 0:
+                media_v = gols_v.get('media_pro', 0) or (gols_v.get('gols_pro', 0) / gols_v['jogos'] if gols_v['jogos'] > 0 else 0)
                 md_lines.append(
                     f"- {j['visitante_abrev']}: {gols_v.get('gols_pro', 0)} gols em "
-                    f"{gols_v['jogos']} jogos (média {gols_v.get('media_gp', 0):.1f})"
+                    f"{gols_v['jogos']} jogos (média {media_v:.1f})"
                 )
             md_lines.append("")
         
@@ -362,7 +364,7 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
                             w1, w2 = stats["team2_wins"], stats["team1_wins"]
                         
                         md_lines.append(
-                            f"**Confronto direto ({h2h['total']} jogos):** "
+                            f"**Histórico de confrontos ({h2h['total']} jogos, todas as competições):** "
                             f"{j['mandante_abrev']} {w1}V | {stats['draws']}E | "
                             f"{j['visitante_abrev']} {w2}V\n"
                         )
@@ -442,6 +444,8 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
                     descanso_m=j.get("dias_descanso_mandante"),
                     descanso_v=j.get("dias_descanso_visitante"),
                     rodada=rodada,
+                    mandante_api_id=af_m,
+                    visitante_api_id=af_v,
                 )
 
                 if insights:
@@ -549,6 +553,29 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
     
     content = "\n".join(md_lines)
     
+    # ── Validação pré-publicação ──
+    warnings = []
+    
+    # 1. Checar médias 0.0 quando há gols > 0
+    for j in jogos_analise:
+        for side, key_gols in [("mandante", "gols_reais_mandante"), ("visitante", "gols_reais_visitante")]:
+            gols_data = j.get(key_gols, {})
+            if gols_data.get("jogos", 0) > 0 and gols_data.get("gols_pro", 0) > 0:
+                media = gols_data.get("media_pro", 0)
+                if media == 0:
+                    # Corrigir inline
+                    gols_data["media_pro"] = round(gols_data["gols_pro"] / gols_data["jogos"], 2)
+                    warnings.append(f"Média corrigida para {j[f'{side}_abrev']}")
+    
+    # 2. Checar diversidade de placares previstos
+    placares = [j["placar_provavel"] for j in jogos_analise]
+    placares_unicos = set(placares)
+    if len(jogos_analise) >= 5 and len(placares_unicos) == 1:
+        warnings.append(f"Baixa diversidade: todos os {len(jogos_analise)} placares são {placares[0]}")
+    
+    if warnings:
+        print(f"[BlogGenerator] ⚠️ Validação da rodada {rodada}: {'; '.join(warnings)}")
+    
     post = {
         "slug": slug,
         "title": title,
@@ -574,15 +601,21 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
 
 
 def listar_posts_gerados() -> List[Dict[str, Any]]:
-    """Lista todos os posts gerados automaticamente, mais recentes primeiro."""
+    """Lista todos os posts gerados automaticamente, mais recentes primeiro (por data)."""
     posts = []
-    for f in sorted(POSTS_DIR.glob("*.json"), reverse=True):
+    seen_slugs = set()
+    for f in POSTS_DIR.glob("*.json"):
         try:
             with open(f, "r", encoding="utf-8") as fp:
                 post = json.load(fp)
+                slug = post["slug"]
+                # Deduplicar por slug
+                if slug in seen_slugs:
+                    continue
+                seen_slugs.add(slug)
                 # Retornar sem o conteúdo completo (listing)
                 posts.append({
-                    "slug": post["slug"],
+                    "slug": slug,
                     "title": post["title"],
                     "date": post["date"],
                     "excerpt": post["excerpt"],
@@ -592,6 +625,8 @@ def listar_posts_gerados() -> List[Dict[str, Any]]:
                 })
         except Exception:
             continue
+    # Ordenar por data (campo JSON), mais recente primeiro
+    posts.sort(key=lambda p: p.get("date", ""), reverse=True)
     return posts
 
 
@@ -630,7 +665,6 @@ TIMES_MAP = {
     "vitoria": {"nome": "Vitória", "abrev": "VIT"},
     # Times adicionais da classificação atual
     "red-bull-bragantino": {"nome": "Red Bull Bragantino", "abrev": "RBB"},
-    "bragantino": {"nome": "Red Bull Bragantino", "abrev": "RBB"},  # Alias
     "chapecoense": {"nome": "Chapecoense", "abrev": "CHA"},
     "coritiba": {"nome": "Coritiba", "abrev": "CFC"},
     "remo": {"nome": "Remo", "abrev": "REM"},
@@ -748,7 +782,7 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
                     jogos_restantes.append({"mandante_id": m, "visitante_id": v, "rodada": r})
             
             if jogos_restantes:
-                resultados = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
+                resultados, _ = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
                 for res in resultados:
                     if res.time_id == time_id:
                         prob_titulo = res.prob_titulo
@@ -800,8 +834,8 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
         
         # Montar markdown
         date_str = datetime.now().strftime("%Y-%m-%d")
-        title = f"{nome} no Brasileirão 2026: Probabilidades e Análise"
-        slug = f"{time_slug}-brasileirao-2026"
+        title = f"{nome} no Brasileirão: Probabilidades e Análise"
+        slug = f"{time_slug}-brasileirao"
         
         # Faixa do time
         if posicao <= 4:
@@ -889,11 +923,17 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
 
 
 def gerar_todos_posts_times(api: Optional[CartolaAPI] = None) -> int:
-    """Gera posts para todos os 20 times. Retorna quantos foram gerados."""
+    """Gera posts para todos os 20 times. Retorna quantos foram gerados.
+    Filtra aliases (mesma abrev) para evitar duplicatas."""
     if api is None:
         api = CartolaAPI()
     count = 0
-    for slug in TIMES_MAP:
+    seen_abrevs = set()
+    for slug, info in TIMES_MAP.items():
+        abrev = info["abrev"]
+        if abrev in seen_abrevs:
+            continue
+        seen_abrevs.add(abrev)
         result = gerar_post_time(slug, api)
         if result:
             count += 1

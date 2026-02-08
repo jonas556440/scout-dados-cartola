@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Calendar, Clock, Tag, Newspaper, Zap } from "lucide-react";
+import { Calendar, Clock, Tag, Newspaper } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SEO } from "@/components/SEO";
@@ -32,12 +32,6 @@ function PostCard({ post, index, isAuto = false }: { post: { slug: string; title
                 <Clock className="w-3 h-3" />
                 {post.readTime} min de leitura
               </span>
-              {isAuto && (
-                <Badge variant="outline" className="text-xs text-primary border-primary/30">
-                  <Zap className="w-3 h-3 mr-1" />
-                  Análise automática
-                </Badge>
-              )}
             </div>
             <h2 className="font-display text-xl font-bold group-hover:text-primary transition-colors">
               {post.title}

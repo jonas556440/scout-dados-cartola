@@ -398,11 +398,12 @@ class StatsEnricher:
 
     # ──────────────────── H2H ────────────────────
 
-    def historico_h2h(self, team1_afid: int, team2_afid: int) -> Optional[Dict]:
+    def historico_h2h(self, team1_afid: int, team2_afid: int, last: int = 20) -> Optional[Dict]:
         """
         Coleta histórico de confrontos entre dois times.
 
         Retorna últimos confrontos com placar, competição e data.
+        O parâmetro `last` limita aos N jogos mais recentes (padrão 20).
         """
         # Ordenar IDs para cache consistente
         pair = f"{min(team1_afid, team2_afid)}-{max(team1_afid, team2_afid)}"
@@ -412,7 +413,8 @@ class StatsEnricher:
         if cached:
             return cached
 
-        resp = self._get("fixtures/headtohead", {"h2h": f"{team1_afid}-{team2_afid}"})
+        params = {"h2h": f"{team1_afid}-{team2_afid}", "last": str(last)}
+        resp = self._get("fixtures/headtohead", params)
         if not resp:
             return None
 
