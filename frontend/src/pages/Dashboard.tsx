@@ -81,6 +81,7 @@ const Dashboard = () => {
   if (errorDashboard) {
     return (
       <MainLayout>
+        <SEO title="Dashboard" description="Painel do Cartola FC 2026: mercado, escalação otimizada, confrontos e destaques da rodada." path="/dashboard" />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -95,6 +96,7 @@ const Dashboard = () => {
   if (!dashboardData || !mercado) {
     return (
       <MainLayout>
+        <SEO title="Dashboard" description="Painel do Cartola FC 2026: mercado, escalação otimizada, confrontos e destaques da rodada." path="/dashboard" />
         <div className="flex flex-col items-center justify-center h-96 gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <span>Carregando dados do Cartola FC...</span>

@@ -1,0 +1,94 @@
+{
+  "team_id": 124,
+  "team_name": "Fluminense",
+  "league": "Serie A",
+  "season": 2024,
+  "forma": "DLWLDLDLLLLLLDLDWWWWLDWWLLLWWWLDLDDDWW",
+  "jogos": {
+    "total": 38,
+    "casa": 19,
+    "fora": 19
+  },
+  "vitorias": {
+    "total": 12,
+    "casa": 7,
+    "fora": 5
+  },
+  "empates": {
+    "total": 10,
+    "casa": 8,
+    "fora": 2
+  },
+  "derrotas": {
+    "total": 16,
+    "casa": 4,
+    "fora": 12
+  },
+  "gols_pro": {
+    "total": 33,
+    "media": "0.9",
+    "casa": 20,
+    "fora": 13,
+    "media_casa": "1.1",
+    "media_fora": "0.7"
+  },
+  "gols_contra": {
+    "total": 39,
+    "media": "1.0",
+    "casa": 16,
+    "fora": 23,
+    "media_casa": "0.8",
+    "media_fora": "1.2"
+  },
+  "gols_por_minuto": {
+    "0-15": {
+      "total": 4,
+      "pct": "12.90%"
+    },
+    "16-30": {
+      "total": 2,
+      "pct": "6.45%"
+    },
+    "31-45": {
+      "total": 7,
+      "pct": "22.58%"
+    },
+    "46-60": {
+      "total": 8,
+      "pct": "25.81%"
+    },
+    "61-75": {
+      "total": 5,
+      "pct": "16.13%"
+    },
+    "76-90": {
+      "total": 4,
+      "pct": "12.90%"
+    },
+    "91-105": {
+      "total": 1,
+      "pct": "3.23%"
+    }
+  },
+  "clean_sheets": {
+    "total": 13,
+    "casa": 8,
+    "fora": 5
+  },
+  "penaltis": {
+    "marcados": 1,
+    "perdidos": 0,
+    "total": 1,
+    "pct": "100.00%"
+  },
+  "maior_sequencia": {
+    "vitorias": 4,
+    "derrotas": 6,
+    "invicto": 3
+  },
+  "maior_vitoria_casa": "2-0",
+  "maior_vitoria_fora": "0-2",
+  "maior_derrota_casa": "1-2",
+  "maior_derrota_fora": "3-0",
+  "_cached_at": "2026-02-08T18:08:33.293143"
+}

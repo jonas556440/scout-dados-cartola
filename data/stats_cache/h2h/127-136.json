@@ -1,0 +1,248 @@
+{
+  "pair": "127-136",
+  "team1_id": 127,
+  "team2_id": 136,
+  "team1_name": "Flamengo",
+  "team2_name": "Vitoria",
+  "total": 18,
+  "stats": {
+    "team1_wins": 10,
+    "team2_wins": 2,
+    "draws": 4
+  },
+  "ultimos_5": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-11",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2025-08-26",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 8,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2025-04-06",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2024-12-08",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 2,
+      "gols_visitante": 2
+    }
+  ],
+  "todos": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-11",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2025-08-26",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 8,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2025-04-06",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2024-12-08",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 2,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2024-07-24",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2018-08-23",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2018-04-14",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": 2,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2017-12-03",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2017-08-06",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2016-09-10",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2016-06-03",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2014-11-29",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 4,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2014-08-31",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2013-12-01",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": 4,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2013-09-04",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2010-09-11",
+      "liga": "Serie A",
+      "mandante": "Flamengo",
+      "mandante_id": 127,
+      "visitante": "Vitoria",
+      "visitante_id": 136,
+      "gols_mandante": 2,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2010-05-15",
+      "liga": "Serie A",
+      "mandante": "Vitoria",
+      "mandante_id": 136,
+      "visitante": "Flamengo",
+      "visitante_id": 127,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    }
+  ],
+  "_cached_at": "2026-02-08T17:57:10.994033"
+}

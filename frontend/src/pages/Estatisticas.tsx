@@ -89,6 +89,7 @@ const Estatisticas = () => {
   if (isLoading) {
     return (
       <MainLayout>
+        <SEO title="Estatísticas" description="Estatísticas completas do mercado Cartola FC e xG do Brasilão 2026." path="/estatisticas" />
         <div className="flex items-center justify-center h-96">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
@@ -99,6 +100,7 @@ const Estatisticas = () => {
   if (error) {
     return (
       <MainLayout>
+        <SEO title="Estatísticas" description="Estatísticas completas do mercado Cartola FC e xG do Brasilão 2026." path="/estatisticas" />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Erro ao carregar estatísticas</AlertTitle>

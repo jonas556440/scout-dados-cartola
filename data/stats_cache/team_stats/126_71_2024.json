@@ -1,0 +1,94 @@
+{
+  "team_id": 126,
+  "team_name": "Sao Paulo",
+  "league": "Serie A",
+  "season": 2024,
+  "forma": "LLWDWWWDDLLWWWWLWDDLWWLWLWLWLWDWWDDLLL",
+  "jogos": {
+    "total": 38,
+    "casa": 19,
+    "fora": 19
+  },
+  "vitorias": {
+    "total": 17,
+    "casa": 12,
+    "fora": 5
+  },
+  "empates": {
+    "total": 8,
+    "casa": 3,
+    "fora": 5
+  },
+  "derrotas": {
+    "total": 13,
+    "casa": 4,
+    "fora": 9
+  },
+  "gols_pro": {
+    "total": 53,
+    "media": "1.4",
+    "casa": 31,
+    "fora": 22,
+    "media_casa": "1.6",
+    "media_fora": "1.2"
+  },
+  "gols_contra": {
+    "total": 43,
+    "media": "1.1",
+    "casa": 18,
+    "fora": 25,
+    "media_casa": "0.9",
+    "media_fora": "1.3"
+  },
+  "gols_por_minuto": {
+    "0-15": {
+      "total": 11,
+      "pct": "20.37%"
+    },
+    "16-30": {
+      "total": 6,
+      "pct": "11.11%"
+    },
+    "31-45": {
+      "total": 6,
+      "pct": "11.11%"
+    },
+    "46-60": {
+      "total": 10,
+      "pct": "18.52%"
+    },
+    "61-75": {
+      "total": 10,
+      "pct": "18.52%"
+    },
+    "76-90": {
+      "total": 8,
+      "pct": "14.81%"
+    },
+    "91-105": {
+      "total": 3,
+      "pct": "5.56%"
+    }
+  },
+  "clean_sheets": {
+    "total": 12,
+    "casa": 7,
+    "fora": 5
+  },
+  "penaltis": {
+    "marcados": 3,
+    "perdidos": 0,
+    "total": 3,
+    "pct": "100.00%"
+  },
+  "maior_sequencia": {
+    "vitorias": 4,
+    "derrotas": 2,
+    "invicto": 2
+  },
+  "maior_vitoria_casa": "3-0",
+  "maior_vitoria_fora": "0-3",
+  "maior_derrota_casa": "1-3",
+  "maior_derrota_fora": "4-1",
+  "_cached_at": "2026-02-08T18:07:48.220732"
+}

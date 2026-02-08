@@ -463,10 +463,20 @@ def get_confrontos(rodada: Optional[int] = None):
         # Analisar confrontos
         confrontos_analyzer.analisar_rodada(partidas, clubes)
         
-        # Gerar previsões de placar usando Poisson
+        # Gerar previsões de placar usando Poisson + Dixon-Coles V4
         match_analyzer.carregar_estatisticas_times(clubes, partidas)
         score_predictor = ScorePredictor()
-        previsoes = score_predictor.prever_rodada(partidas, match_analyzer.estatisticas_times)
+        
+        # Calcular dias de descanso via DataCollector
+        descanso = {}
+        try:
+            from src.analysis.data_collector import DataCollector
+            collector = DataCollector(api)
+            descanso = collector.dias_descanso_rodada(rodada)
+        except Exception:
+            pass
+        
+        previsoes = score_predictor.prever_rodada(partidas, match_analyzer.estatisticas_times, descanso)
         
         # Criar mapa de previsões por time mandante
         previsoes_map = {}
@@ -573,15 +583,24 @@ def get_previsoes_placares(rodada: Optional[int] = None):
         # Carregar estatísticas dos times
         match_analyzer.carregar_estatisticas_times(clubes, partidas)
         
-        # Prever placares
+        # Prever placares com Dixon-Coles V4 + descanso
         score_predictor = ScorePredictor()
-        previsoes = score_predictor.prever_rodada(partidas, match_analyzer.estatisticas_times)
+        
+        descanso = {}
+        try:
+            from src.analysis.data_collector import DataCollector
+            collector = DataCollector(api)
+            descanso = collector.dias_descanso_rodada(rodada)
+        except Exception:
+            pass
+        
+        previsoes = score_predictor.prever_rodada(partidas, match_analyzer.estatisticas_times, descanso)
         
         # Converter para response
         resultado = {
             "rodada": rodada,
-            "metodologia": "Distribuição de Poisson + Expected Goals (xG)",
-            "referencia": "Frontiers in Sports, PLOS ONE (2021-2023)",
+            "metodologia": "Poisson + Dixon-Coles V4 (τ=0.12, time decay, descanso)",
+            "referencia": "Dixon & Coles (1997), Frontiers in Sports, PLOS ONE (2021-2023)",
             "previsoes": [
                 {
                     "mandante": p.mandante,
@@ -2514,6 +2533,61 @@ def gerar_blog_post(rodada: int):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao gerar post: {str(e)}")
+
+
+# ============ Match Pages (Páginas Progressivas de Jogos) ============
+
+@app.get("/api/jogos")
+def list_match_pages(limit: int = 50):
+    """Lista todas as páginas de jogos (pré-jogo e pós-jogo)."""
+    try:
+        from src.analysis.match_page_manager import MatchPageManager
+        pm = MatchPageManager()
+        pages = pm.listar_paginas(limit=limit)
+        stats = pm.stats()
+        return {"pages": pages, "stats": stats}
+    except Exception as e:
+        return {"pages": [], "stats": {}, "error": str(e)}
+
+
+@app.get("/api/jogos/{slug}")
+def get_match_page(slug: str):
+    """Retorna página completa de um jogo pelo slug."""
+    try:
+        from src.analysis.match_page_manager import MatchPageManager
+        pm = MatchPageManager()
+        page = pm.get_pagina(slug)
+        if not page:
+            raise HTTPException(status_code=404, detail="Página de jogo não encontrada")
+        return page
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar página: {str(e)}")
+
+
+@app.post("/api/jogos/discover")
+def discover_match_pages(days: int = 30):
+    """Descobre jogos futuros e cria páginas base."""
+    try:
+        from src.analysis.match_page_manager import MatchPageManager
+        pm = MatchPageManager()
+        result = pm.discover_and_create(max_days_ahead=days)
+        return {"status": "ok", **result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro na descoberta: {str(e)}")
+
+
+@app.post("/api/jogos/update")
+def update_match_pages():
+    """Atualiza páginas de jogos nas janelas T-72h/T-48h/pós-jogo."""
+    try:
+        from src.analysis.match_page_manager import MatchPageManager
+        pm = MatchPageManager()
+        result = pm.update_upcoming()
+        return {"status": "ok", **result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro na atualização: {str(e)}")
 
 
 # ============ Executar ============

@@ -46,6 +46,7 @@ const Brasileirao = () => {
   if (error) {
     return (
       <MainLayout>
+        <SEO title="Brasileirão 2026" description="Classificação do Brasileirão 2026 com simulação Monte Carlo." path="/brasileirao" />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -59,6 +60,7 @@ const Brasileirao = () => {
   if (isLoading) {
     return (
       <MainLayout>
+        <SEO title="Brasileirão 2026" description="Classificação do Brasileirão 2026 com simulação Monte Carlo." path="/brasileirao" />
         <div className="space-y-6">
           <div className="flex items-center gap-2">
             <Loader2 className="h-6 w-6 animate-spin" />

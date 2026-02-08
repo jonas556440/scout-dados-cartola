@@ -42,7 +42,7 @@ const STATIC_ROUTES = [
   '/escalacao',
   // '/mercado',       // ❌ Tempo real (desabilitado)
   '/scouts',
-  // '/historico',     // ❌ Causa erro React #310 (desabilitado)
+  '/historico',       // ✅ Erro #310 corrigido
   // '/estatisticas',  // ❌ Dados dinâmicos (desabilitado)
   '/blog',
   '/sobre',

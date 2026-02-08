@@ -194,6 +194,66 @@ class CartolaScheduler:
         )
         logger.info("✅ Job 'snapshot_monte_carlo' agendado (a cada 4h)")
         
+        # Tarefa 14: Coletar resultados reais após jogos (a cada 3h)
+        self.scheduler.add_job(
+            func=self.coletar_resultados_rodada,
+            trigger=IntervalTrigger(hours=3),
+            id='coletar_resultados',
+            name='Coletar Resultados Reais',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'coletar_resultados' agendado (a cada 3h)")
+        
+        # Tarefa 15: Calibração automática do modelo (diariamente 04:30)
+        self.scheduler.add_job(
+            func=self.calibrar_modelo,
+            trigger=CronTrigger(hour=4, minute=30),
+            id='calibrar_modelo',
+            name='Calibração Automática do Modelo',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'calibrar_modelo' agendado (04:30 diariamente)")
+        
+        # Tarefa 16: Coletar fixtures multi-competição (diariamente 05:00)
+        self.scheduler.add_job(
+            func=self.coletar_fixtures_diario,
+            trigger=CronTrigger(hour=5, minute=0),
+            id='coletar_fixtures',
+            name='Coletar Fixtures Multi-Competição',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'coletar_fixtures' agendado (05:00 diariamente)")
+        
+        # Tarefa 17: Enriquecer dados da rodada via API-Football (diariamente 06:30)
+        self.scheduler.add_job(
+            func=self.enriquecer_dados_rodada,
+            trigger=CronTrigger(hour=6, minute=30),
+            id='enriquecer_dados',
+            name='Enriquecer Dados via API-Football',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'enriquecer_dados' agendado (06:30 diariamente)")
+        
+        # Tarefa 18: Descobrir jogos e criar páginas (diariamente 04:00)
+        self.scheduler.add_job(
+            func=self.descobrir_paginas_jogos,
+            trigger=CronTrigger(hour=4, minute=0),
+            id='descobrir_paginas',
+            name='Descobrir Jogos e Criar Páginas',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'descobrir_paginas' agendado (04:00 diariamente)")
+        
+        # Tarefa 19: Atualizar páginas de jogos próximos (4x/dia)
+        self.scheduler.add_job(
+            func=self.atualizar_paginas_jogos,
+            trigger=CronTrigger(hour='6,12,18,23', minute=30),
+            id='atualizar_paginas',
+            name='Atualizar Páginas de Jogos',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'atualizar_paginas' agendado (06:30, 12:30, 18:30, 23:30)")
+        
         # Iniciar scheduler
         self.scheduler.start()
         logger.info("🟢 Scheduler ATIVO - Monitoramento em execução")
@@ -451,11 +511,19 @@ class CartolaScheduler:
         """
         Salva snapshot das simulações Monte Carlo + previsões de placar
         para a rodada atual em data/monte_carlo/rodada_N.json
+
+        Também:
+        - Coleta resultados reais de rodadas passadas (DataCollector)
+        - Salva previsões pré-jogo para backtest futuro
+        - Injeta dias de descanso nas previsões
+        - Roda calibração automática se houver dados suficientes
         """
         try:
             import json
             from src.analysis.score_predictor import ScorePredictor
             from src.analysis.monte_carlo import MonteCarloSimulator
+            from src.analysis.match_analyzer import MatchAnalyzer
+            from src.analysis.data_collector import DataCollector
             
             if not self.rodada_atual:
                 logger.info("⏳ Monte Carlo: sem rodada definida, pulando snapshot")
@@ -467,26 +535,69 @@ class CartolaScheduler:
             
             logger.info(f"🎲 Gerando snapshot Monte Carlo para rodada {self.rodada_atual}...")
             
-            # 1) Previsões de placar via ScorePredictor
+            # 0) Coletar resultados reais de rodadas passadas
+            collector = DataCollector(self.api)
+            try:
+                collector.coletar_todas_rodadas(ate_rodada=self.rodada_atual)
+                logger.info("📥 Resultados históricos coletados")
+            except Exception as e:
+                logger.warning(f"⚠️  Erro ao coletar histórico: {e}")
+            
+            # 1) Previsões de placar via ScorePredictor (com descanso)
             previsoes_data = []
+            previsoes_obj = []
             try:
                 predictor = ScorePredictor()
-                previsoes = predictor.prever_rodada(self.rodada_atual)
-                for p in previsoes:
-                    previsoes_data.append({
-                        "mandante": p.mandante,
-                        "visitante": p.visitante,
-                        "xg_mandante": round(p.xg_mandante, 2),
-                        "xg_visitante": round(p.xg_visitante, 2),
-                        "placar_provavel": p.placar_provavel,
-                        "prob_placar": round(p.probabilidade_placar, 1),
-                        "prob_casa": round(p.prob_vitoria_casa, 1),
-                        "prob_empate": round(p.prob_empate, 1),
-                        "prob_fora": round(p.prob_vitoria_fora, 1),
-                        "over25": round(p.prob_over_2_5, 1),
-                        "btts": round(p.prob_btts, 1),
-                        "confianca": round(p.confianca, 2),
-                    })
+                analyzer = MatchAnalyzer()
+                
+                # Buscar partidas e estatísticas
+                mercado = self.api.get_mercado()
+                if mercado:
+                    clubes = mercado.get("clubes", {})
+                    partidas_resp = self.api.get_partidas(self.rodada_atual)
+                    partidas = partidas_resp if isinstance(partidas_resp, list) else \
+                               (partidas_resp.get("partidas", []) if partidas_resp else [])
+                    
+                    if partidas:
+                        analyzer.carregar_estatisticas_times(clubes, partidas)
+                        
+                        # Calcular dias de descanso
+                        descanso = {}
+                        try:
+                            descanso = collector.dias_descanso_rodada(self.rodada_atual)
+                            logger.info(f"😴 Descanso calculado para {len(descanso)} times")
+                        except Exception as e:
+                            logger.warning(f"⚠️  Erro ao calcular descanso: {e}")
+                        
+                        previsoes_obj = predictor.prever_rodada(
+                            partidas, analyzer.estatisticas_times, descanso
+                        )
+                        
+                        for p in previsoes_obj:
+                            previsoes_data.append({
+                                "mandante": p.mandante,
+                                "visitante": p.visitante,
+                                "mandante_id": p.mandante_id,
+                                "visitante_id": p.visitante_id,
+                                "xg_mandante": round(p.xg_mandante, 2),
+                                "xg_visitante": round(p.xg_visitante, 2),
+                                "placar_provavel": p.placar_provavel,
+                                "prob_placar": round(p.probabilidade_placar, 1),
+                                "prob_casa": round(p.prob_vitoria_casa, 1),
+                                "prob_empate": round(p.prob_empate, 1),
+                                "prob_fora": round(p.prob_vitoria_fora, 1),
+                                "over25": round(p.prob_over_2_5, 1),
+                                "btts": round(p.prob_btts, 1),
+                                "confianca": round(p.confianca, 2),
+                                "dias_descanso_mandante": p.fatores.get("dias_descanso_mandante", -1),
+                                "dias_descanso_visitante": p.fatores.get("dias_descanso_visitante", -1),
+                            })
+                        
+                        # Salvar previsões para backtest
+                        try:
+                            collector.salvar_previsoes(self.rodada_atual, previsoes_obj)
+                        except Exception as e:
+                            logger.warning(f"⚠️  Erro ao salvar previsões para backtest: {e}")
             except Exception as e:
                 logger.warning(f"⚠️  Erro ao gerar previsões de placar: {e}")
             
@@ -509,11 +620,33 @@ class CartolaScheduler:
             except Exception as e:
                 logger.warning(f"⚠️  Erro na simulação Monte Carlo: {e}")
             
+            # 3) Calibração automática
+            calibracao = None
+            try:
+                calibracao = collector.calibrar()
+                if calibracao and calibracao.get("jogos", 0) > 0:
+                    logger.info(
+                        f"📊 Calibração: LL={calibracao['log_loss']:.4f} "
+                        f"({calibracao['nota']}) em {calibracao['jogos']} jogos"
+                    )
+            except Exception as e:
+                logger.warning(f"⚠️  Erro na calibração: {e}")
+            
+            # 4) Gols por time (stats reais)
+            gols_stats = {}
+            try:
+                gols_stats = collector.gols_por_time()
+            except Exception:
+                pass
+            
             snapshot = {
                 "rodada": self.rodada_atual,
                 "timestamp": datetime.now().isoformat(),
+                "modelo": "V4_Dixon-Coles",
                 "previsoes_placar": previsoes_data,
                 "simulacao_campeonato": simulacao_data,
+                "calibracao": calibracao,
+                "gols_reais": {str(k): v for k, v in gols_stats.items()} if gols_stats else {},
             }
             
             with open(snapshot_file, "w", encoding="utf-8") as f:
@@ -524,6 +657,189 @@ class CartolaScheduler:
                 
         except Exception as e:
             logger.error(f"❌ Erro ao salvar snapshot Monte Carlo: {e}", exc_info=True)
+    
+    # ==================== COLETA DE RESULTADOS ====================
+    
+    def coletar_resultados_rodada(self):
+        """
+        Coleta resultados reais das rodadas finalizadas.
+        Persiste em data/historico/resultados_rodada_N.json para 
+        backtest e calibração automática do modelo.
+        """
+        try:
+            from src.analysis.data_collector import DataCollector
+            
+            if not self.rodada_atual:
+                logger.info("⏳ Coleta resultados: sem rodada definida")
+                return
+            
+            collector = DataCollector(self.api)
+            
+            # Coletar todas as rodadas passadas (idempotente - pula já coletadas)
+            resultado = collector.coletar_todas_rodadas(ate_rodada=self.rodada_atual)
+            
+            total = resultado.get("total_jogos_novos", 0) if isinstance(resultado, dict) else 0
+            logger.info(f"📥 Coleta resultados: {total} jogos novos coletados")
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao coletar resultados: {e}", exc_info=True)
+    
+    # ==================== CALIBRAÇÃO AUTOMÁTICA ====================
+    
+    def coletar_fixtures_diario(self):
+        """
+        Coleta fixtures multi-competição via API-Football (free tier).
+        Busca jogos de hoje + adjacentes (window ±1 dia do free tier).
+        Gasta ~1-3 requests/dia (cache impede reprocessamento).
+        """
+        try:
+            from src.analysis.fixture_collector import FixtureCollector
+            
+            fc = FixtureCollector()
+            
+            # Verificar status da conta antes
+            status = fc.status_conta()
+            logger.info(f"🏟️ API-Football: {status['used']}/{status['limit']} requests usados")
+            
+            if status['used'] >= status['limit'] - 5:
+                logger.warning("⚠️ API-Football: quase no limite diário, pulando coleta")
+                return
+            
+            # Coletar hoje + adjacentes
+            fixtures = fc.coletar_hoje()
+            
+            resumo = fc.resumo_cache()
+            logger.info(
+                f"🏟️ Fixtures coletados: {len(fixtures)} jogos BR hoje. "
+                f"Cache: {resumo['total_fixtures_br']} total, "
+                f"{resumo['arquivos']} dias ({resumo.get('primeira_data', '?')} → {resumo.get('ultima_data', '?')})"
+            )
+            
+            # Se temos mercado aberto, completar mapeamento de IDs
+            if self.rodada_atual:
+                try:
+                    mercado = self.api.get_mercado()
+                    clubes = mercado.get("clubes", {}) if isinstance(mercado, dict) else {}
+                    if clubes:
+                        fc.completar_mapeamento(clubes)
+                except Exception:
+                    pass
+                    
+        except Exception as e:
+            logger.error(f"❌ Erro ao coletar fixtures: {e}", exc_info=True)
+    
+    def enriquecer_dados_rodada(self):
+        """
+        Enriquece dados da rodada atual via API-Football.
+        Coleta team stats (2024), H2H e standings para cache.
+        Roda DEPOIS do coletar_fixtures (06:30 vs 05:00).
+        Budget: máx 30 requests (sobra ~67 para coleta + outros).
+        """
+        try:
+            from src.analysis.stats_enricher import StatsEnricher
+            
+            enricher = StatsEnricher()
+            restantes = enricher.requests_restantes()
+            
+            if restantes < 20:
+                logger.warning(f"⚠️ API-Football: só {restantes} requests restantes, pulando enriquecimento")
+                return
+            
+            if not self.rodada_atual:
+                logger.info("📊 Enriquecimento: sem rodada ativa")
+                return
+            
+            # Buscar partidas da rodada
+            partidas_data = self.api.get_partidas(self.rodada_atual)
+            if not partidas_data:
+                return
+            partidas = partidas_data.get("partidas", []) if isinstance(partidas_data, dict) else partidas_data
+            
+            # Enriquecer (budget controlado)
+            budget = min(30, restantes - 10)
+            result = enricher.enriquecer_rodada(partidas, budget_max=budget)
+            
+            n_teams = len(result.get("team_stats", {}))
+            n_h2h = len(result.get("h2h", {}))
+            has_standings = bool(result.get("standings"))
+            
+            logger.info(
+                f"📊 Enrichment rodada {self.rodada_atual}: "
+                f"{n_teams} team stats, {n_h2h} H2H, standings={has_standings}"
+            )
+            logger.info(f"📊 Cache stats: {enricher.resumo_cache()}")
+            
+        except Exception as e:
+            logger.error(f"❌ Erro no enriquecimento: {e}", exc_info=True)
+    
+    def descobrir_paginas_jogos(self):
+        """
+        Descobre jogos dos próximos 30 dias via football-data.org
+        e cria páginas base para cada jogo novo.
+        Usa cache — sem desperdício de requests se nada mudou.
+        """
+        try:
+            from src.analysis.match_page_manager import MatchPageManager
+            pm = MatchPageManager()
+            result = pm.discover_and_create(max_days_ahead=30)
+            logger.info(
+                f"📄 Descoberta de páginas: {result.get('criados', 0)} novas, "
+                f"{result.get('existentes', 0)} existentes"
+            )
+        except Exception as e:
+            logger.error(f"❌ Erro na descoberta de páginas: {e}", exc_info=True)
+    
+    def atualizar_paginas_jogos(self):
+        """
+        Atualiza páginas de jogos nas janelas:
+        - T-72h a T-48h: dados básicos (tabela, forma, artilheiro)
+        - T-48h a kickoff: dados completos (H2H, insights)
+        - Pós-jogo: placar final
+        """
+        try:
+            from src.analysis.match_page_manager import MatchPageManager
+            pm = MatchPageManager()
+            result = pm.update_upcoming()
+            logger.info(
+                f"📄 Atualização de páginas: {result.get('atualizados', 0)} atualizadas, "
+                f"{result.get('ignorados', 0)} ignoradas"
+            )
+        except Exception as e:
+            logger.error(f"❌ Erro na atualização de páginas: {e}", exc_info=True)
+    
+    def calibrar_modelo(self):
+        """
+        Compara previsões salvas vs resultados reais.
+        Gera relatório de calibração (log-loss, Brier, acertos exatos/VED).
+        Salva em data/historico/calibracao_atual.json
+        """
+        try:
+            from src.analysis.data_collector import DataCollector
+            
+            collector = DataCollector(self.api)
+            
+            # Primeiro garantir que temos os resultados mais recentes
+            if self.rodada_atual:
+                try:
+                    collector.coletar_todas_rodadas(ate_rodada=self.rodada_atual)
+                except Exception:
+                    pass
+            
+            relatorio = collector.calibrar()
+            
+            if relatorio and relatorio.get("jogos", 0) > 0:
+                logger.info(
+                    f"📊 Calibração V4: LL={relatorio['log_loss']:.4f} "
+                    f"({relatorio['nota']}), "
+                    f"Brier={relatorio.get('brier_score', 0):.4f}, "
+                    f"Exatos={relatorio.get('acertos_exatos', 0)}/{relatorio['jogos']}, "
+                    f"VED={relatorio.get('acertos_ved', 0)}/{relatorio['jogos']}"
+                )
+            else:
+                logger.info("📊 Calibração: dados insuficientes (sem previsões salvas)")
+                
+        except Exception as e:
+            logger.error(f"❌ Erro na calibração do modelo: {e}", exc_info=True)
     
     # ==================== BACKUP ====================
     

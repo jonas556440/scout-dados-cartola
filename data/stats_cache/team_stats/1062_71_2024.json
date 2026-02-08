@@ -1,0 +1,94 @@
+{
+  "team_id": 1062,
+  "team_name": "Atletico-MG",
+  "league": "Serie A",
+  "season": 2024,
+  "forma": "DDWWDDWLLDWDLLWDWWLDDLWLWLDWDLLDLDDLLW",
+  "jogos": {
+    "total": 38,
+    "casa": 19,
+    "fora": 19
+  },
+  "vitorias": {
+    "total": 11,
+    "casa": 7,
+    "fora": 4
+  },
+  "empates": {
+    "total": 14,
+    "casa": 7,
+    "fora": 7
+  },
+  "derrotas": {
+    "total": 13,
+    "casa": 5,
+    "fora": 8
+  },
+  "gols_pro": {
+    "total": 47,
+    "media": "1.2",
+    "casa": 27,
+    "fora": 20,
+    "media_casa": "1.4",
+    "media_fora": "1.1"
+  },
+  "gols_contra": {
+    "total": 54,
+    "media": "1.4",
+    "casa": 26,
+    "fora": 28,
+    "media_casa": "1.4",
+    "media_fora": "1.5"
+  },
+  "gols_por_minuto": {
+    "0-15": {
+      "total": 6,
+      "pct": "12.50%"
+    },
+    "16-30": {
+      "total": 7,
+      "pct": "14.58%"
+    },
+    "31-45": {
+      "total": 9,
+      "pct": "18.75%"
+    },
+    "46-60": {
+      "total": 8,
+      "pct": "16.67%"
+    },
+    "61-75": {
+      "total": 7,
+      "pct": "14.58%"
+    },
+    "76-90": {
+      "total": 7,
+      "pct": "14.58%"
+    },
+    "91-105": {
+      "total": 4,
+      "pct": "8.33%"
+    }
+  },
+  "clean_sheets": {
+    "total": 9,
+    "casa": 5,
+    "fora": 4
+  },
+  "penaltis": {
+    "marcados": 11,
+    "perdidos": 0,
+    "total": 11,
+    "pct": "100.00%"
+  },
+  "maior_sequencia": {
+    "vitorias": 2,
+    "derrotas": 2,
+    "invicto": 2
+  },
+  "maior_vitoria_casa": "3-0",
+  "maior_vitoria_fora": "0-3",
+  "maior_derrota_casa": "0-4",
+  "maior_derrota_fora": "3-0",
+  "_cached_at": "2026-02-08T18:06:08.675506"
+}

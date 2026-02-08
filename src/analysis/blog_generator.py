@@ -2,8 +2,11 @@
 Gerador automático de posts de blog por rodada.
 
 Gera análise de confrontos de cada rodada com:
-- Previsões de placar (Poisson)
+- Previsões de placar (Poisson + Dixon-Coles V4)
 - xG de cada jogo
+- Dias de descanso entre rodadas
+- Gols reais por time (histórico coletado)
+- Calibração do modelo (auto-avaliação)
 - Destaques/dicas para Cartola
 - Análise dos times mandante/visitante
 
@@ -59,6 +62,56 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
     predictor = ScorePredictor()
     analyzer = ConfrontosAnalyzer()
     
+    # Inicializar DataCollector para dados enriquecidos
+    descanso_rodada: Dict[int, Optional[int]] = {}
+    gols_stats: Dict[int, Any] = {}
+    calibracao: Optional[Dict] = None
+    try:
+        from src.analysis.data_collector import DataCollector
+        collector = DataCollector(api)
+        descanso_rodada = collector.dias_descanso_rodada(rodada)
+        gols_stats = collector.gols_por_time()
+        calibracao = collector.calibrar()
+    except Exception:
+        pass  # Graceful fallback se DataCollector falhar
+    
+    # Inicializar StatsEnricher para dados API-Football (xG, H2H, forma, etc.)
+    enriched_data: Dict[str, Any] = {}
+    enricher = None
+    try:
+        from src.analysis.stats_enricher import StatsEnricher
+        from src.analysis.fixture_collector import CARTOLA_TO_APIFOOTBALL
+        enricher = StatsEnricher()
+        # Budget conservador: máx 25 req por geração de post
+        partidas_data_temp = api.get_partidas(rodada)
+        partidas_temp = partidas_data_temp.get("partidas", []) if partidas_data_temp else []
+        if partidas_temp:
+            enriched_data = enricher.enriquecer_rodada(partidas_temp, budget_max=25)
+    except Exception:
+        pass  # Graceful fallback
+
+    # football-data.org: artilheiros + classificação 2025/26 (fallback/complemento)
+    fdo_client = None
+    fdo_artilheiros: List[Dict] = []
+    fdo_classificacao: List[Dict] = []
+    fdo_matches: List[Dict] = []
+    try:
+        from src.analysis.football_data_client import FootballDataClient
+        fdo_client = FootballDataClient()
+        fdo_artilheiros = fdo_client.artilheiros(limit=30) or []
+        fdo_classificacao = fdo_client.classificacao() or []
+        fdo_matches = fdo_client.jogos_rodada(rodada) or []
+    except Exception:
+        pass
+
+    # MatchInsights: frases 100% factuais
+    insights_gen = None
+    try:
+        from src.analysis.match_insights import MatchInsights
+        insights_gen = MatchInsights()
+    except Exception:
+        pass
+    
     # Buscar dados da rodada
     partidas_data = api.get_partidas(rodada)
     mercado = api.get_mercado()
@@ -73,17 +126,35 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
     if not partidas:
         return {}
     
-    # Calcular forças dos times
+    # Calcular forças dos times REAIS baseadas na média dos atletas
     forcas = {}
     status = api.get_status_mercado()
     rodada_atual = status.get("rodada_atual", rodada) if status else rodada
     
     for clube_id, clube in clubes.items():
-        forcas[int(clube_id)] = {
+        cid = int(clube_id)
+        # Calcular força baseada na média dos atletas do time
+        atletas_time = [a for a in atletas if a.get("clube_id") == cid]
+        if atletas_time:
+            media_time = sum(a.get("media_num", 0) for a in atletas_time) / len(atletas_time)
+            # Atacantes e meiocampistas contam mais para ataque
+            atacantes = [a for a in atletas_time if a.get("posicao_id") in [4, 5]]
+            media_ataque = sum(a.get("media_num", 0) for a in atacantes) / max(len(atacantes), 1) if atacantes else media_time
+            # Zagueiros e goleiros contam mais para defesa
+            defensores = [a for a in atletas_time if a.get("posicao_id") in [1, 2, 3]]
+            media_defesa = sum(a.get("media_num", 0) for a in defensores) / max(len(defensores), 1) if defensores else media_time
+            
+            # Converter média (0-15) para força (20-80)
+            forca_atq = max(20, min(80, 30 + media_ataque * 4))
+            forca_def = max(20, min(80, 30 + media_defesa * 4))
+        else:
+            forca_atq, forca_def = 50, 50
+        
+        forcas[cid] = {
             "nome": clube.get("nome", ""),
             "abrev": clube.get("abreviacao", ""),
-            "forca_ataque": 50,
-            "forca_defesa": 50,
+            "forca_ataque": forca_atq,
+            "forca_defesa": forca_def,
         }
     
     # Gerar previsões para cada jogo
@@ -110,6 +181,10 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
         
         # Previsão via ScorePredictor
         try:
+            # Dias de descanso de cada time
+            desc_m = descanso_rodada.get(mandante_id)
+            desc_v = descanso_rodada.get(visitante_id)
+            
             previsao = predictor.prever_confronto(
                 mandante=mandante_nome,
                 visitante=visitante_nome,
@@ -118,13 +193,21 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
                 forca_mandante=forca_m,
                 forca_visitante=forca_v,
                 rodada=rodada,
+                dias_descanso_mandante=desc_m,
+                dias_descanso_visitante=desc_v,
             )
+            
+            # Gols reais históricos (se disponíveis)
+            gols_m_stats = gols_stats.get(mandante_id, {})
+            gols_v_stats = gols_stats.get(visitante_id, {})
             
             jogo = {
                 "mandante": mandante_nome,
                 "visitante": visitante_nome,
                 "mandante_abrev": mandante_abrev,
                 "visitante_abrev": visitante_abrev,
+                "mandante_id": mandante_id,
+                "visitante_id": visitante_id,
                 "placar_provavel": previsao.placar_provavel,
                 "xg_mandante": round(previsao.xg_mandante, 2),
                 "xg_visitante": round(previsao.xg_visitante, 2),
@@ -137,6 +220,10 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
                 "confianca": round(previsao.confianca, 0),
                 "local": partida.get("local", ""),
                 "data": partida.get("partida_data", ""),
+                "dias_descanso_mandante": desc_m,
+                "dias_descanso_visitante": desc_v,
+                "gols_reais_mandante": gols_m_stats,
+                "gols_reais_visitante": gols_v_stats,
             }
             jogos_analise.append(jogo)
         except Exception:
@@ -164,7 +251,8 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
     md_lines.append(f"## Rodada {rodada} — Visão Geral\n")
     md_lines.append(
         f"O ScoutDados analisou os **{len(jogos_analise)} confrontos** da rodada {rodada} "
-        f"usando nosso modelo **Poisson V3** com xG contextual. Confira as previsões:\n"
+        f"usando nosso modelo **Poisson + Dixon-Coles V4** com correção de baixas pontuações, "
+        f"decaimento temporal e ajuste de descanso. Confira as previsões:\n"
     )
     
     # Tabela resumo
@@ -197,12 +285,220 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
         md_lines.append(f"- Over 2.5: {j['over_25']}% | Ambos marcam: {j['btts']}%")
         md_lines.append(f"- Confiança do modelo: {j['confianca']}%\n")
         
+        # Dias de descanso
+        desc_m = j.get("dias_descanso_mandante")
+        desc_v = j.get("dias_descanso_visitante")
+        if desc_m is not None or desc_v is not None:
+            descanso_parts = []
+            if desc_m is not None:
+                emoji_m = "🟢" if desc_m >= 7 else ("🟡" if desc_m >= 4 else "🔴")
+                descanso_parts.append(f"{emoji_m} {j['mandante_abrev']}: {desc_m}d")
+            if desc_v is not None:
+                emoji_v = "🟢" if desc_v >= 7 else ("🟡" if desc_v >= 4 else "🔴")
+                descanso_parts.append(f"{emoji_v} {j['visitante_abrev']}: {desc_v}d")
+            md_lines.append(f"- **Descanso:** {' | '.join(descanso_parts)}\n")
+        
+        # Gols reais históricos
+        gols_m = j.get("gols_reais_mandante", {})
+        gols_v = j.get("gols_reais_visitante", {})
+        if gols_m.get("jogos", 0) > 0 or gols_v.get("jogos", 0) > 0:
+            md_lines.append("**Dados reais no campeonato:**\n")
+            if gols_m.get("jogos", 0) > 0:
+                md_lines.append(
+                    f"- {j['mandante_abrev']}: {gols_m.get('gols_pro', 0)} gols em "
+                    f"{gols_m['jogos']} jogos (média {gols_m.get('media_gp', 0):.1f})"
+                )
+            if gols_v.get("jogos", 0) > 0:
+                md_lines.append(
+                    f"- {j['visitante_abrev']}: {gols_v.get('gols_pro', 0)} gols em "
+                    f"{gols_v['jogos']} jogos (média {gols_v.get('media_gp', 0):.1f})"
+                )
+            md_lines.append("")
+        
+        # ── Stats avançadas do API-Football (se disponíveis) ──
+        if enricher and enriched_data:
+            try:
+                from src.analysis.fixture_collector import CARTOLA_TO_APIFOOTBALL
+                af_m = CARTOLA_TO_APIFOOTBALL.get(j.get("mandante_id", 0))
+                af_v = CARTOLA_TO_APIFOOTBALL.get(j.get("visitante_id", 0))
+                
+                # Forma e desempenho dos times (BSA 2024)
+                ts_m = enriched_data.get("team_stats", {}).get(af_m) if af_m else None
+                ts_v = enriched_data.get("team_stats", {}).get(af_v) if af_v else None
+                
+                if ts_m or ts_v:
+                    liga_ref = ts_m.get("league", ts_v.get("league", "Série A")) if ts_m else ts_v.get("league", "Série A")
+                    md_lines.append(f"**Retrospecto ({liga_ref} 2024):**\n")
+                    if ts_m:
+                        forma_m = (ts_m.get("forma") or "")[-5:]
+                        fe = "".join("🟢" if c == "W" else ("🟡" if c == "D" else "🔴") for c in forma_m)
+                        md_lines.append(
+                            f"- {j['mandante_abrev']}: {fe} | "
+                            f"{ts_m['vitorias']['total']}V {ts_m['empates']['total']}E {ts_m['derrotas']['total']}D | "
+                            f"Gols: {ts_m['gols_pro']['media']}/jogo | "
+                            f"CS: {ts_m['clean_sheets']['total']}"
+                        )
+                    if ts_v:
+                        forma_v = (ts_v.get("forma") or "")[-5:]
+                        fe = "".join("🟢" if c == "W" else ("🟡" if c == "D" else "🔴") for c in forma_v)
+                        md_lines.append(
+                            f"- {j['visitante_abrev']}: {fe} | "
+                            f"{ts_v['vitorias']['total']}V {ts_v['empates']['total']}E {ts_v['derrotas']['total']}D | "
+                            f"Gols: {ts_v['gols_pro']['media']}/jogo | "
+                            f"CS: {ts_v['clean_sheets']['total']}"
+                        )
+                    md_lines.append("")
+                
+                # H2H (confrontos diretos)
+                if af_m and af_v:
+                    pair = f"{min(af_m, af_v)}-{max(af_m, af_v)}"
+                    h2h = enriched_data.get("h2h", {}).get(pair)
+                    if h2h and h2h.get("total", 0) > 0:
+                        stats = h2h["stats"]
+                        # Determinar quem é team1/team2 no H2H
+                        if h2h.get("team1_id") == af_m:
+                            w1, w2 = stats["team1_wins"], stats["team2_wins"]
+                        else:
+                            w1, w2 = stats["team2_wins"], stats["team1_wins"]
+                        
+                        md_lines.append(
+                            f"**Confronto direto ({h2h['total']} jogos):** "
+                            f"{j['mandante_abrev']} {w1}V | {stats['draws']}E | "
+                            f"{j['visitante_abrev']} {w2}V\n"
+                        )
+                        # Últimos 3 jogos
+                        for jogo_h2h in h2h.get("ultimos_5", [])[:3]:
+                            gm = jogo_h2h.get("gols_mandante")
+                            gv = jogo_h2h.get("gols_visitante")
+                            if gm is not None and gv is not None:
+                                md_lines.append(
+                                    f"- {jogo_h2h['data']}: {jogo_h2h['mandante']} "
+                                    f"{gm}x{gv} {jogo_h2h['visitante']} ({jogo_h2h['liga']})"
+                                )
+                        md_lines.append("")
+            except Exception:
+                pass  # Graceful fallback
+
+        # ── Insights factuais (100% dados reais, sem IA) ──
+        if insights_gen:
+            try:
+                from src.analysis.fixture_collector import CARTOLA_TO_APIFOOTBALL
+                af_m = CARTOLA_TO_APIFOOTBALL.get(j.get("mandante_id", 0))
+                af_v = CARTOLA_TO_APIFOOTBALL.get(j.get("visitante_id", 0))
+
+                # Team stats do enriquecimento
+                ts_m = enriched_data.get("team_stats", {}).get(af_m) if af_m and enriched_data else None
+                ts_v = enriched_data.get("team_stats", {}).get(af_v) if af_v and enriched_data else None
+
+                # H2H do enriquecimento
+                h2h_data = None
+                if af_m and af_v and enriched_data:
+                    pair = f"{min(af_m, af_v)}-{max(af_m, af_v)}"
+                    h2h_data = enriched_data.get("h2h", {}).get(pair)
+
+                # Artilheiros do football-data.org
+                art_m = None
+                art_v = None
+                # Buscar IDs do football-data para este jogo
+                fdo_m_id = 0
+                fdo_v_id = 0
+                for fm in fdo_matches:
+                    fm_m_tla = fm.get("mandante_sigla", "")
+                    fm_v_tla = fm.get("visitante_sigla", "")
+                    if (fm_m_tla == j["mandante_abrev"] and
+                            fm_v_tla == j["visitante_abrev"]):
+                        fdo_m_id = fm.get("mandante_id", 0)
+                        fdo_v_id = fm.get("visitante_id", 0)
+                        break
+                for a in fdo_artilheiros:
+                    tid = a.get("time_id", 0)
+                    if fdo_m_id and tid == fdo_m_id and not art_m:
+                        art_m = a
+                    if fdo_v_id and tid == fdo_v_id and not art_v:
+                        art_v = a
+
+                # Posição na tabela (football-data.org 2025/26 = ATUAL)
+                pos_m = None
+                pos_v = None
+                for t in fdo_classificacao:
+                    tid = t.get("time_id", 0)
+                    if fdo_m_id and tid == fdo_m_id:
+                        pos_m = t
+                    if fdo_v_id and tid == fdo_v_id:
+                        pos_v = t
+
+                insights = insights_gen.gerar_insights_jogo(
+                    mandante=j["mandante"],
+                    visitante=j["visitante"],
+                    mandante_abrev=j["mandante_abrev"],
+                    visitante_abrev=j["visitante_abrev"],
+                    team_stats_m=ts_m,
+                    team_stats_v=ts_v,
+                    h2h=h2h_data,
+                    posicao_m=pos_m,
+                    posicao_v=pos_v,
+                    artilheiro_m=art_m,
+                    artilheiro_v=art_v,
+                    descanso_m=j.get("dias_descanso_mandante"),
+                    descanso_v=j.get("dias_descanso_visitante"),
+                    rodada=rodada,
+                )
+
+                if insights:
+                    md_lines.append(insights_gen.formatar_secao_insights(insights))
+            except Exception:
+                pass
+
         # Top placares
         if j["top_placares"]:
             md_lines.append("**Top placares mais prováveis:**\n")
             for placar, prob in j["top_placares"]:
                 md_lines.append(f"- {placar} ({prob}%)")
             md_lines.append("")
+    
+    # Classificação ATUAL (football-data.org 2025/26) — prioridade
+    # Fallback: API-Football 2024
+    standings_atual = fdo_classificacao if fdo_classificacao else None
+    standings_ref = enriched_data.get("standings") if enriched_data else None
+
+    if standings_atual:
+        md_lines.append("---\n")
+        md_lines.append("## Classificação — Brasileirão 2026\n")
+        md_lines.append("| Pos | Time | P | J | V | E | D | GP | GC | SG |")
+        md_lines.append("|-----|------|---|---|---|---|---|----|----|-----|")
+        for t in standings_atual[:10]:
+            md_lines.append(
+                f"| {t['posicao']} | {t['time']} | **{t['pontos']}** "
+                f"| {t['jogos']} | {t['vitorias']} | {t['empates']} "
+                f"| {t['derrotas']} | {t['gols_pro']} | {t['gols_contra']} "
+                f"| {t['saldo']} |"
+            )
+        md_lines.append("")
+    elif standings_ref:
+        md_lines.append("---\n")
+        md_lines.append("## Classificação — Série A 2024 (Referência)\n")
+        md_lines.append("| Pos | Time | P | J | V | E | D | GP | GC | SG |")
+        md_lines.append("|-----|------|---|---|---|---|---|----|----|-----|")
+        for t in standings_ref[:10]:
+            md_lines.append(
+                f"| {t['posicao']} | {t['time']} | **{t['pontos']}** "
+                f"| {t['jogos']} | {t['vitorias']} | {t['empates']} "
+                f"| {t['derrotas']} | {t['gols_pro']} | {t['gols_contra']} "
+                f"| {t['saldo']} |"
+            )
+        md_lines.append("")
+
+    # Artilheiros do campeonato (football-data.org — exclusivo, API-Football não tem)
+    if fdo_artilheiros:
+        md_lines.append("## Artilheiros — Brasileirão 2026\n")
+        md_lines.append("| # | Jogador | Time | Gols | Assists | Jogos |")
+        md_lines.append("|---|---------|------|------|---------|-------|")
+        for i, a in enumerate(fdo_artilheiros[:10], 1):
+            md_lines.append(
+                f"| {i} | {a['jogador']} | {a['time']} | **{a['gols']}** "
+                f"| {a.get('assists', 0)} | {a.get('jogos', 0)} |"
+            )
+        md_lines.append("")
     
     # Dicas Cartola
     md_lines.append("---\n")
@@ -224,8 +520,30 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
         md_lines.append(f"- **{j['mandante_abrev']} x {j['visitante_abrev']}** — {total_xg:.2f} xG total")
     md_lines.append("")
     
+    # Seção de calibração do modelo (transparência)
+    if calibracao and calibracao.get("jogos", 0) > 0:
+        md_lines.append("---\n")
+        md_lines.append("## Calibração do Modelo\n")
+        md_lines.append(
+            f"Nosso modelo V4 foi avaliado em **{calibracao['jogos']}** jogos reais "
+            f"do campeonato atual:\n"
+        )
+        md_lines.append(f"- **Log-Loss:** {calibracao['log_loss']:.4f} ({calibracao['nota']})")
+        if calibracao.get("brier_score"):
+            md_lines.append(f"- **Brier Score:** {calibracao['brier_score']:.4f}")
+        if calibracao.get("acertos_exatos") is not None:
+            md_lines.append(
+                f"- **Acertos exatos:** {calibracao['acertos_exatos']}/{calibracao['jogos']}"
+            )
+        if calibracao.get("acertos_ved") is not None:
+            md_lines.append(
+                f"- **Acertos V/E/D:** {calibracao['acertos_ved']}/{calibracao['jogos']} "
+                f"({100*calibracao['acertos_ved']/calibracao['jogos']:.0f}%)"
+            )
+        md_lines.append("")
+    
     md_lines.append(
-        "*As projeções são resultado de modelos estatísticos (Poisson, Monte Carlo) "
+        "*As projeções são resultado de modelos estatísticos (Poisson + Dixon-Coles V4, Monte Carlo) "
         "com fins informativos e educacionais. Não representam garantia de resultado.*"
     )
     
@@ -237,10 +555,12 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
         "date": date_str,
         "excerpt": excerpt,
         "content": content,
-        "tags": ["Brasileirão", f"Rodada {rodada}", "Previsão", "xG"],
+        "tags": ["Brasileirão", f"Rodada {rodada}", "Previsão", "xG", "Dixon-Coles"],
         "readTime": max(5, len(jogos_analise)),
         "rodada": rodada,
         "jogos": jogos_analise,
+        "calibracao": calibracao,
+        "modelo": "V4_Dixon-Coles",
         "geradoEm": datetime.now().isoformat(),
         "tipo": "analise_rodada",
     }

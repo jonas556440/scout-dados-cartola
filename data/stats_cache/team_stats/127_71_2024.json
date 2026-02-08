@@ -1,0 +1,94 @@
+{
+  "team_id": 127,
+  "team_name": "Flamengo",
+  "league": "Serie A",
+  "season": 2024,
+  "forma": "WWDLDWWWDWWLWWDLWWWLDLWLDLWWLWDWDWDWWD",
+  "jogos": {
+    "total": 38,
+    "casa": 19,
+    "fora": 19
+  },
+  "vitorias": {
+    "total": 20,
+    "casa": 11,
+    "fora": 9
+  },
+  "empates": {
+    "total": 10,
+    "casa": 5,
+    "fora": 5
+  },
+  "derrotas": {
+    "total": 8,
+    "casa": 3,
+    "fora": 5
+  },
+  "gols_pro": {
+    "total": 61,
+    "media": "1.6",
+    "casa": 30,
+    "fora": 31,
+    "media_casa": "1.6",
+    "media_fora": "1.6"
+  },
+  "gols_contra": {
+    "total": 42,
+    "media": "1.1",
+    "casa": 21,
+    "fora": 21,
+    "media_casa": "1.1",
+    "media_fora": "1.1"
+  },
+  "gols_por_minuto": {
+    "0-15": {
+      "total": 3,
+      "pct": "4.92%"
+    },
+    "16-30": {
+      "total": 12,
+      "pct": "19.67%"
+    },
+    "31-45": {
+      "total": 10,
+      "pct": "16.39%"
+    },
+    "46-60": {
+      "total": 10,
+      "pct": "16.39%"
+    },
+    "61-75": {
+      "total": 10,
+      "pct": "16.39%"
+    },
+    "76-90": {
+      "total": 10,
+      "pct": "16.39%"
+    },
+    "91-105": {
+      "total": 6,
+      "pct": "9.84%"
+    }
+  },
+  "clean_sheets": {
+    "total": 10,
+    "casa": 4,
+    "fora": 6
+  },
+  "penaltis": {
+    "marcados": 9,
+    "perdidos": 0,
+    "total": 9,
+    "pct": "100.00%"
+  },
+  "maior_sequencia": {
+    "vitorias": 3,
+    "derrotas": 1,
+    "invicto": 1
+  },
+  "maior_vitoria_casa": "4-2",
+  "maior_vitoria_fora": "1-6",
+  "maior_derrota_casa": "0-2",
+  "maior_derrota_fora": "4-1",
+  "_cached_at": "2026-02-08T17:57:10.944402"
+}

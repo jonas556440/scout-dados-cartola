@@ -164,8 +164,9 @@ const Scouts = () => {
             ) : (
               <div className="glass-card p-12 text-center text-muted-foreground">
                 <Star className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                <p>Nenhum scout disponível</p>
-                <p className="text-xs mt-1">Os scouts são atualizados após cada rodada</p>
+                <p className="font-semibold">Nenhum scout disponível para esta rodada</p>
+                <p className="text-sm mt-2">Os scouts são atualizados após o encerramento de cada rodada do Brasileirão.</p>
+                <p className="text-xs mt-1 text-muted-foreground/70">Volte após os jogos para conferir os destaques.</p>
               </div>
             )}
           </motion.div>

@@ -1,0 +1,98 @@
+{
+  "pair": "1062-1198",
+  "team1_id": 1062,
+  "team2_id": 1198,
+  "team1_name": "Atletico-MG",
+  "team2_name": "remo",
+  "total": 4,
+  "stats": {
+    "team1_wins": 2,
+    "team2_wins": 0,
+    "draws": 0
+  },
+  "ultimos_5": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "remo",
+      "mandante_id": 1198,
+      "visitante": "Atletico-MG",
+      "visitante_id": 1062,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-11",
+      "liga": "Serie A",
+      "mandante": "Atletico-MG",
+      "mandante_id": 1062,
+      "visitante": "remo",
+      "visitante_id": 1198,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2021-06-10",
+      "liga": "Copa Do Brasil",
+      "mandante": "Atletico-MG",
+      "mandante_id": 1062,
+      "visitante": "remo",
+      "visitante_id": 1198,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2021-06-02",
+      "liga": "Copa Do Brasil",
+      "mandante": "remo",
+      "mandante_id": 1198,
+      "visitante": "Atletico-MG",
+      "visitante_id": 1062,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    }
+  ],
+  "todos": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "remo",
+      "mandante_id": 1198,
+      "visitante": "Atletico-MG",
+      "visitante_id": 1062,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-11",
+      "liga": "Serie A",
+      "mandante": "Atletico-MG",
+      "mandante_id": 1062,
+      "visitante": "remo",
+      "visitante_id": 1198,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2021-06-10",
+      "liga": "Copa Do Brasil",
+      "mandante": "Atletico-MG",
+      "mandante_id": 1062,
+      "visitante": "remo",
+      "visitante_id": 1198,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2021-06-02",
+      "liga": "Copa Do Brasil",
+      "mandante": "remo",
+      "mandante_id": 1198,
+      "visitante": "Atletico-MG",
+      "visitante_id": 1062,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    }
+  ],
+  "_cached_at": "2026-02-08T18:10:21.914195"
+}

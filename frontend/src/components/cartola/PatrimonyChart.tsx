@@ -10,6 +10,16 @@ interface PatrimonyChartProps {
 }
 
 export function PatrimonyChart({ data, className }: PatrimonyChartProps) {
+  // Defender contra dados inválidos
+  if (!data || data.length === 0) {
+    return (
+      <div className={cn("chart-container p-6 text-center text-muted-foreground", className)}>
+        <Wallet className="w-8 h-8 mx-auto mb-2 opacity-30" />
+        <p className="text-sm">Dados de patrimônio indisponíveis</p>
+      </div>
+    );
+  }
+
   const chartData = data.map(p => ({
     rodada: `R${p.rodada}`,
     cartoletas: p.cartoletas,

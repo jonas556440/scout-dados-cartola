@@ -24,7 +24,16 @@ import TimePage from "./pages/TimePage";
 import JogoPage from "./pages/JogoPage";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 2,
+      retryDelay: 1000,
+      staleTime: 1000 * 60 * 5, // 5 min default
+    },
+  },
+});
 
 const App = () => (
   <HelmetProvider>

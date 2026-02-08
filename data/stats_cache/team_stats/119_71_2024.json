@@ -1,0 +1,94 @@
+{
+  "team_id": 119,
+  "team_name": "Internacional",
+  "league": "Serie A",
+  "season": 2024,
+  "forma": "WWLDWDLWWLDDLLDDDWLWDWWWWDWDWWDWWWWLLL",
+  "jogos": {
+    "total": 38,
+    "casa": 19,
+    "fora": 19
+  },
+  "vitorias": {
+    "total": 18,
+    "casa": 11,
+    "fora": 7
+  },
+  "empates": {
+    "total": 11,
+    "casa": 5,
+    "fora": 6
+  },
+  "derrotas": {
+    "total": 9,
+    "casa": 3,
+    "fora": 6
+  },
+  "gols_pro": {
+    "total": 53,
+    "media": "1.4",
+    "casa": 30,
+    "fora": 23,
+    "media_casa": "1.6",
+    "media_fora": "1.2"
+  },
+  "gols_contra": {
+    "total": 36,
+    "media": "0.9",
+    "casa": 15,
+    "fora": 21,
+    "media_casa": "0.8",
+    "media_fora": "1.1"
+  },
+  "gols_por_minuto": {
+    "0-15": {
+      "total": 4,
+      "pct": "7.69%"
+    },
+    "16-30": {
+      "total": 4,
+      "pct": "7.69%"
+    },
+    "31-45": {
+      "total": 11,
+      "pct": "21.15%"
+    },
+    "46-60": {
+      "total": 8,
+      "pct": "15.38%"
+    },
+    "61-75": {
+      "total": 9,
+      "pct": "17.31%"
+    },
+    "76-90": {
+      "total": 11,
+      "pct": "21.15%"
+    },
+    "91-105": {
+      "total": 5,
+      "pct": "9.62%"
+    }
+  },
+  "clean_sheets": {
+    "total": 12,
+    "casa": 7,
+    "fora": 5
+  },
+  "penaltis": {
+    "marcados": 4,
+    "perdidos": 0,
+    "total": 4,
+    "pct": "100.00%"
+  },
+  "maior_sequencia": {
+    "vitorias": 4,
+    "derrotas": 2,
+    "invicto": 3
+  },
+  "maior_vitoria_casa": "4-1",
+  "maior_vitoria_fora": "1-3",
+  "maior_derrota_casa": "1-2",
+  "maior_derrota_fora": "3-0",
+  "_cached_at": "2026-02-08T18:09:01.330847"
+}

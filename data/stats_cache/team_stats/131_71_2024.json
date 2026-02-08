@@ -1,0 +1,94 @@
+{
+  "team_id": 131,
+  "team_name": "Corinthians",
+  "league": "Serie A",
+  "season": 2024,
+  "forma": "DLLWDLLDDLDDLWLLWWDLDDDLWLWLDWWWWWWWWW",
+  "jogos": {
+    "total": 38,
+    "casa": 19,
+    "fora": 19
+  },
+  "vitorias": {
+    "total": 15,
+    "casa": 10,
+    "fora": 5
+  },
+  "empates": {
+    "total": 11,
+    "casa": 8,
+    "fora": 3
+  },
+  "derrotas": {
+    "total": 12,
+    "casa": 1,
+    "fora": 11
+  },
+  "gols_pro": {
+    "total": 54,
+    "media": "1.4",
+    "casa": 37,
+    "fora": 17,
+    "media_casa": "1.9",
+    "media_fora": "0.9"
+  },
+  "gols_contra": {
+    "total": 45,
+    "media": "1.2",
+    "casa": 18,
+    "fora": 27,
+    "media_casa": "0.9",
+    "media_fora": "1.4"
+  },
+  "gols_por_minuto": {
+    "0-15": {
+      "total": 7,
+      "pct": "12.50%"
+    },
+    "16-30": {
+      "total": 7,
+      "pct": "12.50%"
+    },
+    "31-45": {
+      "total": 8,
+      "pct": "14.29%"
+    },
+    "46-60": {
+      "total": 12,
+      "pct": "21.43%"
+    },
+    "61-75": {
+      "total": 10,
+      "pct": "17.86%"
+    },
+    "76-90": {
+      "total": 7,
+      "pct": "12.50%"
+    },
+    "91-105": {
+      "total": 5,
+      "pct": "8.93%"
+    }
+  },
+  "clean_sheets": {
+    "total": 10,
+    "casa": 6,
+    "fora": 4
+  },
+  "penaltis": {
+    "marcados": 5,
+    "perdidos": 0,
+    "total": 5,
+    "pct": "100.00%"
+  },
+  "maior_sequencia": {
+    "vitorias": 2,
+    "derrotas": 2,
+    "invicto": 3
+  },
+  "maior_vitoria_casa": "5-2",
+  "maior_vitoria_fora": "0-3",
+  "maior_derrota_casa": "0-1",
+  "maior_derrota_fora": "3-0",
+  "_cached_at": "2026-02-08T18:08:47.292453"
+}

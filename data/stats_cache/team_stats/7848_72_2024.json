@@ -1,0 +1,94 @@
+{
+  "team_id": 7848,
+  "team_name": "Mirassol",
+  "league": "Serie B",
+  "season": 2024,
+  "forma": "LWDWDWLWWLLDDWLWDWWWWLDWLDLWDWLWWWWDDW",
+  "jogos": {
+    "total": 38,
+    "casa": 19,
+    "fora": 19
+  },
+  "vitorias": {
+    "total": 19,
+    "casa": 14,
+    "fora": 5
+  },
+  "empates": {
+    "total": 10,
+    "casa": 4,
+    "fora": 6
+  },
+  "derrotas": {
+    "total": 9,
+    "casa": 1,
+    "fora": 8
+  },
+  "gols_pro": {
+    "total": 42,
+    "media": "1.1",
+    "casa": 27,
+    "fora": 15,
+    "media_casa": "1.4",
+    "media_fora": "0.8"
+  },
+  "gols_contra": {
+    "total": 26,
+    "media": "0.7",
+    "casa": 6,
+    "fora": 20,
+    "media_casa": "0.3",
+    "media_fora": "1.1"
+  },
+  "gols_por_minuto": {
+    "0-15": {
+      "total": 4,
+      "pct": "9.76%"
+    },
+    "16-30": {
+      "total": 9,
+      "pct": "21.95%"
+    },
+    "31-45": {
+      "total": 4,
+      "pct": "9.76%"
+    },
+    "46-60": {
+      "total": 5,
+      "pct": "12.20%"
+    },
+    "61-75": {
+      "total": 6,
+      "pct": "14.63%"
+    },
+    "76-90": {
+      "total": 10,
+      "pct": "24.39%"
+    },
+    "91-105": {
+      "total": 3,
+      "pct": "7.32%"
+    }
+  },
+  "clean_sheets": {
+    "total": 23,
+    "casa": 15,
+    "fora": 8
+  },
+  "penaltis": {
+    "marcados": 4,
+    "perdidos": 0,
+    "total": 4,
+    "pct": "100.00%"
+  },
+  "maior_sequencia": {
+    "vitorias": 4,
+    "derrotas": 2,
+    "invicto": 2
+  },
+  "maior_vitoria_casa": "4-1",
+  "maior_vitoria_fora": "1-2",
+  "maior_derrota_casa": "1-2",
+  "maior_derrota_fora": "4-2",
+  "_cached_at": "2026-02-08T18:13:26.897619"
+}

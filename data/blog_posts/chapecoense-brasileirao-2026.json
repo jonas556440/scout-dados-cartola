@@ -1,0 +1,17 @@
+{
+  "slug": "chapecoense-brasileirao-2026",
+  "title": "Chapecoense no Brasileirão 2026: Probabilidades e Análise",
+  "date": "2026-02-08",
+  "excerpt": "Análise completa do Chapecoense na rodada 3 do Brasileirão 2026. Atualmente em 7º lugar com 4 pontos. Probabilidade de título: 0.4%.",
+  "content": "## Chapecoense — Situação Atual\n\nNa **rodada 3**, o Chapecoense ocupa a **7ª posição** com **4 pontos** em 2 jogos (1V 1E 0D), na briga por Sul-Americana.\n\n- Gols pró: **3** | Gols contra: **1** | Saldo: **+2**\n- Forma recente: **VE**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.4%** |\n| 🌎 Libertadores (G4) | **3.6%** |\n| 🏅 Sul-Americana | **32.6%** |\n| ⚠️ Rebaixamento | **31.0%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | CFC | Casa | **1x2** | 55.7% | 1.96 |\n| 4 | BAH | Fora | **1x0** | 12.1% | 1.0 |\n| 5 | SAO | Fora | **3x0** | 7.6% | 0.85 |\n| 6 | GRE | Casa | **1x1** | 42.4% | 1.83 |\n| 7 | COR | Casa | **1x0** | 51.6% | 2.1 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "tags": [
+    "Chapecoense",
+    "Brasileirão 2026",
+    "Probabilidades"
+  ],
+  "readTime": 4,
+  "rodada": 3,
+  "tipo": "analise_time",
+  "time": "chapecoense",
+  "geradoEm": "2026-02-08T06:01:45.529646"
+}

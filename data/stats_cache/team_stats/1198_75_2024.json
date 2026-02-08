@@ -1,0 +1,94 @@
+{
+  "team_id": 1198,
+  "team_name": "remo",
+  "league": "Serie C",
+  "season": 2024,
+  "forma": "LLLWDLWLWLWWLWLWLWDWDDDWL",
+  "jogos": {
+    "total": 25,
+    "casa": 12,
+    "fora": 13
+  },
+  "vitorias": {
+    "total": 10,
+    "casa": 8,
+    "fora": 2
+  },
+  "empates": {
+    "total": 5,
+    "casa": 2,
+    "fora": 3
+  },
+  "derrotas": {
+    "total": 10,
+    "casa": 2,
+    "fora": 8
+  },
+  "gols_pro": {
+    "total": 27,
+    "media": "1.1",
+    "casa": 14,
+    "fora": 13,
+    "media_casa": "1.2",
+    "media_fora": "1.0"
+  },
+  "gols_contra": {
+    "total": 30,
+    "media": "1.2",
+    "casa": 6,
+    "fora": 24,
+    "media_casa": "0.5",
+    "media_fora": "1.8"
+  },
+  "gols_por_minuto": {
+    "0-15": {
+      "total": 2,
+      "pct": "7.14%"
+    },
+    "16-30": {
+      "total": 3,
+      "pct": "10.71%"
+    },
+    "31-45": {
+      "total": 4,
+      "pct": "14.29%"
+    },
+    "46-60": {
+      "total": 7,
+      "pct": "25.00%"
+    },
+    "61-75": {
+      "total": 3,
+      "pct": "10.71%"
+    },
+    "76-90": {
+      "total": 7,
+      "pct": "25.00%"
+    },
+    "91-105": {
+      "total": 2,
+      "pct": "7.14%"
+    }
+  },
+  "clean_sheets": {
+    "total": 8,
+    "casa": 7,
+    "fora": 1
+  },
+  "penaltis": {
+    "marcados": 1,
+    "perdidos": 0,
+    "total": 1,
+    "pct": "100.00%"
+  },
+  "maior_sequencia": {
+    "vitorias": 2,
+    "derrotas": 3,
+    "invicto": 3
+  },
+  "maior_vitoria_casa": "3-0",
+  "maior_vitoria_fora": "2-4",
+  "maior_derrota_casa": "1-2",
+  "maior_derrota_fora": "4-1",
+  "_cached_at": "2026-02-08T18:13:05.909265"
+}

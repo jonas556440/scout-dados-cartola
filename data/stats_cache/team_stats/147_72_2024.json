@@ -1,0 +1,94 @@
+{
+  "team_id": 147,
+  "team_name": "Coritiba",
+  "league": "Serie B",
+  "season": 2024,
+  "forma": "DWLLWDWLWDWLDDLLLWLDWWWLDLWWDLWWLWLLLL",
+  "jogos": {
+    "total": 38,
+    "casa": 19,
+    "fora": 19
+  },
+  "vitorias": {
+    "total": 14,
+    "casa": 10,
+    "fora": 4
+  },
+  "empates": {
+    "total": 8,
+    "casa": 5,
+    "fora": 3
+  },
+  "derrotas": {
+    "total": 16,
+    "casa": 4,
+    "fora": 12
+  },
+  "gols_pro": {
+    "total": 41,
+    "media": "1.1",
+    "casa": 26,
+    "fora": 15,
+    "media_casa": "1.4",
+    "media_fora": "0.8"
+  },
+  "gols_contra": {
+    "total": 44,
+    "media": "1.2",
+    "casa": 17,
+    "fora": 27,
+    "media_casa": "0.9",
+    "media_fora": "1.4"
+  },
+  "gols_por_minuto": {
+    "0-15": {
+      "total": 5,
+      "pct": "11.90%"
+    },
+    "16-30": {
+      "total": 8,
+      "pct": "19.05%"
+    },
+    "31-45": {
+      "total": 4,
+      "pct": "9.52%"
+    },
+    "46-60": {
+      "total": 11,
+      "pct": "26.19%"
+    },
+    "61-75": {
+      "total": 7,
+      "pct": "16.67%"
+    },
+    "76-90": {
+      "total": 5,
+      "pct": "11.90%"
+    },
+    "91-105": {
+      "total": 2,
+      "pct": "4.76%"
+    }
+  },
+  "clean_sheets": {
+    "total": 12,
+    "casa": 7,
+    "fora": 5
+  },
+  "penaltis": {
+    "marcados": 6,
+    "perdidos": 0,
+    "total": 6,
+    "pct": "100.00%"
+  },
+  "maior_sequencia": {
+    "vitorias": 3,
+    "derrotas": 3,
+    "invicto": 2
+  },
+  "maior_vitoria_casa": "3-0",
+  "maior_vitoria_fora": "0-3",
+  "maior_derrota_casa": "1-3",
+  "maior_derrota_fora": "4-0",
+  "_cached_at": "2026-02-08T18:13:19.894543"
+}

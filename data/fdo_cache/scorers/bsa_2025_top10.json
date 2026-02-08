@@ -1,0 +1,115 @@
+{
+  "_data": [
+    {
+      "jogador": "Kaio Jorge",
+      "jogador_id": 91310,
+      "time": "Cruzeiro",
+      "time_id": 1771,
+      "gols": 21,
+      "assists": 7,
+      "penaltis": 1,
+      "jogos": 34,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Giorgian De Arrascaeta",
+      "jogador_id": 1244,
+      "time": "Flamengo",
+      "time_id": 1783,
+      "gols": 18,
+      "assists": 14,
+      "penaltis": 2,
+      "jogos": 33,
+      "nacionalidade": "Uruguay"
+    },
+    {
+      "jogador": "Vítor Roque",
+      "jogador_id": 181439,
+      "time": "Palmeiras",
+      "time_id": 1769,
+      "gols": 16,
+      "assists": 3,
+      "penaltis": 1,
+      "jogos": 33,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Pablo Vegetti",
+      "jogador_id": 59859,
+      "time": "Vasco da Gama",
+      "time_id": 1780,
+      "gols": 14,
+      "assists": 1,
+      "penaltis": 3,
+      "jogos": 36,
+      "nacionalidade": "Argentina"
+    },
+    {
+      "jogador": "Rayan",
+      "jogador_id": 203356,
+      "time": "Vasco da Gama",
+      "time_id": 1780,
+      "gols": 14,
+      "assists": 1,
+      "penaltis": 2,
+      "jogos": 35,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Reinaldo",
+      "jogador_id": 1340,
+      "time": "Mirassol",
+      "time_id": 4364,
+      "gols": 13,
+      "assists": 6,
+      "penaltis": 6,
+      "jogos": 34,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "José Manuel López",
+      "jogador_id": 170698,
+      "time": "Palmeiras",
+      "time_id": 1769,
+      "gols": 12,
+      "assists": 2,
+      "penaltis": 2,
+      "jogos": 35,
+      "nacionalidade": "Argentina"
+    },
+    {
+      "jogador": "Pedro",
+      "jogador_id": 1077,
+      "time": "Flamengo",
+      "time_id": 1783,
+      "gols": 12,
+      "assists": 6,
+      "penaltis": 1,
+      "jogos": 23,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Carlos Vinícius",
+      "jogador_id": 37833,
+      "time": "Grêmio",
+      "time_id": 1767,
+      "gols": 12,
+      "assists": null,
+      "penaltis": 3,
+      "jogos": 14,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Pedro Raul",
+      "jogador_id": 40134,
+      "time": "Ceará",
+      "time_id": 1837,
+      "gols": 11,
+      "assists": 1,
+      "penaltis": 1,
+      "jogos": 34,
+      "nacionalidade": "Brazil"
+    }
+  ],
+  "_cached_at": "2026-02-08T18:29:11.706840"
+}

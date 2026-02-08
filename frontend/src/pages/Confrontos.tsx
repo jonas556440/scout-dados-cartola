@@ -66,6 +66,7 @@ const Confrontos = () => {
   if (error) {
     return (
       <MainLayout>
+        <SEO title="Confrontos" description="Análise de confrontos da rodada com previsão de placares (Poisson + xG)." path="/confrontos" />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -80,6 +81,7 @@ const Confrontos = () => {
   if (isLoading) {
     return (
       <MainLayout>
+        <SEO title="Confrontos" description="Análise de confrontos da rodada com previsão de placares (Poisson + xG)." path="/confrontos" />
         <div className="space-y-6">
           <div className="flex items-center gap-2">
             <Loader2 className="h-6 w-6 animate-spin" />

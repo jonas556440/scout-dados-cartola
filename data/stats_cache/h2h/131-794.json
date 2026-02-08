@@ -1,0 +1,288 @@
+{
+  "pair": "131-794",
+  "team1_id": 131,
+  "team2_id": 794,
+  "team1_name": "Corinthians",
+  "team2_name": "RB Bragantino",
+  "total": 22,
+  "stats": {
+    "team1_wins": 6,
+    "team2_wins": 10,
+    "draws": 4
+  },
+  "ultimos_5": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-12",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-01-15",
+      "liga": "Paulista - A1",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 3,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2025-11-05",
+      "liga": "Serie A",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2025-07-13",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    }
+  ],
+  "todos": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-12",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-01-15",
+      "liga": "Paulista - A1",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 3,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2025-11-05",
+      "liga": "Serie A",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2025-07-13",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2025-01-16",
+      "liga": "Paulista - A1",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2024-08-21",
+      "liga": "CONMEBOL Sudamericana",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2024-08-14",
+      "liga": "CONMEBOL Sudamericana",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2024-08-11",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2024-04-20",
+      "liga": "Serie A",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2023-11-05",
+      "liga": "Serie A",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2023-07-02",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2023-01-15",
+      "liga": "Paulista - A1",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2022-08-30",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2022-05-08",
+      "liga": "Serie A",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2022-02-27",
+      "liga": "Paulista - A1",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2021-10-02",
+      "liga": "Serie A",
+      "mandante": "RB Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 2,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2021-06-16",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "RB Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2021-02-28",
+      "liga": "Paulista - A1",
+      "mandante": "Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2021-01-25",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Bragantino",
+      "visitante_id": 794,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2020-10-04",
+      "liga": "Serie A",
+      "mandante": "Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2020-07-31",
+      "liga": "Paulista - A1",
+      "mandante": "Bragantino",
+      "mandante_id": 794,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    }
+  ],
+  "_cached_at": "2026-02-08T18:10:56.894220"
+}

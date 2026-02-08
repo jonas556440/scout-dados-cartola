@@ -155,29 +155,47 @@ const Historico = () => {
   const isLoading = loadingRodadas || loadingStatus;
   const error = errorRodadas;
 
+  // Extrair primitivos diretamente — sem useMemo (primitivos são estáveis por natureza)
+  const rodadaAtual = dashboardData?.mercado?.rodadaAtual ?? 1;
+  const patrimonioAtual = dashboardData?.patrimonio ?? 100;
+  const rodadas = historicoRodadas ?? [];
+  const temHistorico = rodadas.length > 0;
+
   // Gerar dados de patrimônio baseado no histórico real ou dados do dashboard
   const patrimonyData = useMemo(() => {
-    const patrimonioAtual = dashboardData?.patrimonio ?? 100;
-    const rodadaAtual = dashboardData?.mercado?.rodadaAtual ?? 1;
-    
-    // Se temos histórico real, usar ele
-    if (historicoRodadas && historicoRodadas.length > 0) {
-      return historicoRodadas.map((item, index) => ({
+    if (rodadas.length > 0) {
+      const sortedHistory = [...rodadas].sort((a, b) => a.rodada - b.rodada);
+      return sortedHistory.map((item, index) => ({
         rodada: item.rodada,
-        patrimonio: 100 + (index * 2), // Estimativa simples
+        cartoletas: 100 + (index * 2), 
+        pontuacaoTotal: 0,
+        variacao: 0,
       }));
     }
     
-    // Senão, gerar dados baseado na rodada atual
     const data = [];
-    for (let i = 1; i <= rodadaAtual; i++) {
-      data.push({
-        rodada: i,
-        patrimonio: i === rodadaAtual ? patrimonioAtual : 100 + ((i - 1) * 2),
-      });
+    const maxRodadas = Math.max(1, rodadaAtual);
+    for (let i = 1; i <= maxRodadas; i++) {
+      const valor = i === maxRodadas ? patrimonioAtual : 100 + ((i - 1) * 2);
+      data.push({ rodada: i, cartoletas: valor, pontuacaoTotal: 0, variacao: 0 });
     }
     return data;
-  }, [historicoRodadas, dashboardData]);
+  }, [rodadas, patrimonioAtual, rodadaAtual]);
+
+  // Construir timeline completa (DEVE ficar acima dos early returns — regra de hooks)
+  const timelineCompleta = useMemo(() => {
+    const items = [];
+    for (let r = 1; r <= rodadaAtual; r++) {
+      const historicoItem = rodadas.find(h => h.rodada === r);
+      items.push({
+        rodada: r,
+        temDados: !!historicoItem,
+        dados: historicoItem || null,
+        isAtual: r === rodadaAtual,
+      });
+    }
+    return items.reverse();
+  }, [rodadas, rodadaAtual]);
 
   if (isLoading) {
     return (
@@ -207,26 +225,6 @@ const Historico = () => {
       </MainLayout>
     );
   }
-
-  const rodadaAtual = dashboardData?.mercado?.rodadaAtual ?? 1;
-  const patrimonioAtual = dashboardData?.patrimonio ?? 100;
-  const temHistorico = historicoRodadas && historicoRodadas.length > 0;
-
-  // Construir timeline completa: todas as rodadas de 1 até a atual, 
-  // marcando quais têm dados e quais não
-  const timelineCompleta = useMemo(() => {
-    const items = [];
-    for (let r = 1; r <= rodadaAtual; r++) {
-      const historicoItem = historicoRodadas?.find(h => h.rodada === r);
-      items.push({
-        rodada: r,
-        temDados: !!historicoItem,
-        dados: historicoItem || null,
-        isAtual: r === rodadaAtual,
-      });
-    }
-    return items.reverse(); // Mais recente primeiro
-  }, [historicoRodadas, rodadaAtual]);
 
   return (
     <MainLayout>

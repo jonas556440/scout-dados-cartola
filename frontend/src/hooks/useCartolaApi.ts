@@ -34,9 +34,7 @@ export function useDashboard() {
         queryFn: () => cartolaApi.getDashboard() as Promise<DashboardStats>,
         staleTime: 1000 * 60 * 5, // 5 minutos
         gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
-        retry: 2,
-        retryDelay: 1000,
-        initialData: () => {
+        placeholderData: () => {
             try {
                 return cacheUtils.dashboard.restoreData();
             } catch {
@@ -60,9 +58,7 @@ export function useStatus() {
         queryFn: () => cartolaApi.getStatus() as Promise<MercadoStatus>,
         staleTime: 1000 * 60, // 1 minuto (status muda rápido)
         gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
-        retry: 2,
-        retryDelay: 1000,
-        initialData: () => {
+        placeholderData: () => {
             try {
                 return cacheUtils.status.restoreData();
             } catch {
@@ -86,9 +82,7 @@ export function useAtletas(params?: UseAtletasParams) {
         queryFn: () => cartolaApi.getAtletas(params) as Promise<Player[]>,
         staleTime: 1000 * 60 * 5, // 5 minutos
         gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
-        retry: 2,
-        retryDelay: 1000,
-        initialData: () => {
+        placeholderData: () => {
             try {
                 return cacheUtils.mercado.restoreData();
             } catch {
@@ -106,9 +100,7 @@ export function useConfrontos(rodada?: number) {
         queryFn: () => cartolaApi.getConfrontos(rodada) as Promise<Match[]>,
         staleTime: 1000 * 60 * 10, // 10 minutos
         gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
-        retry: 2,
-        retryDelay: 1000,
-        initialData: () => {
+        placeholderData: () => {
             try {
                 return cacheUtils.confrontos.restoreData();
             } catch {
@@ -126,9 +118,7 @@ export function useConfrontosAnalise(rodada?: number) {
         queryFn: () => cartolaApi.getConfrontosAnalise(rodada) as Promise<ConfrontosAnaliseResponse>,
         staleTime: 1000 * 60 * 10, // 10 minutos
         gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
-        retry: 2,
-        retryDelay: 1000,
-        initialData: () => {
+        placeholderData: () => {
             try {
                 return cacheUtils.confrontos.restoreData();
             } catch {
@@ -148,9 +138,7 @@ export function useForcaTimes(rodada?: number) {
         queryFn: () => cartolaApi.getForcaTimes(rodada) as Promise<ForcaTimesResponse>,
         staleTime: 1000 * 60 * 30, // 30 minutos (muda pouco)
         gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
-        retry: 2,
-        retryDelay: 1000,
-        initialData: () => {
+        placeholderData: () => {
             try {
                 return cacheUtils.confrontos.restoreData();
             } catch {
@@ -176,10 +164,8 @@ export function useEscalacao(esquema: string = '4-4-2', cartoletas: number = 100
         queryFn: () => cartolaApi.gerarEscalacao(esquema, cartoletas) as Promise<EscalacaoResponse>,
         staleTime: 1000 * 60 * 5, // 5 minutos
         gcTime: 24 * 60 * 60 * 1000, // 24h para cache persist
-        retry: 2,
-        retryDelay: 1000,
         enabled: true, // Sempre buscar quando mudar esquema/cartoletas
-        initialData: () => {
+        placeholderData: () => {
             try {
                 return cacheUtils.escalacao.restoreData();
             } catch {

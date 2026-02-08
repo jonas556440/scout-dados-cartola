@@ -1,0 +1,65 @@
+{
+  "team_id": 1198,
+  "team_name": "remo",
+  "league": "Serie B",
+  "season": 2024,
+  "forma": null,
+  "jogos": {
+    "total": 0,
+    "casa": 0,
+    "fora": 0
+  },
+  "vitorias": {
+    "total": 0,
+    "casa": 0,
+    "fora": 0
+  },
+  "empates": {
+    "total": 0,
+    "casa": 0,
+    "fora": 0
+  },
+  "derrotas": {
+    "total": 0,
+    "casa": 0,
+    "fora": 0
+  },
+  "gols_pro": {
+    "total": 0,
+    "media": "0.0",
+    "casa": 0,
+    "fora": 0,
+    "media_casa": "0.0",
+    "media_fora": "0.0"
+  },
+  "gols_contra": {
+    "total": 0,
+    "media": "0.0",
+    "casa": 0,
+    "fora": 0,
+    "media_casa": "0.0",
+    "media_fora": "0.0"
+  },
+  "gols_por_minuto": {},
+  "clean_sheets": {
+    "total": 0,
+    "casa": 0,
+    "fora": 0
+  },
+  "penaltis": {
+    "marcados": 0,
+    "perdidos": 0,
+    "total": 0,
+    "pct": "0%"
+  },
+  "maior_sequencia": {
+    "vitorias": 0,
+    "derrotas": 0,
+    "invicto": 0
+  },
+  "maior_vitoria_casa": null,
+  "maior_vitoria_fora": null,
+  "maior_derrota_casa": null,
+  "maior_derrota_fora": null,
+  "_cached_at": "2026-02-08T18:12:59.200074"
+}
