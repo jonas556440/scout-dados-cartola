@@ -124,7 +124,7 @@ const Confrontos = () => {
               </p>
               {confrontos && (
                 <span className="text-xs px-2 py-1 rounded-full bg-success/20 text-success font-semibold">
-                  🔴 AO VIVO - API REAL
+                  ✅ Dados atualizados
                 </span>
               )}
             </div>

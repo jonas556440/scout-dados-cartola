@@ -2,260 +2,482 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://scoutdados.com.br/</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/confrontos</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/dashboard</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/escalacao</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/mercado</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/scouts</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/estatisticas</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/historico</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/blog</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/sobre</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/privacidade</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/termos</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/blog/monte-carlo-futebol</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/blog/xg-expected-goals</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/blog/classificacao-brasileirao-2026</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/blog/guia-cartola-fc-2026</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/blog/modelo-poisson-previsao-placares</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://scoutdados.com.br/blog/vasco-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/mirassol-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/red-bull-bragantino-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/coritiba-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/palmeiras-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/corinthians-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/cruzeiro-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/botafogo-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/athletico-pr-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/chapecoense-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/atletico-mg-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/gremio-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/internacional-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/santos-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/fluminense-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/remo-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/vitoria-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/sao-paulo-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/flamengo-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/blog/bahia-brasileirao</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://scoutdados.com.br/blog/analise-rodada-3-brasileirao-2026</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/atletico-mg</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/athletico-pr</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/bahia</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/botafogo</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/corinthians</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/cruzeiro</loc>
-    <lastmod>2026-02-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://scoutdados.com.br/brasileirao/time/cuiaba</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/flamengo</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/fluminense</loc>
-    <lastmod>2026-02-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://scoutdados.com.br/brasileirao/time/fortaleza</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/gremio</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/internacional</loc>
-    <lastmod>2026-02-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://scoutdados.com.br/brasileirao/time/juventude</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/mirassol</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/palmeiras</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/santos</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/sao-paulo</loc>
-    <lastmod>2026-02-07</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://scoutdados.com.br/brasileirao/time/sport</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/vasco</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/vitoria</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/red-bull-bragantino</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/chapecoense</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/coritiba</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://scoutdados.com.br/brasileirao/time/remo</loc>
-    <lastmod>2026-02-07</lastmod>
+    <lastmod>2026-02-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/flamengo-x-mirassol-2026-02-24</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/sao-paulo-x-gremio-2026-02-11</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/clube-do-remo-x-internacional-2026-02-25</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/santos-x-vasco-da-gama-2026-02-26</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/mineiro-x-clube-do-remo-2026-02-11</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/botafogo-x-vitoria-2026-02-24</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/palmeiras-x-fluminense-2026-02-25</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/cruzeiro-x-corinthians-2026-02-25</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/vitoria-x-flamengo-2026-02-10</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/vasco-da-gama-x-bahia-2026-02-11</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/bragantino-x-paranaense-2026-02-25</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/corinthians-x-bragantino-2026-02-12</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/gremio-x-mineiro-2026-02-25</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/chapecoense-x-coritiba-2026-02-11</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/mirassol-x-cruzeiro-2026-02-11</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/fluminense-x-botafogo-2026-02-12</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/paranaense-x-corinthians-2026-02-19</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/bahia-x-chapecoense-2026-02-24</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/internacional-x-palmeiras-2026-02-12</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/coritiba-x-sao-paulo-2026-02-26</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://scoutdados.com.br/brasileirao/jogo/paranaense-x-santos-2026-02-12</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

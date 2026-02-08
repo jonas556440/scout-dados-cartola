@@ -546,6 +546,36 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
             )
         md_lines.append("")
     
+    # Links internos
+    md_lines.append("---\n")
+    md_lines.append("## Acompanhe no ScoutDados\n")
+    md_lines.append("- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)")
+    md_lines.append("- ⚽ [Confrontos e previsões da rodada](/confrontos)")
+    md_lines.append("- 🏆 [Monte sua escalação no Cartola FC](/escalacao)")
+    md_lines.append("- 📈 [Análise de mercado](/mercado)")
+    md_lines.append("")
+    
+    # FAQ
+    md_lines.append("## Perguntas Frequentes\n")
+    md_lines.append(f"### Como são feitas as previsões da rodada {rodada}?\n")
+    md_lines.append(
+        f"O ScoutDados utiliza o modelo **Poisson + Dixon-Coles V4** com dados reais de "
+        f"desempenho dos times no Brasileirão 2026. O modelo considera força de ataque e "
+        f"defesa, dias de descanso, e desempenho recente para calcular as probabilidades.\n"
+    )
+    md_lines.append(f"### Qual o jogo mais imprevisível da rodada {rodada}?\n")
+    mais_equilibrado = min(jogos_analise, key=lambda j: abs(j["prob_vitoria_casa"] - j["prob_vitoria_fora"]))
+    md_lines.append(
+        f"O confronto mais equilibrado é **{mais_equilibrado['mandante']} x {mais_equilibrado['visitante']}** "
+        f"com {mais_equilibrado['prob_vitoria_casa']}% x {mais_equilibrado['prob_vitoria_fora']}%.\n"
+    )
+    md_lines.append(f"### Onde encontrar dicas para o Cartola rodada {rodada}?\n")
+    md_lines.append(
+        f"As dicas estão neste mesmo post, na seção 'Dicas para o Cartola FC'. "
+        f"Recomendamos escalar jogadores de jogos com alto xG esperado para maximizar pontuação.\n"
+    )
+    
+    md_lines.append("---\n")
     md_lines.append(
         "*As projeções são resultado de modelos estatísticos (Poisson + Dixon-Coles V4, Monte Carlo) "
         "com fins informativos e educacionais. Não representam garantia de resultado.*"
@@ -573,8 +603,17 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
     if len(jogos_analise) >= 5 and len(placares_unicos) == 1:
         warnings.append(f"Baixa diversidade: todos os {len(jogos_analise)} placares são {placares[0]}")
     
+    # 3. Bloquear publicação se TODOS os placares forem idênticos
+    if len(jogos_analise) >= 5 and len(placares_unicos) == 1:
+        print(f"[BlogGenerator] 🚫 Rodada {rodada} BLOQUEADA: todos os {len(jogos_analise)} placares = {placares[0]}. Dados insuficientes.")
+        return {}
+    
     if warnings:
         print(f"[BlogGenerator] ⚠️ Validação da rodada {rodada}: {'; '.join(warnings)}")
+    
+    # Calcular readTime real
+    word_count = len(content.split())
+    read_time = max(5, round(word_count / 200))
     
     post = {
         "slug": slug,
@@ -582,8 +621,8 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
         "date": date_str,
         "excerpt": excerpt,
         "content": content,
-        "tags": ["Brasileirão", f"Rodada {rodada}", "Previsão", "xG", "Dixon-Coles"],
-        "readTime": max(5, len(jogos_analise)),
+        "tags": ["Brasileirão 2026", f"Rodada {rodada}", "Previsão", "xG", "Dixon-Coles", "Cartola FC"],
+        "readTime": read_time,
         "rodada": rodada,
         "jogos": jogos_analise,
         "calibracao": calibracao,
@@ -834,20 +873,47 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
         
         # Montar markdown
         date_str = datetime.now().strftime("%Y-%m-%d")
-        title = f"{nome} no Brasileirão: Probabilidades e Análise"
-        slug = f"{time_slug}-brasileirao"
         
-        # Faixa do time
+        # Diversificar títulos por posição
         if posicao <= 4:
             faixa = "zona de classificação para a Libertadores (G4)"
+            titulo_variantes = [
+                f"{nome}: Análise e Probabilidades no Brasileirão 2026",
+                f"{nome} no Brasileirão 2026 — Na briga pelo G4",
+                f"Como está o {nome} no Brasileirão 2026?",
+            ]
         elif posicao <= 6:
             faixa = "pré-Libertadores"
+            titulo_variantes = [
+                f"{nome}: Análise e Probabilidades no Brasileirão 2026",
+                f"{nome} no Brasileirão 2026 — Em busca da Libertadores",
+                f"Como está o {nome} no Brasileirão 2026?",
+            ]
         elif posicao <= 12:
             faixa = "briga por Sul-Americana"
+            titulo_variantes = [
+                f"{nome} no Brasileirão: Probabilidades e Análise Completa",
+                f"{nome} — Situação e Projeções no Brasileirão 2026",
+                f"Análise {nome}: chances reais no Brasileirão 2026",
+            ]
         elif posicao <= 16:
             faixa = "meio de tabela"
+            titulo_variantes = [
+                f"{nome} no Brasileirão 2026 — Situação e Projeções",
+                f"{nome}: o que esperar no resto do Brasileirão 2026?",
+                f"Análise {nome}: probabilidades e próximos jogos",
+            ]
         else:
             faixa = "zona de rebaixamento (Z4)"
+            titulo_variantes = [
+                f"{nome} no Brasileirão 2026 — Luta contra o rebaixamento",
+                f"{nome}: quais as chances de escapar do Z4?",
+                f"Situação do {nome} no Brasileirão 2026 — Análise completa",
+            ]
+        
+        # Selecionar título baseado em hash do slug para ser determinístico
+        title = titulo_variantes[hash(time_slug) % len(titulo_variantes)]
+        slug = f"{time_slug}-brasileirao"
         
         excerpt = (
             f"Análise completa do {nome} na rodada {rodada_atual} do Brasileirão 2026. "
@@ -855,19 +921,58 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
             f"Probabilidade de título: {prob_titulo:.1f}%."
         )
         
+        # Calcular métricas adicionais para narrativa
+        aproveitamento = round((stats.vitorias * 3 + stats.empates) / max(stats.jogos * 3, 1) * 100, 1) if stats.jogos > 0 else 0
+        media_gols = round(stats.gols_pro / max(stats.jogos, 1), 2)
+        media_sofridos = round(stats.gols_contra / max(stats.jogos, 1), 2)
+        saldo = stats.gols_pro - stats.gols_contra
+        
+        # Gerar seções narrativas contextuais
         md = []
         md.append(f"## {nome} — Situação Atual\n")
         md.append(
-            f"Na **rodada {rodada_atual}**, o {nome} ocupa a **{posicao}ª posição** com "
+            f"Na **rodada {rodada_atual}** do Brasileirão 2026, o {nome} ocupa a **{posicao}ª posição** com "
             f"**{pontos} pontos** em {jogos} jogos ({stats.vitorias}V {stats.empates}E {stats.derrotas}D), "
             f"na {faixa}.\n"
         )
         md.append(f"- Gols pró: **{stats.gols_pro}** | Gols contra: **{stats.gols_contra}** | "
-                   f"Saldo: **{stats.gols_pro - stats.gols_contra:+d}**")
+                   f"Saldo: **{saldo:+d}**")
+        md.append(f"- Aproveitamento: **{aproveitamento}%** | Média de gols: **{media_gols}/jogo**")
         if hasattr(stats, "forma_sequencia") and stats.forma_sequencia:
-            md.append(f"- Forma recente: **{stats.forma_sequencia}**\n")
+            forma = stats.forma_sequencia
+            emojis = "".join("🟢" if c == "V" else ("🟡" if c == "E" else "🔴") for c in forma)
+            md.append(f"- Forma recente: {emojis} ({forma})\n")
         else:
             md.append("")
+        
+        # Parágrafo narrativo contextual
+        md.append("## Análise\n")
+        narrativa = []
+        if stats.vitorias > stats.derrotas * 2 and stats.jogos >= 3:
+            narrativa.append(f"O {nome} vive excelente fase no campeonato, com {stats.vitorias} vitórias em {jogos} jogos.")
+        elif stats.derrotas > stats.vitorias * 2 and stats.jogos >= 3:
+            narrativa.append(f"O {nome} atravessa momento difícil no Brasileirão, com apenas {stats.vitorias} vitória(s) em {jogos} jogos.")
+        elif stats.empates >= stats.vitorias and stats.jogos >= 3:
+            narrativa.append(f"O {nome} vem tropeçando com muitos empates ({stats.empates}E em {jogos} jogos), o que dificulta a subida na tabela.")
+        else:
+            narrativa.append(f"O {nome} faz campanha regular até aqui, com {stats.vitorias}V {stats.empates}E {stats.derrotas}D em {jogos} jogos.")
+        
+        if media_gols >= 1.5:
+            narrativa.append(f"O ataque é um ponto forte: média de {media_gols} gols por jogo.")
+        elif media_gols <= 0.7:
+            narrativa.append(f"O ataque é uma preocupação, com média de apenas {media_gols} gol por jogo.")
+        
+        if media_sofridos >= 1.5:
+            narrativa.append(f"A defesa precisa melhorar: média de {media_sofridos} gols sofridos por partida.")
+        elif media_sofridos <= 0.5:
+            narrativa.append(f"A defesa tem sido destaque, sofrendo apenas {media_sofridos} gol por jogo em média.")
+        
+        if prob_g4 >= 50:
+            narrativa.append(f"As simulações Monte Carlo projetam **{prob_g4:.1f}%** de chance de classificação para a Libertadores.")
+        elif prob_z4 >= 15:
+            narrativa.append(f"Alerta: as simulações apontam **{prob_z4:.1f}%** de risco de rebaixamento.")
+        
+        md.append(" ".join(narrativa) + "\n")
         
         md.append("## Probabilidades (Monte Carlo)\n")
         md.append("| Objetivo | Probabilidade |")
@@ -890,12 +995,65 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
             md.append("")
         
         md.append("---\n")
+        
+        # Seção de contexto dos próximos jogos
+        if proximos:
+            dificeis = [p for p in proximos if p["prob_vitoria"] < 35]
+            faceis = [p for p in proximos if p["prob_vitoria"] >= 60]
+            if dificeis:
+                adversarios = ", ".join(p["adversario"] for p in dificeis)
+                md.append(f"⚠️ **Jogos difíceis pela frente:** {adversarios} — probabilidades de vitória abaixo de 35%.\n")
+            if faceis:
+                adversarios = ", ".join(p["adversario"] for p in faceis)
+                md.append(f"✅ **Jogos favoráveis:** {adversarios} — probabilidades de vitória acima de 60%.\n")
+        
+        # Links internos
+        md.append("## Acompanhe no ScoutDados\n")
+        md.append(f"- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)")
+        md.append(f"- ⚽ [Confrontos e previsões da rodada](/confrontos)")
+        md.append(f"- 🏆 [Monte sua escalação no Cartola FC](/escalacao)")
+        md.append("")
+        
+        # FAQ
+        md.append("## Perguntas Frequentes\n")
+        md.append(f"### Qual a chance do {nome} ser campeão em 2026?\n")
+        md.append(
+            f"Segundo as simulações Monte Carlo do ScoutDados (1.000 cenários), "
+            f"o {nome} tem **{prob_titulo:.1f}%** de chance de título. "
+            f"A probabilidade de classificação para a Libertadores (G4) é de **{prob_g4:.1f}%**.\n"
+        )
+        md.append(f"### Qual a posição atual do {nome} no Brasileirão?\n")
+        md.append(
+            f"O {nome} está na **{posicao}ª posição** com **{pontos} pontos** "
+            f"em {jogos} jogos disputados (rodada {rodada_atual}).\n"
+        )
+        if proximos:
+            prox = proximos[0]
+            md.append(f"### Qual o próximo jogo do {nome}?\n")
+            md.append(
+                f"O próximo jogo é contra o **{prox['adversario']}** ({prox['local']}) na rodada {prox['rodada']}. "
+                f"O placar provável é **{prox['placar']}** com {prox['prob_vitoria']}% de chance de vitória.\n"
+            )
+        md.append(f"### O {nome} corre risco de rebaixamento?\n")
+        if prob_z4 >= 10:
+            md.append(f"Sim, as simulações indicam **{prob_z4:.1f}%** de risco de rebaixamento. É preciso atenção.\n")
+        elif prob_z4 >= 2:
+            md.append(f"O risco é baixo mas existe: **{prob_z4:.1f}%** segundo as simulações Monte Carlo.\n")
+        else:
+            md.append(f"Não. O risco de rebaixamento é mínimo (**{prob_z4:.1f}%**) segundo as simulações.\n")
+        
+        md.append("---\n")
         md.append(
             f"*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) "
-            f"do ScoutDados. As probabilidades são estimativas com fins informativos.*"
+            f"do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. "
+            f"Dados atualizados na rodada {rodada_atual}.*"
         )
         
         content = "\n".join(md)
+        
+        # Calcular readTime real
+        word_count = len(content.split())
+        read_time = max(2, round(word_count / 200))
         
         post = {
             "slug": slug,
@@ -903,8 +1061,8 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
             "date": date_str,
             "excerpt": excerpt,
             "content": content,
-            "tags": [nome, "Brasileirão 2026", "Probabilidades"],
-            "readTime": 4,
+            "tags": [nome, "Brasileirão 2026", "Probabilidades", faixa.split("(")[0].strip()],
+            "readTime": read_time,
             "rodada": rodada_atual,
             "tipo": "analise_time",
             "time": time_slug,

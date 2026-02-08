@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { SEO } from "@/components/SEO";
@@ -22,13 +22,13 @@ const NotFound = () => {
             A página <code className="text-sm bg-muted px-1.5 py-0.5 rounded">{location.pathname}</code> não existe.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <a
-              href="/"
+            <Link
+              to="/"
               className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
             >
               <Home className="w-4 h-4" />
               Página Inicial
-            </a>
+            </Link>
             <button
               onClick={() => window.history.back()}
               className="inline-flex items-center gap-2 px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors"

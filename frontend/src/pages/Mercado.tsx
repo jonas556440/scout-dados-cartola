@@ -163,8 +163,27 @@ const Mercado = () => {
         </div>
       </div>
 
+      {/* Loading state */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Carregando mercado...</span>
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && !isLoading && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erro ao carregar mercado</AlertTitle>
+          <AlertDescription>
+            Não foi possível carregar os dados dos atletas. Tente novamente em alguns instantes.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Players Table */}
-      <div className="glass-card overflow-hidden">
+      {!isLoading && !error && <div className="glass-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="stats-table">
             <thead>
@@ -263,7 +282,7 @@ const Mercado = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      </div>}
     </MainLayout>
   );
 };

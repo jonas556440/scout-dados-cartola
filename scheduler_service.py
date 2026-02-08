@@ -144,15 +144,15 @@ class CartolaScheduler:
         )
         logger.info("✅ Job 'atualizar_classificacao' agendado (a cada 1h)")
         
-        # Tarefa 9: Limpar cache da API (a cada 15 min)
+        # Tarefa 9: Limpar cache da API (a cada 2h — os TTLs internos já gerenciam frescor)
         self.scheduler.add_job(
             func=self.limpar_cache_api,
-            trigger=IntervalTrigger(minutes=15),
+            trigger=IntervalTrigger(hours=2),
             id='limpar_cache',
             name='Limpar Cache da API',
             replace_existing=True
         )
-        logger.info("✅ Job 'limpar_cache' agendado (a cada 15 min)")
+        logger.info("✅ Job 'limpar_cache' agendado (a cada 2h)")
         
         # Tarefa 10: Regenerar sitemap a cada 6h
         self.scheduler.add_job(
@@ -605,7 +605,7 @@ class CartolaScheduler:
             simulacao_data = []
             try:
                 simulator = MonteCarloSimulator(score_predictor=None, n_simulacoes=1000)
-                resultados = simulator.simular_campeonato()
+                resultados, _ = simulator.simular_campeonato()
                 for r in resultados:
                     simulacao_data.append({
                         "time": r.nome,

@@ -57,18 +57,52 @@ def _get_auto_blog_posts() -> list:
 
 
 def _get_team_pages() -> list:
-    """Gera URLs de páginas por time a partir dos times conhecidos."""
-    teams_file = PROJECT_ROOT / "data" / "blog_posts"
-    # Slugs dos 24 times do Brasileirão 2026 (atual classificação)
+    """Gera URLs de páginas por time dinamicamente a partir dos dados disponíveis."""
+    # Slugs canônicos dos times do Brasileirão 2026 (exclui aliases)
     team_slugs = [
         "atletico-mg", "athletico-pr", "bahia", "botafogo",
-        "corinthians", "cruzeiro", "cuiaba", "flamengo",
-        "fluminense", "fortaleza", "gremio", "internacional",
-        "juventude", "mirassol", "palmeiras", "santos",
-        "sao-paulo", "sport", "vasco", "vitoria",
+        "corinthians", "cruzeiro", "flamengo", "fluminense",
+        "gremio", "internacional", "mirassol", "palmeiras",
+        "santos", "sao-paulo", "vasco", "vitoria",
         "red-bull-bragantino", "chapecoense", "coritiba", "remo",
     ]
+    
+    # Tentar enriquecer com times da classificação real (JSON de cache)
+    try:
+        cache_file = PROJECT_ROOT / "data" / "stats_cache" / "classificacao.json"
+        if cache_file.exists():
+            import re
+            data = json.loads(cache_file.read_text(encoding="utf-8"))
+            classificacao = data if isinstance(data, list) else data.get("classificacao", [])
+            for t in classificacao:
+                nome = t.get("time", "")
+                # Gerar slug a partir do nome
+                slug = nome.lower().strip()
+                slug = slug.replace(" ", "-").replace(".", "")
+                slug = re.sub(r"[^a-z0-9-]", "", slug)
+                if slug and slug not in team_slugs:
+                    team_slugs.append(slug)
+    except Exception:
+        pass  # Fallback para lista hardcoded
+    
     return [{"slug": s} for s in team_slugs]
+
+
+def _get_match_pages() -> list:
+    """Lê páginas de jogos auto-geradas em data/match_pages/."""
+    match_dir = PROJECT_ROOT / "data" / "match_pages"
+    entries = []
+    if not match_dir.exists():
+        return entries
+    for f in match_dir.glob("*.json"):
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+            slug = data.get("slug", f.stem)
+            date = data.get("date", data.get("data", datetime.now().strftime("%Y-%m-%d")))
+            entries.append({"slug": slug, "date": date})
+        except Exception:
+            continue
+    return entries
 
 
 def generate_sitemap() -> str:
@@ -112,6 +146,24 @@ def generate_sitemap() -> str:
             "priority": "0.8",
         })
 
+    # 5. Páginas de jogos individuais
+    for match in _get_match_pages():
+        urls.append({
+            "loc": f"{BASE_URL}/brasileirao/jogo/{match['slug']}",
+            "lastmod": match.get("date", today),
+            "changefreq": "weekly",
+            "priority": "0.6",
+        })
+
+    # Deduplicar URLs por loc
+    seen = set()
+    unique_urls = []
+    for u in urls:
+        if u["loc"] not in seen:
+            seen.add(u["loc"])
+            unique_urls.append(u)
+    urls = unique_urls
+
     # Gerar XML
     xml_entries = ""
     for u in urls:
@@ -143,9 +195,12 @@ def main():
     blog_static = len(STATIC_BLOG_SLUGS)
     blog_auto = len(_get_auto_blog_posts())
     teams = len(_get_team_pages())
-    total = static_count + blog_static + blog_auto + teams
+    matches = len(_get_match_pages())
+    
+    # Contar URLs no XML gerado
+    total = sitemap.count("<url>")
     print(f"Sitemap gerado: {output_path} ({total} URLs)")
-    print(f"  Rotas estáticas: {static_count} | Blog estático: {blog_static} | Blog auto: {blog_auto} | Times: {teams}")
+    print(f"  Rotas estáticas: {static_count} | Blog estático: {blog_static} | Blog auto: {blog_auto} | Times: {teams} | Jogos: {matches}")
 
 
 if __name__ == "__main__":

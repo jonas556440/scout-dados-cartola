@@ -12,7 +12,10 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 import sys
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Adicionar path do projeto
 sys.path.append(str(Path(__file__).parent.parent))
@@ -181,8 +184,6 @@ class DashboardStatsResponse(BaseModel):
 ALLOWED_ORIGINS = [
     "https://scoutdados.com.br",
     "https://www.scoutdados.com.br",
-    "https://scoutfutebol.com.br",
-    "https://www.scoutfutebol.com.br",
 ]
 
 # Apenas em desenvolvimento
@@ -387,7 +388,9 @@ def get_status(request: Request):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
+        logger.error(f"Erro interno: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/mercado/atletas", response_model=List[PlayerResponse])
@@ -430,15 +433,23 @@ def get_atletas(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar atletas: {str(e)}")
+        logger.error(f"Erro ao buscar atletas: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/confrontos", response_model=List[MatchResponse])
 def get_confrontos(rodada: Optional[int] = None):
     """Retorna análise de confrontos da rodada com previsão de placares"""
     try:
-        mercado = api.get_mercado()
         status = api.get_status_mercado()
+        rodada_req = rodada or (status.get("rodada_atual", 1) if status else 1)
+        
+        cached = _cache_get("confrontos", str(rodada_req))
+        if cached is not None:
+            return cached
+        
+        mercado = api.get_mercado()
         
         if not mercado:
             raise HTTPException(status_code=503, detail="API Cartola indisponível. Aguarde.")
@@ -531,11 +542,14 @@ def get_confrontos(rodada: Optional[int] = None):
             
             responses.append(response)
         
+        _cache_set("confrontos", responses, str(rodada_req))
         return responses
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao analisar confrontos: {str(e)}")
+        logger.error(f"Erro ao analisar confrontos: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/previsoes/placares")
@@ -632,7 +646,9 @@ def get_previsoes_placares(rodada: Optional[int] = None):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro na previsão: {str(e)}")
+        logger.error(f"Erro na previsão: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/confrontos/analise")
@@ -892,7 +908,9 @@ def gerar_escalacao(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao gerar escalação: {str(e)}")
+        logger.error(f"Erro ao gerar escalação: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 def _auto_salvar_historico(time_valor, time_pontos, rodada: int, cartoletas: float) -> bool:
@@ -914,6 +932,10 @@ def _auto_salvar_historico(time_valor, time_pontos, rodada: int, cartoletas: flo
 def get_dashboard(request: Request):
     """Retorna estatísticas para o dashboard"""
     try:
+        cached = _cache_get("dashboard")
+        if cached is not None:
+            return cached
+        
         mercado = api.get_mercado()
         status = api.get_status_mercado()
         
@@ -996,7 +1018,7 @@ def get_dashboard(request: Request):
         hm = HistoryManager()
         patrimonio_atual = hm.get_cartoletas_atuais("valorizacao")
         
-        return DashboardStatsResponse(
+        result = DashboardStatsResponse(
             mercado={
                 "rodadaAtual": rodada,
                 "status": status_map.get(status.get("status_mercado", 4), "fechado"),
@@ -1013,10 +1035,14 @@ def get_dashboard(request: Request):
             topPontuadores=[converter_atleta_para_response(a, clubes) for a in top_pontos],
             confrontos=confrontos
         )
+        _cache_set("dashboard", result)
+        return result
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro no dashboard: {str(e)}")
+        logger.error(f"Erro no dashboard: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.post("/api/cache/limpar")
@@ -1027,6 +1053,13 @@ def limpar_cache():
     """
     try:
         api.limpar_cache()
+        # Limpar caches de endpoints
+        for key, val in _endpoint_caches.items():
+            if isinstance(val, dict) and "data" in val:
+                val["data"] = None
+                val["timestamp"] = 0
+            elif isinstance(val, dict):
+                val.clear()
         return {
             "success": True, 
             "message": "Cache limpo! Próximas requisições buscarão dados atualizados da API"
@@ -1068,7 +1101,9 @@ def get_historico_rodadas():
         return result
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar histórico: {str(e)}")
+        logger.error(f"Erro ao buscar histórico: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/historico/rodada/{rodada}")
@@ -1110,7 +1145,9 @@ def get_historico_rodada(rodada: int):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar rodada: {str(e)}")
+        logger.error(f"Erro ao buscar rodada: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/historico/status")
@@ -1147,7 +1184,9 @@ def get_historico_status():
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar status: {str(e)}")
+        logger.error(f"Erro ao buscar status: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.post("/api/historico/salvar")
@@ -1230,7 +1269,9 @@ def salvar_time_historico(request: Request, body: SaveTeamRequest):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro ao salvar time: {str(e)}")
+        logger.error(f"Erro ao salvar time: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/noticias/{clube_abrev}")
@@ -1257,7 +1298,9 @@ def get_noticias_time(clube_abrev: str):
             "ultima_atualizacao": datetime.now().isoformat()
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar notícias: {str(e)}")
+        logger.error(f"Erro ao buscar notícias: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/noticias/rodada/{rodada}")
@@ -1319,7 +1362,9 @@ def get_noticias_rodada(rodada: int):
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar notícias da rodada: {str(e)}")
+        logger.error(f"Erro ao buscar notícias da rodada: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.post("/api/previsoes/customizado")
@@ -1387,22 +1432,21 @@ def prever_jogo_customizado(
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro na previsão: {str(e)}")
+        logger.error(f"Erro na previsão: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/times/forca")
 def get_forca_times(rodada: Optional[int] = None):
     """
     Retorna força calculada de todos os times
-    
-    Usa sistema ponderado:
-    - 80% ranking histórico (início do campeonato)
-    - 20% posição atual na tabela
-    - Ajuste conforme avançam as rodadas
-    
-    Retorna lista ordenada por força geral
     """
     try:
+        cached = _cache_get("forca_times")
+        if cached is not None:
+            return cached
+        
         mercado = api.get_mercado()
         status = api.get_status_mercado()
         
@@ -1456,19 +1500,23 @@ def get_forca_times(rodada: Optional[int] = None):
         for i, time in enumerate(times_forca, 1):
             time["ranking"] = i
         
-        return {
+        result = {
             "rodada": rodada,
             "times": times_forca,
             "metodologia": "80% ranking histórico + 20% classificação atual (início campeonato)",
             "peso_historico": 0.80 if rodada <= 5 else max(0.30, 0.80 - ((rodada - 5) * 0.05))
         }
+        _cache_set("forca_times", result)
+        return result
         
     except HTTPException:
         raise
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro ao calcular força: {str(e)}")
+        logger.error(f"Erro ao calcular força: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/times/xg")
@@ -1567,17 +1615,75 @@ def get_xg_por_time(rodada: Optional[int] = None):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro ao calcular xG: {str(e)}")
+        logger.error(f"Erro ao calcular xG: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 # ============ Brasileirão ============
+
+# Sistema de cache in-memory genérico para endpoints pesados
+import time as _time
+
+_endpoint_caches = {
+    "classificacao": {"data": None, "timestamp": 0, "ttl": 600},   # 10 min
+    "confrontos":    {"data": None, "timestamp": 0, "ttl": 300},   # 5 min
+    "previsoes":     {"data": None, "timestamp": 0, "ttl": 300},   # 5 min
+    "dashboard":     {"data": None, "timestamp": 0, "ttl": 300},   # 5 min
+    "forca_times":   {"data": None, "timestamp": 0, "ttl": 600},   # 10 min
+    "times_xg":      {"data": None, "timestamp": 0, "ttl": 600},   # 10 min
+    "acuracia":      {"data": None, "timestamp": 0, "ttl": 3600},  # 1 hora
+    "time_detail":   {},  # keyed by slug, each entry is {data, timestamp, ttl}
+}
+
+
+def _cache_get(name: str, key: str = "") -> Any:
+    """Retorna dados cacheados ou None se expirado."""
+    if key:
+        entry = _endpoint_caches.get(name, {}).get(key)
+    else:
+        entry = _endpoint_caches.get(name)
+    if entry and entry.get("data") is not None:
+        if _time.time() - entry["timestamp"] < entry["ttl"]:
+            return entry["data"]
+    return None
+
+
+def _cache_set(name: str, data: Any, key: str = ""):
+    """Salva dados no cache."""
+    if key:
+        if name not in _endpoint_caches:
+            _endpoint_caches[name] = {}
+        _endpoint_caches[name][key] = {
+            "data": data,
+            "timestamp": _time.time(),
+            "ttl": 900,  # 15 min para caches keyed
+        }
+    else:
+        cache = _endpoint_caches[name]
+        cache["data"] = data
+        cache["timestamp"] = _time.time()
+
+
+# Cache in-memory para classificação (TTL 10 min)
+_classificacao_cache = _endpoint_caches["classificacao"]
 
 @app.get("/api/brasileirao/classificacao")
 def get_classificacao():
     """
     Retorna classificação do Brasileirão + simulação Monte Carlo.
     Combina dados reais da API Cartola com simulação de probabilidades.
+    Cache de 10 minutos para evitar sobrecarga.
     """
+    import time as _time
+    
+    # Verificar cache
+    if (
+        _classificacao_cache["data"] is not None
+        and _time.time() - _classificacao_cache["timestamp"] < _classificacao_cache["ttl"]
+    ):
+        return _classificacao_cache["data"]
+    
     try:
         from src.analysis.monte_carlo import MonteCarloSimulator
         
@@ -1641,44 +1747,73 @@ def get_classificacao():
         for i, time in enumerate(classificacao, 1):
             time["posicao"] = i
         
-        # Monte Carlo (500 simulações, sem ScorePredictor para performance)
+        # Monte Carlo (500 simulações, com ScorePredictor para qualidade)
         simulacao = None
+        pontos_necessarios_mc = None
+        predictor = None
         try:
-            mc = MonteCarloSimulator(score_predictor=None, n_simulacoes=500)
+            predictor = ScorePredictor()
+            mc = MonteCarloSimulator(score_predictor=predictor, n_simulacoes=500)
             
-            # Gerar jogos restantes com round-robin simplificado
+            # Gerar jogos restantes com round-robin completo
             jogos_restantes = []
             time_ids = [t["id"] for t in classificacao]
             n_times = len(time_ids)
-            jogos_por_rodada = n_times // 2
             
-            for rodada in range(rodada_atual + 1, 39):
-                # Rodar os times de forma alternada
-                offset = (rodada - 1) % (n_times - 1) if n_times > 1 else 0
-                rotated = [time_ids[0]] + time_ids[1:]
-                # Rotacionar para criar pareamentos diferentes cada rodada
-                for j in range(offset):
-                    rotated = [rotated[0]] + [rotated[-1]] + rotated[1:-1]
-                
-                for j in range(jogos_por_rodada):
-                    m = rotated[j]
-                    v = rotated[n_times - 1 - j]
-                    # Alternar mando (rodada par = invertido)
-                    if rodada % 2 == 0:
-                        m, v = v, m
-                    jogos_restantes.append({
-                        "mandante_id": m,
-                        "visitante_id": v,
-                        "rodada": rodada,
-                    })
+            # Coletar confrontos já realizados usando partidas já carregadas
+            # (evita N chamadas extras à API Cartola)
+            confrontos_realizados = set()
+            # Partidas da rodada atual já foram carregadas acima
+            for p in partidas:
+                m_id = p.get("clube_casa_id")
+                v_id = p.get("clube_visitante_id")
+                if m_id and v_id:
+                    confrontos_realizados.add((m_id, v_id))
+            # Buscar rodadas passadas (apenas se necessário)
+            for rod in range(1, rodada_atual):
+                try:
+                    p_resp = api.get_partidas(rod)
+                    if isinstance(p_resp, dict):
+                        p_list = p_resp.get("partidas", [])
+                    elif isinstance(p_resp, list):
+                        p_list = p_resp
+                    else:
+                        p_list = []
+                    for p in p_list:
+                        m_id = p.get("clube_casa_id")
+                        v_id = p.get("clube_visitante_id")
+                        if m_id and v_id:
+                            confrontos_realizados.add((m_id, v_id))
+                except Exception:
+                    pass
+            
+            # Gerar jogos restantes (turno e returno completos)
+            rodada_futura = rodada_atual + 1
+            jogos_pendentes = []
+            for i_t in range(n_times):
+                for j_t in range(n_times):
+                    if i_t == j_t:
+                        continue
+                    m = time_ids[i_t]
+                    v = time_ids[j_t]
+                    if (m, v) not in confrontos_realizados:
+                        jogos_pendentes.append({"mandante_id": m, "visitante_id": v})
+            
+            # Distribuir em rodadas
+            jogos_por_rodada = max(n_times // 2, 1)
+            for idx, jogo in enumerate(jogos_pendentes):
+                jogo["rodada"] = rodada_futura + (idx // jogos_por_rodada)
+                jogos_restantes.append(jogo)
             
             if jogos_restantes:
-                resultados = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
+                resultados, pontos_necessarios_mc = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
                 simulacao = [
                     {
                         "id": r.time_id,
                         "abrev": r.abrev,
                         "pontosMedio": r.pontos_medio,
+                        "pontosMin": r.pontos_min,
+                        "pontosMax": r.pontos_max,
                         "probTitulo": r.prob_titulo,
                         "probLibertadores": r.prob_libertadores,
                         "probSulamericana": r.prob_sulamericana,
@@ -1689,20 +1824,213 @@ def get_classificacao():
                 ]
         except Exception as e:
             print(f"[Monte Carlo] Simulação falhou: {e}")
+            import traceback
+            traceback.print_exc()
         
-        return {
+        # Montar resposta com dados de confrontos para o frontend
+        # Buscar próximos jogos da rodada atual
+        proximos_jogos = []
+        ultima_rodada_jogos = []
+        try:
+            predictor_pj = predictor if predictor else ScorePredictor()
+            
+            # Próximos jogos (rodada atual) — reusar partidas já carregadas
+            p_list = partidas
+            
+            for p in p_list:
+                m_id = p.get("clube_casa_id")
+                v_id = p.get("clube_visitante_id")
+                clube_m = clubes.get(str(m_id), {})
+                clube_v = clubes.get(str(v_id), {})
+                realizado = p.get("placar_oficial_mandante") is not None
+                
+                jogo_data = {
+                    "mandante": clube_m.get("abreviacao", "?"),
+                    "mandanteNome": clube_m.get("nome", ""),
+                    "visitante": clube_v.get("abreviacao", "?"),
+                    "visitanteNome": clube_v.get("nome", ""),
+                    "dataHora": p.get("partida_data", ""),
+                    "local": p.get("local", ""),
+                    "realizado": realizado,
+                    "placarMandante": p.get("placar_oficial_mandante"),
+                    "placarVisitante": p.get("placar_oficial_visitante"),
+                    "probVitoriaMandante": None,
+                    "probEmpate": None,
+                    "probVitoriaVisitante": None,
+                }
+                
+                # Gerar probabilidades
+                stats_m = match_analyzer.estatisticas_times.get(m_id)
+                stats_v = match_analyzer.estatisticas_times.get(v_id)
+                if stats_m and stats_v:
+                    try:
+                        prev = predictor_pj.prever_confronto(
+                            mandante=jogo_data["mandante"],
+                            visitante=jogo_data["visitante"],
+                            mandante_id=m_id,
+                            visitante_id=v_id,
+                            forca_mandante=stats_m.forca_geral,
+                            forca_visitante=stats_v.forca_geral,
+                            posicao_mandante=stats_m.posicao or 10,
+                            posicao_visitante=stats_v.posicao or 10,
+                        )
+                        jogo_data["probVitoriaMandante"] = prev.prob_vitoria_casa
+                        jogo_data["probEmpate"] = prev.prob_empate
+                        jogo_data["probVitoriaVisitante"] = prev.prob_vitoria_fora
+                    except Exception as e:
+                        print(f"[PJ] Erro previsao {jogo_data.get('mandante')} vs {jogo_data.get('visitante')}: {e}")
+                
+                if not realizado:
+                    proximos_jogos.append(jogo_data)
+                else:
+                    ultima_rodada_jogos.append(jogo_data)
+            
+            # Se todos da rodada atual já foram realizados, pegar próxima rodada
+            if not proximos_jogos and rodada_atual < 38:
+                p_resp_next = api.get_partidas(rodada_atual + 1)
+                if isinstance(p_resp_next, dict):
+                    p_list_next = p_resp_next.get("partidas", [])
+                elif isinstance(p_resp_next, list):
+                    p_list_next = p_resp_next
+                else:
+                    p_list_next = []
+                
+                for p in p_list_next:
+                    m_id = p.get("clube_casa_id")
+                    v_id = p.get("clube_visitante_id")
+                    clube_m = clubes.get(str(m_id), {})
+                    clube_v = clubes.get(str(v_id), {})
+                    
+                    jogo_data = {
+                        "mandante": clube_m.get("abreviacao", "?"),
+                        "mandanteNome": clube_m.get("nome", ""),
+                        "visitante": clube_v.get("abreviacao", "?"),
+                        "visitanteNome": clube_v.get("nome", ""),
+                        "dataHora": p.get("partida_data", ""),
+                        "local": p.get("local", ""),
+                        "realizado": False,
+                        "placarMandante": None,
+                        "placarVisitante": None,
+                        "probVitoriaMandante": None,
+                        "probEmpate": None,
+                        "probVitoriaVisitante": None,
+                    }
+                    
+                    stats_m = match_analyzer.estatisticas_times.get(m_id)
+                    stats_v = match_analyzer.estatisticas_times.get(v_id)
+                    if stats_m and stats_v:
+                        try:
+                            prev = predictor_pj.prever_confronto(
+                                mandante=jogo_data["mandante"],
+                                visitante=jogo_data["visitante"],
+                                mandante_id=m_id,
+                                visitante_id=v_id,
+                                forca_mandante=stats_m.forca_geral,
+                                forca_visitante=stats_v.forca_geral,
+                                posicao_mandante=stats_m.posicao or 10,
+                                posicao_visitante=stats_v.posicao or 10,
+                            )
+                            jogo_data["probVitoriaMandante"] = prev.prob_vitoria_casa
+                            jogo_data["probEmpate"] = prev.prob_empate
+                            jogo_data["probVitoriaVisitante"] = prev.prob_vitoria_fora
+                        except Exception:
+                            pass
+                    
+                    proximos_jogos.append(jogo_data)
+            
+            # Se não temos jogos da rodada atual realizados, buscar rodada anterior
+            if not ultima_rodada_jogos and rodada_atual > 1:
+                p_resp_prev = api.get_partidas(rodada_atual - 1)
+                if isinstance(p_resp_prev, dict):
+                    p_list_prev = p_resp_prev.get("partidas", [])
+                elif isinstance(p_resp_prev, list):
+                    p_list_prev = p_resp_prev
+                else:
+                    p_list_prev = []
+                
+                for p in p_list_prev:
+                    m_id = p.get("clube_casa_id")
+                    v_id = p.get("clube_visitante_id")
+                    clube_m = clubes.get(str(m_id), {})
+                    clube_v = clubes.get(str(v_id), {})
+                    realizado = p.get("placar_oficial_mandante") is not None
+                    
+                    if realizado:
+                        jogo_data = {
+                            "mandante": clube_m.get("abreviacao", "?"),
+                            "mandanteNome": clube_m.get("nome", ""),
+                            "visitante": clube_v.get("abreviacao", "?"),
+                            "visitanteNome": clube_v.get("nome", ""),
+                            "dataHora": p.get("partida_data", ""),
+                            "local": p.get("local", ""),
+                            "realizado": True,
+                            "placarMandante": p.get("placar_oficial_mandante"),
+                            "placarVisitante": p.get("placar_oficial_visitante"),
+                            "probVitoriaMandante": None,
+                            "probEmpate": None,
+                            "probVitoriaVisitante": None,
+                        }
+                        
+                        stats_m = match_analyzer.estatisticas_times.get(m_id)
+                        stats_v = match_analyzer.estatisticas_times.get(v_id)
+                        if stats_m and stats_v:
+                            try:
+                                prev = predictor_pj.prever_confronto(
+                                    mandante=jogo_data["mandante"],
+                                    visitante=jogo_data["visitante"],
+                                    mandante_id=m_id,
+                                    visitante_id=v_id,
+                                    forca_mandante=stats_m.forca_geral,
+                                    forca_visitante=stats_v.forca_geral,
+                                    posicao_mandante=stats_m.posicao or 10,
+                                    posicao_visitante=stats_v.posicao or 10,
+                                )
+                                jogo_data["probVitoriaMandante"] = prev.prob_vitoria_casa
+                                jogo_data["probEmpate"] = prev.prob_empate
+                                jogo_data["probVitoriaVisitante"] = prev.prob_vitoria_fora
+                            except Exception:
+                                pass
+                        
+                        ultima_rodada_jogos.append(jogo_data)
+        except Exception as e:
+            print(f"[Classificação] Erro ao buscar jogos: {e}")
+        
+        # Serializar pontosNecessarios do Monte Carlo
+        pontos_nec_response = []
+        if pontos_necessarios_mc:
+            for pn in pontos_necessarios_mc:
+                pontos_nec_response.append({
+                    "probabilidade": pn.probabilidade,
+                    "titulo": pn.titulo,
+                    "libertadores": pn.libertadores,
+                    "sulamericana": pn.sulamericana,
+                    "permanencia": pn.permanencia,
+                })
+        
+        response = {
             "rodada": rodada_atual,
             "classificacao": classificacao,
             "simulacao": simulacao,
+            "pontosNecessarios": pontos_nec_response,
             "totalTimes": len(classificacao),
+            "proximosJogos": proximos_jogos,
+            "jogosRealizados": ultima_rodada_jogos,
         }
+        
+        # Cachear resultado
+        _classificacao_cache["data"] = response
+        _classificacao_cache["timestamp"] = _time.time()
+        
+        return response
     
     except HTTPException:
         raise
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro classificação: {str(e)}")
+        logger.error(f"Erro classificação: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/brasileirao/rodada/{rodada}")
@@ -1810,7 +2138,9 @@ def get_rodada_detalhada(rodada: int):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro rodada: {str(e)}")
+        logger.error(f"Erro rodada: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/brasileirao/acuracia")
@@ -1820,6 +2150,10 @@ def get_acuracia_geral():
     Compara previsões vs resultados reais para cada rodada concluída.
     """
     try:
+        cached = _cache_get("acuracia")
+        if cached is not None:
+            return cached
+        
         status = api.get_status_mercado()
         rodada_atual = status.get("rodada_atual", 1) if status else 1
         
@@ -1846,7 +2180,7 @@ def get_acuracia_geral():
             except Exception:
                 continue
         
-        return {
+        result = {
             "rodadaAtual": rodada_atual,
             "totalRodadas": len(resumo_rodadas),
             "totalJogos": total_jogos,
@@ -1855,11 +2189,15 @@ def get_acuracia_geral():
             "rodadas": resumo_rodadas,
             "metodologia": "Poisson V3 + Frequências contextuais",
         }
+        _cache_set("acuracia", result)
+        return result
     
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro acurácia: {str(e)}")
+        logger.error(f"Erro acurácia: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 # ============ Página por Time ============
@@ -1888,6 +2226,10 @@ def get_time_detalhado(slug: str):
     abrev = TEAM_SLUGS.get(slug)
     if not abrev:
         raise HTTPException(status_code=404, detail=f"Time '{slug}' não encontrado")
+
+    cached = _cache_get("time_detail", slug)
+    if cached is not None:
+        return cached
 
     try:
         from src.analysis.monte_carlo import MonteCarloSimulator
@@ -1938,10 +2280,10 @@ def get_time_detalhado(slug: str):
         )
         posicao = next((i + 1 for i, t in enumerate(classificacao) if t["id"] == time_id), 0)
 
-        # Monte Carlo
+        # Monte Carlo (harmonizado com /classificacao: mesmo preditor e n_sims)
         prob = {"titulo": 0, "libertadores": 0, "sulamericana": 0, "rebaixamento": 0, "posicaoMedia": 10}
         try:
-            mc = MonteCarloSimulator(score_predictor=None, n_simulacoes=1000)
+            mc = MonteCarloSimulator(score_predictor=ScorePredictor(), n_simulacoes=500)
             time_ids = [t["id"] for t in classificacao]
             n = len(time_ids)
             jogos_restantes = []
@@ -1955,7 +2297,7 @@ def get_time_detalhado(slug: str):
                     if r % 2 == 0: m, v = v, m
                     jogos_restantes.append({"mandante_id": m, "visitante_id": v, "rodada": r})
             if jogos_restantes:
-                resultados = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
+                resultados, _ = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
                 for res in resultados:
                     if res.time_id == time_id:
                         prob = {
@@ -2025,7 +2367,7 @@ def get_time_detalhado(slug: str):
         if isinstance(clube_info.get("escudo"), dict):
             escudo = clube_info["escudo"].get("60x60")
 
-        return {
+        result = {
             "slug": slug,
             "id": time_id,
             "nome": stats.nome,
@@ -2049,13 +2391,17 @@ def get_time_detalhado(slug: str):
             "proximosJogos": proximos,
             "rodadaAtual": rodada_atual,
         }
+        _cache_set("time_detail", result, slug)
+        return result
 
     except HTTPException:
         raise
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro time: {str(e)}")
+        logger.error(f"Erro time: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/brasileirao/jogo/{partida_id}")
@@ -2189,7 +2535,9 @@ def get_jogo_detalhado(partida_id: int):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro jogo: {str(e)}")
+        logger.error(f"Erro jogo: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 # ============ Scouts ============
@@ -2284,7 +2632,9 @@ def get_scouts_destaques(rodada: Optional[int] = None, limite: int = Query(defau
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro scouts destaques: {str(e)}")
+        logger.error(f"Erro scouts destaques: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/scouts/jogador/{atleta_id}")
@@ -2352,7 +2702,9 @@ def get_scout_jogador(atleta_id: int):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro scout jogador: {str(e)}")
+        logger.error(f"Erro scout jogador: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.get("/api/scouts/desfalques")
@@ -2423,7 +2775,9 @@ def get_desfalques_geral():
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro desfalques: {str(e)}")
+        logger.error(f"Erro desfalques: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 # ============ Health, Sitemap, Métricas ============
@@ -2517,12 +2871,19 @@ def get_blog_post(slug: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar post: {str(e)}")
+        logger.error(f"Erro ao buscar post: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.post("/api/blog/gerar/{rodada}")
-def gerar_blog_post(rodada: int):
-    """Gera manualmente um post de análise para uma rodada específica."""
+def gerar_blog_post(rodada: int, request: Request):
+    """Gera manualmente um post de análise para uma rodada específica.
+    Requer header X-Blog-Key para autenticação."""
+    blog_key = os.environ.get("BLOG_API_KEY", "scoutdados-blog-2026")
+    request_key = request.headers.get("X-Blog-Key", "")
+    if request_key != blog_key:
+        raise HTTPException(status_code=403, detail="Acesso negado. Header X-Blog-Key inválido.")
     try:
         from src.analysis.blog_generator import gerar_post_rodada
         post = gerar_post_rodada(rodada, api)
@@ -2532,7 +2893,9 @@ def gerar_blog_post(rodada: int):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao gerar post: {str(e)}")
+        logger.error(f"Erro ao gerar post: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 # ============ Match Pages (Páginas Progressivas de Jogos) ============
@@ -2563,7 +2926,9 @@ def get_match_page(slug: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao buscar página: {str(e)}")
+        logger.error(f"Erro ao buscar página: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.post("/api/jogos/discover")
@@ -2575,7 +2940,9 @@ def discover_match_pages(days: int = 30):
         result = pm.discover_and_create(max_days_ahead=days)
         return {"status": "ok", **result}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro na descoberta: {str(e)}")
+        logger.error(f"Erro na descoberta: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 @app.post("/api/jogos/update")
@@ -2587,7 +2954,9 @@ def update_match_pages():
         result = pm.update_upcoming()
         return {"status": "ok", **result}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro na atualização: {str(e)}")
+        logger.error(f"Erro na atualização: {e}", exc_info=True)
+
+        raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
 # ============ Executar ============

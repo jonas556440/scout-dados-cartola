@@ -241,7 +241,7 @@ const Historico = () => {
           </div>
           <div>
             <h1 className="font-display text-3xl md:text-4xl font-bold">
-              Histórico <span className="text-sm px-2 py-1 bg-red-500 text-white rounded-md ml-2">🔴 AO VIVO - API REAL</span>
+              Histórico
             </h1>
             <p className="text-muted-foreground">
               Escalações salvas automaticamente a cada rodada

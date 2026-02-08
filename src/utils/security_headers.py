@@ -61,10 +61,23 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 "payment=(), "
                 "usb=()"
             ),
-            
-            # Cache control para API
-            "Cache-Control": "no-store, max-age=0",
         }
+        
+        # Cache-Control inteligente por tipo de request
+        if "Cache-Control" not in response.headers:
+            path = request.url.path
+            method = request.method.upper()
+            if method == "GET" and path.startswith("/api/"):
+                # APIs GET: cache curto para browser/proxy
+                if any(p in path for p in ["/brasileirao/acuracia", "/times/forca", "/times/xg"]):
+                    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
+                elif any(p in path for p in ["/blog/", "/brasileirao/classificacao"]):
+                    response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=30"
+                else:
+                    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=15"
+            else:
+                # POST/PUT/DELETE e não-API: sem cache
+                response.headers["Cache-Control"] = "no-store, max-age=0"
         
         # Apenas em HTTPS: adicionar HSTS
         if request.url.scheme == "https" or request.headers.get("X-Forwarded-Proto") == "https":
