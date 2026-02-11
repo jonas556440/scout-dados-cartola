@@ -122,15 +122,15 @@ const Estatisticas = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 hero-gradient rounded-lg">
-            <BarChart3 className="w-6 h-6 text-primary-foreground" />
+        <div className="flex items-start gap-3 mb-2">
+          <div className="p-2 hero-gradient rounded-lg shrink-0">
+            <BarChart3 className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="font-display text-3xl md:text-4xl font-bold">
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl md:text-4xl font-bold leading-tight">
               Estatísticas
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm md:text-base text-muted-foreground mt-1">
               Mercado Cartola e ranking xG dos times
             </p>
           </div>

@@ -235,15 +235,15 @@ const Historico = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 hero-gradient rounded-lg">
-            <History className="w-6 h-6 text-primary-foreground" />
+        <div className="flex items-start gap-3 mb-2">
+          <div className="p-2 hero-gradient rounded-lg shrink-0">
+            <History className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="font-display text-3xl md:text-4xl font-bold">
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl md:text-4xl font-bold leading-tight">
               Histórico
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm md:text-base text-muted-foreground mt-1">
               Escalações salvas automaticamente a cada rodada
             </p>
           </div>

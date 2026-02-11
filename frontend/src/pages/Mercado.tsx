@@ -228,6 +228,7 @@ const Mercado = () => {
                           src={player.clubeEscudo} 
                           alt={player.clubeAbrev} 
                           className="w-8 h-8 object-contain"
+                          loading="lazy"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
                           }}

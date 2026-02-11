@@ -7,23 +7,29 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CookieBanner } from "@/components/CookieBanner";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+// Eager load: landing page (first paint)
 import LandingPage from "./pages/LandingPage";
-import Dashboard from "./pages/Dashboard";
-import Escalacao from "./pages/Escalacao";
-import Confrontos from "./pages/Confrontos";
-import Mercado from "./pages/Mercado";
-import Historico from "./pages/Historico";
-import Estatisticas from "./pages/Estatisticas";
-import Sobre from "./pages/Sobre";
-import Privacidade from "./pages/Privacidade";
-import Termos from "./pages/Termos";
-import Brasileirao from "./pages/Brasileirao";
-import Scouts from "./pages/Scouts";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import TimePage from "./pages/TimePage";
-import JogoPage from "./pages/JogoPage";
-import NotFound from "./pages/NotFound";
+
+// Lazy load: all other pages
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Escalacao = lazy(() => import("./pages/Escalacao"));
+const Confrontos = lazy(() => import("./pages/Confrontos"));
+const Mercado = lazy(() => import("./pages/Mercado"));
+const Historico = lazy(() => import("./pages/Historico"));
+const Estatisticas = lazy(() => import("./pages/Estatisticas"));
+const Sobre = lazy(() => import("./pages/Sobre"));
+const Privacidade = lazy(() => import("./pages/Privacidade"));
+const Termos = lazy(() => import("./pages/Termos"));
+const Brasileirao = lazy(() => import("./pages/Brasileirao"));
+const Scouts = lazy(() => import("./pages/Scouts"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const TimePage = lazy(() => import("./pages/TimePage"));
+const JogoPage = lazy(() => import("./pages/JogoPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +47,12 @@ const queryClient = new QueryClient({
   },
 });
 
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen bg-background">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
+
 const App = () => (
   <HelmetProvider>
   <QueryClientProvider client={queryClient}>
@@ -49,6 +61,7 @@ const App = () => (
       <Sonner />
       <ErrorBoundary>
         <BrowserRouter>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -68,6 +81,7 @@ const App = () => (
             <Route path="/termos" element={<Termos />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           <CookieBanner />
         </BrowserRouter>
       </ErrorBoundary>

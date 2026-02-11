@@ -205,6 +205,22 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
         })}
       </div>
 
+      {/* Legenda Explicativa */}
+      <div className="flex justify-center flex-wrap gap-x-4 gap-y-1 py-1.5 bg-background/40 backdrop-blur-sm border-t border-border/20 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <span className={cn("font-bold", isVal ? "text-green-400" : "text-blue-400")}>C$</span>
+          <span>Preço</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="font-bold text-secondary">pts</span>
+          <span>Última</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className={cn("font-bold", isVal ? "text-green-400" : "text-blue-400")}>%</span>
+          <span>Valoriz.</span>
+        </div>
+      </div>
+
       {/* Reservas */}
       <div className="p-4 border-t border-border/50 bg-muted/20">
         <div className="flex items-center gap-2 mb-3">

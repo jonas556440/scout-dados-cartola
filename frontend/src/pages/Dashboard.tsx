@@ -122,7 +122,7 @@ const Dashboard = () => {
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl md:text-4xl font-bold">
+            <h1 className="font-display text-2xl md:text-4xl font-bold leading-tight">
               Dashboard
             </h1>
             <div className="flex items-center gap-3 mt-1">

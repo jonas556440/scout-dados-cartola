@@ -3,7 +3,7 @@ import { FormationDisplay } from "@/components/cartola/FormationDisplay";
 import { PlayerCard } from "@/components/cartola/PlayerCard";
 import { useEscalacao, useAtletas, useDashboard, useGerarEscalacao } from "@/hooks/useCartolaApi";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,13 +32,23 @@ const Escalacao = () => {
   const [filtroPos, setFiltroPos] = useState<Position | 'TODOS'>('TODOS');
   const [busca, setBusca] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [limiteExibicao, setLimiteExibicao] = useState(30);
   const { toast } = useToast();
 
-  // Obter orçamento atual
+  // Obter orçamento atual e permitir edição
   const { data: dashboardData } = useDashboard();
-  const orcamento = dashboardData?.patrimonio ?? 100;
+  const [userOrcamento, setUserOrcamento] = useState<number>(100);
+  const [queryOrcamento, setQueryOrcamento] = useState<number>(100);
 
-  const { data: escalacaoData, isLoading: loadingEscalacao, refetch } = useEscalacao(esquema, orcamento);
+  // Sincronizar com dashboard apenas quando carregar pela primeira vez
+  useEffect(() => {
+    if (dashboardData?.patrimonio && queryOrcamento === 100) {
+      setUserOrcamento(dashboardData.patrimonio);
+      setQueryOrcamento(dashboardData.patrimonio);
+    }
+  }, [dashboardData?.patrimonio, queryOrcamento]);
+
+  const { data: escalacaoData, isLoading: loadingEscalacao, refetch } = useEscalacao(esquema, queryOrcamento);
   const { data: atletas, isLoading: loadingAtletas } = useAtletas();
   const gerarEscalacao = useGerarEscalacao();
 
@@ -49,7 +59,7 @@ const Escalacao = () => {
   // Função para regenerar time
   const handleRegenerar = async () => {
     try {
-      await gerarEscalacao.mutateAsync({ esquema, cartoletas: orcamento });
+      await gerarEscalacao.mutateAsync({ esquema, cartoletas: queryOrcamento });
       toast({
         title: "Time regenerado!",
         description: `Nova escalação ${esquema} gerada com sucesso.`,

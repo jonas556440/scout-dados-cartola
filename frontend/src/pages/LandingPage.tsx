@@ -15,15 +15,19 @@ import {
   Mail,
   CheckCircle2,
   Sparkles,
-  Trophy
+  Trophy,
+  Menu,
+  X
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDashboard } from "@/hooks/useCartolaApi";
 import { SEO } from "@/components/SEO";
+import { useState } from "react";
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const { data: dashboard } = useDashboard();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const features = [
     {
@@ -143,10 +147,52 @@ export default function LandingPage() {
               Blog
             </Link>
           </nav>
-          <Button onClick={() => navigate('/escalacao')} className="bg-green-600 hover:bg-green-700">
-            Gerar Time
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => navigate('/escalacao')} className="bg-green-600 hover:bg-green-700 hidden sm:flex">
+              Gerar Time
+            </Button>
+            {/* Hamburger menu mobile */}
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menu de navegação"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile nav */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t bg-background/98 backdrop-blur animate-in slide-in-from-top-2">
+            <nav className="container mx-auto px-4 py-4 flex flex-col gap-3">
+              <Link to="/brasileirao" className="text-sm py-2 px-3 rounded-lg hover:bg-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                🏆 Brasilão
+              </Link>
+              <Link to="/dashboard" className="text-sm py-2 px-3 rounded-lg hover:bg-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                📊 Dashboard
+              </Link>
+              <Link to="/escalacao" className="text-sm py-2 px-3 rounded-lg hover:bg-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                ⚡ Escalação
+              </Link>
+              <Link to="/confrontos" className="text-sm py-2 px-3 rounded-lg hover:bg-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                ⚔️ Confrontos
+              </Link>
+              <Link to="/scouts" className="text-sm py-2 px-3 rounded-lg hover:bg-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                📋 Scouts
+              </Link>
+              <Link to="/mercado" className="text-sm py-2 px-3 rounded-lg hover:bg-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                💰 Mercado
+              </Link>
+              <Link to="/blog" className="text-sm py-2 px-3 rounded-lg hover:bg-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                📝 Blog
+              </Link>
+              <Button onClick={() => { navigate('/escalacao'); setMobileMenuOpen(false); }} className="bg-green-600 hover:bg-green-700 w-full mt-2">
+                Gerar Time Grátis
+              </Button>
+            </nav>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}

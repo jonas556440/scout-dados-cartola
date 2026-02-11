@@ -22,8 +22,31 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log para console em desenvolvimento
+    // Log para console
     console.error('ErrorBoundary capturou erro:', error, errorInfo);
+
+    // Detecção de Chunk Load Error (deploy novo quebrou cache de chunks antigos)
+    // Mensagens comuns: "Failed to fetch dynamically imported module", "Importing a module script failed"
+    const isChunkError = error.message && (
+      error.message.includes('Failed to fetch dynamically imported module') ||
+      error.message.includes('Importing a module script failed') ||
+      error.name === 'ChunkLoadError'
+    );
+
+    if (isChunkError) {
+      console.warn('Chunk loading failed. Reloading page...');
+      // Evitar loop infinito: reload apenas se não tiver tentado imediatamente antes
+      const storageKey = 'chunk_reload_attempt';
+      const now = Date.now();
+      const lastAttempt = parseInt(sessionStorage.getItem(storageKey) || '0', 10);
+      
+      // Se tentou recarregar há menos de 10 segundos, não tenta de novo (mostra erro visual)
+      if (now - lastAttempt > 10000) {
+        sessionStorage.setItem(storageKey, now.toString());
+        window.location.reload();
+        return;
+      }
+    }
   }
 
   handleReset = () => {

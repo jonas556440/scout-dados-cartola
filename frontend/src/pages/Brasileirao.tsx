@@ -79,19 +79,19 @@ const Brasileirao = () => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 hero-gradient rounded-lg">
-            <Trophy className="w-6 h-6 text-primary-foreground" />
+        <div className="flex items-start gap-3 mb-2">
+          <div className="p-2 hero-gradient rounded-lg shrink-0">
+            <Trophy className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="font-display text-2xl md:text-4xl font-bold">
-              Campeonato Brasileiro 2026 - Série A
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl md:text-4xl font-bold leading-tight">
+              Brasilão 2026
             </h1>
-            <div className="flex items-center gap-3">
-              <p className="text-muted-foreground text-sm">
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Rodada {classificacaoData?.rodada || '?'} • Classificação e Probabilidades
               </p>
-              <span className="text-xs px-2 py-1 rounded-full bg-success/20 text-success font-semibold">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-success/20 text-success font-semibold whitespace-nowrap">
                 ✅ Atualizado
               </span>
             </div>

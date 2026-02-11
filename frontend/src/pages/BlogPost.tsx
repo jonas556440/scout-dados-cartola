@@ -8,6 +8,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { getPostBySlug } from "@/content/posts";
 import { useAutoBlogPost } from "@/hooks/useCartolaApi";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -110,7 +111,7 @@ export default function BlogPost() {
 
         {/* Content */}
         <div className="prose prose-invert prose-green max-w-none prose-headings:font-display prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-table:text-sm prose-th:text-left prose-th:p-2 prose-th:border-b prose-th:border-border prose-td:p-2 prose-td:border-b prose-td:border-border/50 prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground prose-em:text-muted-foreground/80">
-          <ReactMarkdown>{post.content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
         </div>
 
         {/* Disclaimer */}

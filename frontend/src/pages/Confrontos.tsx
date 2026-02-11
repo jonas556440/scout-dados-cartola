@@ -108,22 +108,22 @@ const Confrontos = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-6 md:mb-8"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 hero-gradient rounded-lg">
-            <Swords className="w-6 h-6 text-primary-foreground" />
+        <div className="flex items-start gap-3 mb-2">
+          <div className="p-2 hero-gradient rounded-lg shrink-0">
+            <Swords className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="font-display text-3xl md:text-4xl font-bold">
+          <div className="min-w-0">
+            <h1 className="font-display text-2xl md:text-4xl font-bold leading-tight">
               Confrontos
             </h1>
-            <div className="flex items-center gap-3">
-              <p className="text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <p className="text-sm md:text-base text-muted-foreground">
                 Rodada {confrontos?.[0]?.rodada || '?'} • Análise de partidas
               </p>
               {confrontos && (
-                <span className="text-xs px-2 py-1 rounded-full bg-success/20 text-success font-semibold">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-success/20 text-success font-semibold whitespace-nowrap">
                   ✅ Dados atualizados
                 </span>
               )}

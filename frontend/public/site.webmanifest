@@ -1,0 +1,22 @@
+{
+  "name": "ScoutDados",
+  "short_name": "ScoutDados",
+  "description": "Estatísticas do Brasileirão 2026 com simulação Monte Carlo, previsão de placares e Cartola FC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#16a34a",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

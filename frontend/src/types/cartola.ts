@@ -493,6 +493,8 @@ export interface SimulacaoTime {
   id: number;
   abrev: string;
   pontosMedio: number;
+  pontosMin?: number;
+  pontosMax?: number;
   probTitulo: number;
   probLibertadores: number;
   probSulamericana: number;
@@ -500,11 +502,37 @@ export interface SimulacaoTime {
   posicaoMedia: number;
 }
 
+export interface PontosNecessarios {
+  probabilidade: number;
+  titulo: number;
+  libertadores: number;
+  sulamericana: number;
+  permanencia: number;
+}
+
+export interface JogoProbabilidade {
+  mandante: string;
+  mandanteNome: string;
+  visitante: string;
+  visitanteNome: string;
+  dataHora: string;
+  local: string;
+  realizado: boolean;
+  placarMandante: number | null;
+  placarVisitante: number | null;
+  probVitoriaMandante: number | null;
+  probEmpate: number | null;
+  probVitoriaVisitante: number | null;
+}
+
 export interface ClassificacaoResponse {
   rodada: number;
   classificacao: ClassificacaoTime[];
   simulacao: SimulacaoTime[] | null;
   totalTimes: number;
+  pontosNecessarios?: PontosNecessarios[];
+  proximosJogos?: JogoProbabilidade[];
+  jogosRealizados?: JogoProbabilidade[];
 }
 
 export interface PartidaRodada {
