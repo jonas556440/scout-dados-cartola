@@ -85,7 +85,7 @@ const Brasileirao = () => {
           </div>
           <div className="min-w-0">
             <h1 className="font-display text-2xl md:text-4xl font-bold leading-tight">
-              Brasilão 2026
+              Brasileirão 2026
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               <p className="text-sm md:text-base text-muted-foreground">
