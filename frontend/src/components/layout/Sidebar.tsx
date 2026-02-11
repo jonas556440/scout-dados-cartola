@@ -65,15 +65,23 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile Toggle */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </Button>
+      {/* Mobile Header Bar */}
+      <div className="fixed top-0 left-0 right-0 h-14 bg-sidebar border-b border-sidebar-border z-40 md:hidden flex items-center px-4 gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="shrink-0"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </Button>
+        <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg hero-gradient flex items-center justify-center">
+            <span className="text-sm font-bold text-primary-foreground">S</span>
+          </div>
+          <span className="font-display text-base font-bold">ScoutDados</span>
+        </Link>
+      </div>
 
       {/* Overlay */}
       {isOpen && (
@@ -92,7 +100,7 @@ export function Sidebar() {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 p-6 border-b border-sidebar-border">
+        <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-6 border-b border-sidebar-border hover:bg-sidebar-accent/50 transition-colors">
           <div className="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
             <span className="text-lg font-bold text-primary-foreground">S</span>
           </div>
@@ -100,7 +108,7 @@ export function Sidebar() {
             <span className="font-display text-lg font-bold" role="banner">ScoutDados</span>
             <p className="text-xs text-muted-foreground">Estatísticas & Cartola</p>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav className="p-4 space-y-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 240px)' }}>
@@ -162,7 +170,7 @@ export function Sidebar() {
           {/* Rodada/Patrimônio: só em rotas do Cartola FC */}
           {isCartolaRoute && (
             <div className="glass-card p-4">
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                   <TrendingUp className="w-4 h-4 text-primary" />
                 </div>
@@ -171,10 +179,7 @@ export function Sidebar() {
                   <div className="text-xs text-muted-foreground">{statusMercado}</div>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Patrimônio</span>
-                <span className="font-bold text-primary">C${patrimonio.toFixed(1)}</span>
-              </div>
+              {/* Patrimônio movido para a tela de Escalação */}
             </div>
           )}
         </div>

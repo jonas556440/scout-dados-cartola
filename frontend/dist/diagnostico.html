@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico - Cartola FC 2026</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .ok { background: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        button { padding: 10px 20px; margin: 10px 5px; cursor: pointer; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Diagnóstico Cartola FC 2026</h1>
+    
+    <div id="results"></div>
+    
+    <h2>Ações:</h2>
+    <button onclick="clearCache()">🗑️ Limpar Cache do Navegador</button>
+    <button onclick="location.reload(true)">🔄 Hard Refresh</button>
+    <button onclick="window.location.href='/'">🏠 Ir para o App</button>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        async function runTests() {
+            results.innerHTML = '<p>Testando...</p>';
+            let html = '';
+            
+            // Teste 1: Backend
+            try {
+                const backendResp = await fetch('http://localhost:8000/api/status');
+                const backendData = await backendResp.json();
+                html += '<div class="status ok">✅ Backend: OK (Rodada ' + backendData.rodadaAtual + ')</div>';
+            } catch (e) {
+                html += '<div class="status error">❌ Backend: ERRO - ' + e.message + '</div>';
+            }
+            
+            // Teste 2: main.tsx
+            try {
+                const mainResp = await fetch('/src/main.tsx');
+                const mainText = await mainResp.text();
+                if (mainText.includes('_jsxDEV') && !mainText.includes('void 0')) {
+                    html += '<div class="status ok">✅ main.tsx: jsxDEV definido corretamente</div>';
+                } else {
+                    html += '<div class="status error">❌ main.tsx: jsxDEV não encontrado ou vazio</div>';
+                }
+            } catch (e) {
+                html += '<div class="status error">❌ main.tsx: ERRO - ' + e.message + '</div>';
+            }
+            
+            // Teste 3: jsx-dev-runtime
+            try {
+                const runtimeResp = await fetch('/node_modules/.vite/deps/react_jsx-dev-runtime.js');
+                const runtimeText = await runtimeResp.text();
+                if (runtimeText.includes('exports.jsxDEV') && !runtimeText.includes('jsxDEV = void 0')) {
+                    html += '<div class="status ok">✅ jsx-dev-runtime: Implementação presente</div>';
+                } else {
+                    html += '<div class="status error">❌ jsx-dev-runtime: jsxDEV = void 0 (versão produção)</div>';
+                }
+            } catch (e) {
+                html += '<div class="status error">❌ jsx-dev-runtime: ERRO - ' + e.message + '</div>';
+            }
+            
+            // Info do navegador
+            html += '<h3>Info do Navegador:</h3>';
+            html += '<pre>';
+            html += 'User Agent: ' + navigator.userAgent + '\n';
+            html += 'Cache Storage disponível: ' + ('caches' in window ? 'Sim' : 'Não') + '\n';
+            html += '</pre>';
+            
+            results.innerHTML = html;
+        }
+        
+        function clearCache() {
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+            alert('Cache limpo! Agora faça Hard Refresh (Ctrl+F5)');
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>

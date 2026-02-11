@@ -20,7 +20,7 @@ export function MainLayout({ children, className }: MainLayoutProps) {
       <main
         id="main-content"
         className={cn(
-          "md:ml-64 min-h-screen p-4 md:p-8",
+          "md:ml-64 min-h-screen px-4 pb-4 pt-[4.5rem] md:px-8 md:pb-8 md:pt-8",
           className
         )}
       >
