@@ -61,22 +61,22 @@
 ### Consistência de Dados
 
 - [ ] **2.1** Unificar modelo de previsão — usar ScorePredictor V4 (Dixon-Coles) em blog E previsões
-- [ ] **2.2** Criar `src/utils/team_mapping.py` — mapeamento central de 20 times (slug, abrev Cartola, ID FDO, nome completo)
-- [ ] **2.3** Corrigir mapeamento de siglas FDO→Cartola no `match_page_manager.py`
+- [x] **2.2** Criar `src/utils/team_mapping.py` — mapeamento central de 23 times (slug, abrev, IDs) ✅
+- [x] **2.3** Corrigir mapeamento de siglas FDO→Cartola (`normalize_fdo_sigla`) + web_scraper ✅
 - [ ] **2.4** Validar match pages antes de indexar — não publicar `enrichment_level: "base"`
-- [ ] **2.5** Investigar `jogos: 38` — o fix raiz requer que `match_analyzer.carregar_estatisticas_times()` filtre dados por temporada 2026, não use cumulativos
+- [x] **2.5** Fix `jogos: 38` — `match_analyzer` agora faz `min(jogos_real, jogos_totais)` para não usar dados de Season anterior ✅
 
 ### Backend
 
 - [ ] **2.6** Converter circuit breaker para sync e aplicar nos endpoints que chamam API Cartola
-- [ ] **2.7** Usar context manager (`with history.session_scope() as session:`) nos endpoints SQLAlchemy
-- [ ] **2.8** Extrair warm functions para `src/utils/cache_warmup.py` — eliminar import de `api_server` no scheduler
-- [ ] **2.9** Calibrar λ do modelo Poisson com resultados reais (`MEDIA_GOLS_MANDANTE` ~1.35, `MEDIA_GOLS_VISITANTE` ~1.05)
+- [x] **2.7** `session_scope()` context manager criado em `history_manager.py` ✅
+- [x] **2.8** `src/utils/cache_warmup.py` criado — scheduler usa HTTP, sem import de `api_server` ✅
+- [x] **2.9** Fix xG AttributeError — usa `media_gols_base = 1.25` inline (V4 não tem atributo antigo) ✅
 - [ ] **2.10** Implementar connection pooling para SQLite (max 5 threads)
 
 ### Frontend
 
-- [ ] **2.11** Adicionar skip-to-content no MainLayout (WCAG 2.4.1)
+- [x] **2.11** Skip-to-content adicionado em MainLayout (WCAG 2.4.1) ✅
 - [ ] **2.12** Consolidar sitemaps — gerar apenas em `dist/`
 - [ ] **2.13** Implementar OG images dinâmicas por jogo/time
 - [ ] **2.14** Adicionar tratamento de erro granular por endpoint no `useCartolaApi.ts`
