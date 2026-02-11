@@ -2671,7 +2671,7 @@ def get_scouts_destaques(rodada: Optional[int] = None, limite: int = Query(defau
         assistentes = []
         
         for atleta_id, dados in atletas_dict.items():
-            scouts = dados.get("scout", {})
+            scouts = dados.get("scout") or {}
             pontos = dados.get("pontuacao", 0)
             clube_id = dados.get("clube_id", 0)
             clube_info = clubes.get(str(clube_id), {})
