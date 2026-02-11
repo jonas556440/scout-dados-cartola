@@ -143,6 +143,56 @@ class CartolaScheduler:
             replace_existing=True
         )
         logger.info("✅ Job 'atualizar_classificacao' agendado (a cada 1h)")
+
+        # Tarefa 8.1: Pré-aquecer cache de classificação (a cada 20 min)
+        self.scheduler.add_job(
+            func=self.preaquecer_cache_classificacao,
+            trigger=IntervalTrigger(minutes=20),
+            id='preaquecer_cache_classificacao',
+            name='Pré-aquecer Cache Classificação',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'preaquecer_cache_classificacao' agendado (a cada 20 min)")
+        
+        # Tarefa 8.2: Pré-aquecer cache de confrontos (a cada 15 min)
+        self.scheduler.add_job(
+            func=self.preaquecer_cache_confrontos,
+            trigger=IntervalTrigger(minutes=15),
+            id='preaquecer_cache_confrontos',
+            name='Pré-aquecer Cache Confrontos',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'preaquecer_cache_confrontos' agendado (a cada 15 min)")
+        
+        # Tarefa 8.3: Pré-aquecer cache de força dos times (a cada 30 min)
+        self.scheduler.add_job(
+            func=self.preaquecer_cache_forca,
+            trigger=IntervalTrigger(minutes=30),
+            id='preaquecer_cache_forca',
+            name='Pré-aquecer Cache Força Times',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'preaquecer_cache_forca' agendado (a cada 30 min)")
+        
+        # Tarefa 8.4: Pré-aquecer cache de acurácia (a cada 2h)
+        self.scheduler.add_job(
+            func=self.preaquecer_cache_acuracia,
+            trigger=IntervalTrigger(hours=2),
+            id='preaquecer_cache_acuracia',
+            name='Pré-aquecer Cache Acurácia',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'preaquecer_cache_acuracia' agendado (a cada 2h)")
+        
+        # Tarefa 8.5: Pré-aquecer cache de notícias (a cada 20 min)
+        self.scheduler.add_job(
+            func=self.preaquecer_cache_noticias,
+            trigger=IntervalTrigger(minutes=20),
+            id='preaquecer_cache_noticias',
+            name='Pré-aquecer Cache Notícias',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'preaquecer_cache_noticias' agendado (a cada 20 min)")
         
         # Tarefa 9: Limpar cache da API (a cada 2h — os TTLs internos já gerenciam frescor)
         self.scheduler.add_job(
@@ -253,6 +303,16 @@ class CartolaScheduler:
             replace_existing=True
         )
         logger.info("✅ Job 'atualizar_paginas' agendado (06:30, 12:30, 18:30, 23:30)")
+        
+        # Tarefa 20: Pré-aquecer cache de escalação (a cada 20 min)
+        self.scheduler.add_job(
+            func=self.preaquecer_cache_escalacao,
+            trigger=IntervalTrigger(minutes=20),
+            id='preaquecer_cache_escalacao',
+            name='Pré-aquecer Cache Escalação',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'preaquecer_cache_escalacao' agendado (a cada 20 min)")
         
         # Iniciar scheduler
         self.scheduler.start()
@@ -604,7 +664,7 @@ class CartolaScheduler:
             # 2) Simulação Monte Carlo do campeonato
             simulacao_data = []
             try:
-                simulator = MonteCarloSimulator(score_predictor=None, n_simulacoes=1000)
+                simulator = MonteCarloSimulator(score_predictor=predictor, n_simulacoes=1000)
                 resultados, _ = simulator.simular_campeonato()
                 for r in resultados:
                     simulacao_data.append({
@@ -988,16 +1048,74 @@ class CartolaScheduler:
                 
         except Exception as e:
             logger.error(f"❌ Erro ao atualizar classificação: {e}", exc_info=True)
+
+    def preaquecer_cache_classificacao(self):
+        """
+        Pré-aquece o cache de classificação do Brasileirão (disco + memória).
+        Evita travamento em horário de pico.
+        """
+        try:
+            from src.utils.cache_warmup import warm_classificacao_cache
+            warm_classificacao_cache(force=True)
+            logger.info("✅ Cache de classificação pré-aquecido")
+        except Exception as e:
+            logger.error(f"❌ Erro ao pré-aquecer cache de classificação: {e}", exc_info=True)
+
+    def preaquecer_cache_confrontos(self):
+        """Pré-aquece o cache de confrontos (disco + memória)."""
+        try:
+            from src.utils.cache_warmup import warm_confrontos_cache
+            warm_confrontos_cache(force=True)
+            logger.info("✅ Cache de confrontos pré-aquecido")
+        except Exception as e:
+            logger.error(f"❌ Erro ao pré-aquecer cache de confrontos: {e}", exc_info=True)
+
+    def preaquecer_cache_forca(self):
+        """Pré-aquece o cache de força dos times (disco + memória)."""
+        try:
+            from src.utils.cache_warmup import warm_forca_cache
+            warm_forca_cache(force=True)
+            logger.info("✅ Cache de força dos times pré-aquecido")
+        except Exception as e:
+            logger.error(f"❌ Erro ao pré-aquecer cache de força: {e}", exc_info=True)
+
+    def preaquecer_cache_acuracia(self):
+        """Pré-aquece o cache de acurácia (disco + memória)."""
+        try:
+            from src.utils.cache_warmup import warm_acuracia_cache
+            warm_acuracia_cache(force=True)
+            logger.info("✅ Cache de acurácia pré-aquecido")
+        except Exception as e:
+            logger.error(f"❌ Erro ao pré-aquecer cache de acurácia: {e}", exc_info=True)
+
+    def preaquecer_cache_noticias(self):
+        """Pré-aquece o cache de notícias da rodada (disco + memória)."""
+        try:
+            from src.utils.cache_warmup import warm_noticias_cache
+            warm_noticias_cache(force=True)
+            logger.info("✅ Cache de notícias pré-aquecido")
+        except Exception as e:
+            logger.error(f"❌ Erro ao pré-aquecer cache de notícias: {e}", exc_info=True)
+
+    def preaquecer_cache_escalacao(self):
+        """Pré-aquece o cache de escalação (disco + memória)."""
+        try:
+            from src.utils.cache_warmup import warm_escalacao_cache
+            warm_escalacao_cache(force=True)
+            logger.info("✅ Cache de escalação pré-aquecido")
+        except Exception as e:
+            logger.error(f"❌ Erro ao pré-aquecer cache de escalação: {e}", exc_info=True)
     
     def limpar_cache_api(self):
         """
-        Limpa cache da API para forçar dados frescos
-        Executado a cada 15 minutos
+        Limpa cache da API para forçar dados frescos.
+        NÃO limpa o cache de classificação (gerenciado por TTL + disco próprios).
+        Executado a cada 2h.
         """
         try:
             logger.info("🗑️  Limpando cache da API...")
             
-            # Limpar cache interno da API
+            # Limpar cache interno da API (HTTP requests)
             if hasattr(self.api, '_cache'):
                 self.api._cache.clear()
                 logger.info("✅ Cache da API limpo")

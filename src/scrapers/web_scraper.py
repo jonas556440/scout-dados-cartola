@@ -75,7 +75,7 @@ class WebScraper:
         "botafogo": "BOT",
         "internacional": "INT",
         "corinthians": "COR",
-        "sao-paulo": "SÃO",
+        "sao-paulo": "SAO",
         "fluminense": "FLU",
         "atletico-mg": "CAM",
         "gremio": "GRE",
@@ -83,7 +83,7 @@ class WebScraper:
         "santos": "SAN",
         "vasco": "VAS",
         "bahia": "BAH",
-        "athletico-pr": "ATH",
+        "athletico-pr": "CAP",
         "fortaleza": "FOR",
         "bragantino": "RBB",
         "cuiaba": "CUI",
@@ -248,9 +248,7 @@ class WebScraper:
         return noticias
     
     def _buscar_cartola_pfc(self, clube_abrev: str) -> List[NoticiaTime]:
-        """Busca análises no Cartola PFC"""
-        # TODO: Implementar scraping do Cartola PFC
-        # Site: https://cartolapfc.com.br
+        """Busca análises no Cartola PFC (não implementado)"""
         return []
     
     def _identificar_tipo_noticia(self, texto: str) -> str:

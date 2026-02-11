@@ -10,6 +10,8 @@ Análise completa considerando:
 
 Este é o módulo que faltava para fazer seleção inteligente como os sites especializados!
 """
+import json
+import logging
 import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
@@ -20,6 +22,12 @@ from collections import defaultdict
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from config.settings import settings
+from src.analysis.fixture_collector import CARTOLA_TO_APIFOOTBALL
+
+logger = logging.getLogger("MatchAnalyzer")
+
+# Diretório do cache de stats (API-Football)
+STATS_CACHE_DIR = Path(__file__).parent.parent.parent / "data" / "stats_cache"
 
 
 @dataclass
@@ -146,6 +154,39 @@ class MatchAnalyzer:
         self.estatisticas_times: Dict[int, EstatisticasTime] = {}
         self.confrontos_rodada: Dict[int, List[Confronto]] = {}
         self.resultados_anteriores: List[Dict] = []
+        self._stats_cache: Dict[int, Dict] = {}  # cartola_id → stats reais API-Football
+
+    @staticmethod
+    def _carregar_stats_cache() -> Dict[int, Dict]:
+        """
+        Carrega stats reais do cache API-Football (data/stats_cache/team_stats/).
+        Retorna Dict[cartola_id, stats_dict] para cada time mapeado.
+        
+        Prioridade de liga: Serie A (71) > Serie B (72) > Copa BR (75).
+        """
+        cache_dir = STATS_CACHE_DIR / "team_stats"
+        if not cache_dir.exists():
+            return {}
+
+        result: Dict[int, Dict] = {}
+        for cartola_id, af_id in CARTOLA_TO_APIFOOTBALL.items():
+            # Tentar ligas na ordem de prioridade
+            for league in [71, 72, 75]:
+                path = cache_dir / f"{af_id}_{league}_2024.json"
+                if path.exists():
+                    try:
+                        with open(path, "r", encoding="utf-8") as f:
+                            data = json.load(f)
+                        # Validar que tem jogos
+                        jogos = data.get("jogos", {})
+                        if isinstance(jogos, dict) and jogos.get("total", 0) > 0:
+                            result[cartola_id] = data
+                            break
+                    except (json.JSONDecodeError, OSError) as e:
+                        logger.warning(f"Cache corrompido {path.name}: {e}")
+                        continue
+        logger.info(f"📊 Stats cache: {len(result)}/{len(CARTOLA_TO_APIFOOTBALL)} times com dados reais")
+        return result
     
     def carregar_estatisticas_times(
         self, 
@@ -167,32 +208,32 @@ class MatchAnalyzer:
         # ATUALIZADO para o Brasileirão 2026
         RANKING_HISTORICO = {
             # Top 6 - Grandes do Brasil (elencos caros, estrutura)
-            "FLA": 95, "PAL": 93, "BOT": 90, "INT": 85, "CAM": 83, "FLU": 82,
+            "FLA": 85, "PAL": 84, "BOT": 82, "INT": 79, "FLU": 79, "CAM": 78,
             # Grandes tradicionais
-            "SAO": 80, "COR": 78, "GRE": 76, "CRU": 74, "SAN": 72,
+            "SAO": 77, "COR": 76, "GRE": 75, "CRU": 73, "SAN": 73,
             # Série A estabelecidos
-            "BAH": 70, "VAS": 68, "RBB": 66, "CAP": 64, "VIT": 55,
-            # Recém-promovidos / menor estrutura
-            "MIR": 52,  # Campeão Série B - time organizado mas menor
-            "CFC": 50,  # Coritiba
-            "CHA": 48,  # Chapecoense
-            "REM": 40,  # Remo - recém-promovido, menor estrutura
+            "BAH": 76, "VAS": 74, "RBB": 75, "CAP": 74, "VIT": 71,
+            # Recém-promovidos (competitivos na Série A)
+            "MIR": 71,  # Mirassol - competitivo em casa (validado R1: 2x1 VAS)
+            "CFC": 69,  # Coritiba (validado R2: venceu CRU fora)
+            "CHA": 70,  # Chapecoense (validado R1: 4x2 SAN em casa)
+            "REM": 68,  # Remo - competitivo (validado R2: 2x2 MIR)
         }
         
         # v9: Rankings SEPARADOS para ataque e defesa
         # Ataque: baseado em potencial ofensivo (artilharia, criação)
         RANKING_ATAQUE = {
-            "FLA": 97, "PAL": 92, "BOT": 88, "INT": 82, "CAM": 80, "FLU": 78,
-            "SAO": 82, "COR": 75, "GRE": 74, "CRU": 70, "SAN": 68,
-            "BAH": 72, "VAS": 65, "RBB": 68, "CAP": 62, "VIT": 52,
-            "MIR": 48, "CFC": 45, "CHA": 42, "REM": 35,
+            "FLA": 87, "PAL": 83, "BOT": 81, "INT": 77, "FLU": 76, "CAM": 76,
+            "SAO": 78, "COR": 74, "GRE": 73, "CRU": 71, "SAN": 71,
+            "BAH": 75, "VAS": 72, "RBB": 75, "CAP": 72, "VIT": 69,
+            "MIR": 70, "CFC": 67, "CHA": 68, "REM": 65,
         }
         # Defesa: baseado em solidez defensiva (pouco gol sofrido)
         RANKING_DEFESA = {
-            "FLA": 90, "PAL": 94, "BOT": 92, "INT": 88, "CAM": 78, "FLU": 85,
-            "SAO": 78, "COR": 80, "GRE": 78, "CRU": 72, "SAN": 70,
-            "BAH": 68, "VAS": 70, "RBB": 64, "CAP": 66, "VIT": 55,
-            "MIR": 55, "CFC": 52, "CHA": 50, "REM": 42,
+            "FLA": 83, "PAL": 86, "BOT": 83, "INT": 81, "FLU": 82, "CAM": 75,
+            "SAO": 75, "COR": 77, "GRE": 76, "CRU": 73, "SAN": 72,
+            "BAH": 74, "VAS": 75, "RBB": 72, "CAP": 74, "VIT": 71,
+            "MIR": 72, "CFC": 70, "CHA": 71, "REM": 68,
         }
         
         estatisticas = {}
@@ -201,6 +242,9 @@ class MatchAnalyzer:
         posicoes_reais = {}
         aproveitamentos = {}
         jogos_disputados = 0  # Para calcular peso do ranking histórico
+        
+        # Carregar cache de stats reais (API-Football)
+        self._stats_cache = self._carregar_stats_cache()
         
         if partidas:
             for p in partidas:
@@ -251,8 +295,10 @@ class MatchAnalyzer:
             # 2. Força da POSIÇÃO ATUAL
             posicao = posicoes_reais.get(clube_id)
             if posicao:
-                # Posição 1 = 100, posição 20 = 30
-                forca_posicao = max(30, 100 - (posicao - 1) * 3.5)
+                # V5: Spread progressivo — posição importa pouco no início,
+                # muito no fim do campeonato. Evita reversões com 2-3 jogos.
+                spread = min(3.5, 0.5 + jogos_disputados * 0.20)
+                forca_posicao = max(40, 100 - (posicao - 1) * spread)
             else:
                 forca_posicao = forca_historico  # Fallback para histórico
             
@@ -271,6 +317,11 @@ class MatchAnalyzer:
             forma_bonus = (vitorias * 2) - (derrotas * 2)
             forma_bonus = max(-10, min(10, forma_bonus))
             
+            # V5: Escalar bonus pela confiança — poucos jogos = bonus reduzido
+            jogos_totais = vitorias + empates + derrotas
+            confianca_forma = min(1.0, jogos_totais / 5.0)
+            forma_bonus = forma_bonus * confianca_forma
+            
             # 5. Força final = base + forma
             forca_final = min(100, max(20, forca_base + forma_bonus))
             # v9: Forças SEPARADAS para ataque e defesa
@@ -282,33 +333,89 @@ class MatchAnalyzer:
             pontos_totais = (vitorias * 3) + empates
             
             # Estimar gols baseado na força do time e resultados
+            # PRIORIDADE: dados reais do API-Football > heurística
             gols_estimados_pro = 0
             gols_estimados_contra = 0
+            media_gols_pro = 0.0
+            media_gols_contra = 0.0
+            clean_sheets = 0
+            jogos_real = 0
+            usa_dados_reais = False
             
-            if jogos_totais > 0:
-                # v9: Estimativa melhorada com dados reais de gols
+            real_stats = self._stats_cache.get(clube_id)
+            if real_stats:
+                # Dados REAIS da API-Football (gols, clean sheets, etc.)
+                gp = real_stats.get("gols_pro", {})
+                gc = real_stats.get("gols_contra", {})
+                cs = real_stats.get("clean_sheets", {})
+                jogos_info = real_stats.get("jogos", {})
+                jogos_real = jogos_info.get("total", 0) if isinstance(jogos_info, dict) else 0
+                
+                if jogos_real > 0:
+                    usa_dados_reais = True
+                    gols_estimados_pro = gp.get("total", 0) if isinstance(gp, dict) else 0
+                    gols_estimados_contra = gc.get("total", 0) if isinstance(gc, dict) else 0
+                    media_gols_pro = float(gp.get("media", 0)) if isinstance(gp, dict) else 0.0
+                    media_gols_contra = float(gc.get("media", 0)) if isinstance(gc, dict) else 0.0
+                    clean_sheets = cs.get("total", 0) if isinstance(cs, dict) else 0
+                    
+                    # v9: Ajustar ataque/defesa com dados REAIS
+                    confianca_gols = min(1.0, jogos_real / 10.0)
+                    # Ataque: muitos gols = ataque forte (média liga ≈ 1.2)
+                    ajuste_ataque = min(8, max(-8, (media_gols_pro - 1.2) * 6)) * confianca_gols
+                    forca_final_ataque = min(100, max(20, forca_final_ataque + ajuste_ataque))
+                    # Defesa: poucos gols sofridos = defesa forte
+                    ajuste_defesa = min(8, max(-8, (1.2 - media_gols_contra) * 6)) * confianca_gols
+                    forca_final_defesa = min(100, max(20, forca_final_defesa + ajuste_defesa))
+                    # Bônus clean sheets (>25% = boa defesa)
+                    if jogos_real >= 5:
+                        pct_cs = clean_sheets / jogos_real
+                        bonus_cs = min(4, max(-2, (pct_cs - 0.20) * 20)) * confianca_gols
+                        forca_final_defesa = min(100, max(20, forca_final_defesa + bonus_cs))
+            
+            if not usa_dados_reais and jogos_totais > 0:
+                # Fallback: heurística baseada em forma recente (V/E/D)
                 gols_estimados_pro = (vitorias * 2) + empates + (derrotas * 1)
-                gols_estimados_contra = (derrotas * 2) + empates + (vitorias * 0.5)
+                gols_estimados_contra = (derrotas * 2) + empates + int(vitorias * 0.5)
                 gols_estimados_pro = int(gols_estimados_pro)
                 gols_estimados_contra = int(gols_estimados_contra)
                 
-                # v9: Ajustar ataque/defesa com dados reais de gols
                 if jogos_totais >= 2:
                     media_gols_pro = gols_estimados_pro / jogos_totais
                     media_gols_contra = gols_estimados_contra / jogos_totais
-                    # Ajustar ataque: muitos gols = ataque forte
-                    ajuste_ataque = min(8, max(-8, (media_gols_pro - 1.2) * 6))
+                    confianca_gols = min(1.0, jogos_totais / 8.0)
+                    ajuste_ataque = min(8, max(-8, (media_gols_pro - 1.2) * 6)) * confianca_gols
                     forca_final_ataque = min(100, max(20, forca_final_ataque + ajuste_ataque))
-                    # Ajustar defesa: poucos gols sofridos = defesa forte
-                    ajuste_defesa = min(8, max(-8, (1.2 - media_gols_contra) * 6))
+                    ajuste_defesa = min(8, max(-8, (1.2 - media_gols_contra) * 6)) * confianca_gols
                     forca_final_defesa = min(100, max(20, forca_final_defesa + ajuste_defesa))
+            
+            # Enriquecer com dados reais de jogos (casa/fora) se disponível
+            vitorias_casa = 0
+            vitorias_fora = 0
+            gols_casa = 0
+            gols_fora = 0
+            gols_sofridos_casa = 0
+            gols_sofridos_fora = 0
+            
+            if real_stats:
+                vit_info = real_stats.get("vitorias", {})
+                vitorias_casa = vit_info.get("casa", 0) if isinstance(vit_info, dict) else 0
+                vitorias_fora = vit_info.get("fora", 0) if isinstance(vit_info, dict) else 0
+                gp = real_stats.get("gols_pro", {})
+                gc = real_stats.get("gols_contra", {})
+                gols_casa = gp.get("casa", 0) if isinstance(gp, dict) else 0
+                gols_fora = gp.get("fora", 0) if isinstance(gp, dict) else 0
+                gols_sofridos_casa = gc.get("casa", 0) if isinstance(gc, dict) else 0
+                gols_sofridos_fora = gc.get("fora", 0) if isinstance(gc, dict) else 0
             
             stats = EstatisticasTime(
                 clube_id=clube_id,
                 nome=clube_info.get("nome", ""),
                 abreviacao=abrev,
                 posicao=posicao or 0,
-                jogos=jogos_totais,
+                # Cap: se stats vêm de season passada (ex: 2024, jogos=38),
+                # usar mínimo entre jogos_real e rodada Cartola atual
+                jogos=min(jogos_real, jogos_totais) if usa_dados_reais and jogos_totais > 0 else (jogos_real if usa_dados_reais else jogos_totais),
                 vitorias=vitorias,
                 empates=empates,
                 derrotas=derrotas,
@@ -316,6 +423,14 @@ class MatchAnalyzer:
                 gols_pro=gols_estimados_pro,
                 gols_contra=gols_estimados_contra,
                 saldo_gols=gols_estimados_pro - gols_estimados_contra,
+                vitorias_casa=vitorias_casa,
+                vitorias_fora=vitorias_fora,
+                gols_casa=gols_casa,
+                gols_fora=gols_fora,
+                gols_sofridos_casa=gols_sofridos_casa,
+                gols_sofridos_fora=gols_sofridos_fora,
+                media_gols_pro=media_gols_pro,
+                media_gols_contra=media_gols_contra,
                 forca_ataque=forca_final_ataque,
                 forca_defesa=forca_final_defesa,
                 forca_geral=forca_final,

@@ -46,6 +46,26 @@ class HistoryManager:
     def get_session(self) -> Session:
         """Retorna uma nova sessão do banco"""
         return self.SessionLocal()
+
+    from contextlib import contextmanager
+
+    @contextmanager
+    def session_scope(self):
+        """Context manager para sessões com commit/rollback automático.
+        
+        Uso:
+            with history.session_scope() as session:
+                session.query(...).
+        """
+        session = self.SessionLocal()
+        try:
+            yield session
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
     
     # ==================== SALVAR TIME ====================
     

@@ -430,6 +430,15 @@ class FootballDataClient:
             except Exception:
                 data_brt = utc_date[:16]
 
+        # Converter siglas FDO→Cartola (PAU→SAO, FBP→GRE, SCI→INT, etc.)
+        try:
+            from src.utils.team_mapping import normalize_fdo_sigla
+            mandante_sigla = normalize_fdo_sigla(ht.get("tla", ""))
+            visitante_sigla = normalize_fdo_sigla(at.get("tla", ""))
+        except ImportError:
+            mandante_sigla = ht.get("tla", "")
+            visitante_sigla = at.get("tla", "")
+
         return {
             "match_id": m.get("id"),
             "rodada": m.get("matchday"),
@@ -438,10 +447,10 @@ class FootballDataClient:
             "data_brt": data_brt,
             "mandante": ht.get("shortName", ht.get("name", "?")),
             "mandante_id": ht.get("id", 0),
-            "mandante_sigla": ht.get("tla", ""),
+            "mandante_sigla": mandante_sigla,
             "visitante": at.get("shortName", at.get("name", "?")),
             "visitante_id": at.get("id", 0),
-            "visitante_sigla": at.get("tla", ""),
+            "visitante_sigla": visitante_sigla,
             "gols_mandante": ft.get("home"),
             "gols_visitante": ft.get("away"),
             "gols_ht_m": ht_sc.get("home"),

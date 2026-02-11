@@ -13,6 +13,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getTeamSlug } from "@/lib/teams";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Disclaimer } from "@/components/Disclaimer";
@@ -94,7 +95,7 @@ const JogoPage = () => {
         <div className="flex items-center justify-center gap-6 md:gap-12 mb-6">
           {/* Mandante */}
           <Link
-            to={`/brasileirao/time/${slugFromAbrev(mandante.abrev)}`}
+            to={`/brasileirao/time/${getTeamSlug(mandante.abrev)}`}
             className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
           >
             {mandante.escudo && (
@@ -137,7 +138,7 @@ const JogoPage = () => {
 
           {/* Visitante */}
           <Link
-            to={`/brasileirao/time/${slugFromAbrev(visitante.abrev)}`}
+            to={`/brasileirao/time/${getTeamSlug(visitante.abrev)}`}
             className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
           >
             {visitante.escudo && (
@@ -439,36 +440,6 @@ function FormaDisplay({
   );
 }
 
-// Mapeamento abreviação → slug
-const ABREV_TO_SLUG: Record<string, string> = {
-  CAM: "atletico-mg",
-  CAP: "athletico-pr",
-  BAH: "bahia",
-  BOT: "botafogo",
-  COR: "corinthians",
-  CRU: "cruzeiro",
-  CUI: "cuiaba",
-  FLA: "flamengo",
-  FLU: "fluminense",
-  FOR: "fortaleza",
-  GRE: "gremio",
-  INT: "internacional",
-  JUV: "juventude",
-  MIR: "mirassol",
-  PAL: "palmeiras",
-  SAN: "santos",
-  SAO: "sao-paulo",
-  SPO: "sport",
-  VAS: "vasco",
-  VIT: "vitoria",
-  RBB: "red-bull-bragantino",
-  CHA: "chapecoense",
-  CFC: "coritiba",
-  REM: "remo",
-};
-
-function slugFromAbrev(abrev: string): string {
-  return ABREV_TO_SLUG[abrev] || abrev.toLowerCase();
-}
+// Usa mapeamento central de lib/teams.ts — sem duplicação
 
 export default JogoPage;

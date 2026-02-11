@@ -1568,8 +1568,10 @@ def get_xg_por_time(rodada: Optional[int] = None):
             forca_ataque = stats.forca_geral / 50 if stats.forca_geral else 1.0
             forca_defesa_norm = max(0.5, min(1.5, (100 - stats.forca_geral) / 50 + 0.5))
             
-            xg_base = score_predictor_inst.MEDIA_GOLS_MANDANTE * forca_ataque
-            xga_base = score_predictor_inst.MEDIA_GOLS_VISITANTE * forca_defesa_norm
+            # V4: usar MEDIA_GOLS_POR_LIGA (1.25 per team) em vez de MEDIA_GOLS_MANDANTE (removido no V4)
+            media_gols_base = 1.25  # brasileirão média ~2.50 / 2 times
+            xg_base = media_gols_base * forca_ataque
+            xga_base = media_gols_base * forca_defesa_norm
             
             times_xg[stats.abreviacao] = {
                 "id": clube_id,
