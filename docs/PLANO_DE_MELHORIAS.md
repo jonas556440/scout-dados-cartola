@@ -60,26 +60,26 @@
 
 ### Consistência de Dados
 
-- [ ] **2.1** Unificar modelo de previsão — usar ScorePredictor V4 (Dixon-Coles) em blog E previsões
+- [x] **2.1** Unificar modelo de previsão — blog já usava V4, corrigido texto "V3" → "V4 Dixon-Coles" ✅
 - [x] **2.2** Criar `src/utils/team_mapping.py` — mapeamento central de 23 times (slug, abrev, IDs) ✅
 - [x] **2.3** Corrigir mapeamento de siglas FDO→Cartola (`normalize_fdo_sigla`) + web_scraper ✅
-- [ ] **2.4** Validar match pages antes de indexar — não publicar `enrichment_level: "base"`
+- [x] **2.4** `generate_sitemap.py` filtra `enrichment_level == "base"` — só indexa pre_match+ ✅
 - [x] **2.5** Fix `jogos: 38` — `match_analyzer` agora faz `min(jogos_real, jogos_totais)` para não usar dados de Season anterior ✅
 
 ### Backend
 
-- [ ] **2.6** Converter circuit breaker para sync e aplicar nos endpoints que chamam API Cartola
+- [x] **2.6** `with_circuit_breaker` convertido de async → sync ✅
 - [x] **2.7** `session_scope()` context manager criado em `history_manager.py` ✅
 - [x] **2.8** `src/utils/cache_warmup.py` criado — scheduler usa HTTP, sem import de `api_server` ✅
 - [x] **2.9** Fix xG AttributeError — usa `media_gols_base = 1.25` inline (V4 não tem atributo antigo) ✅
-- [ ] **2.10** Implementar connection pooling para SQLite (max 5 threads)
+- [x] **2.10** `db_manager.py` com `pool_size=5, max_overflow=10, pool_pre_ping, check_same_thread=False` ✅
 
 ### Frontend
 
 - [x] **2.11** Skip-to-content adicionado em MainLayout (WCAG 2.4.1) ✅
-- [ ] **2.12** Consolidar sitemaps — gerar apenas em `dist/`
-- [ ] **2.13** Implementar OG images dinâmicas por jogo/time
-- [ ] **2.14** Adicionar tratamento de erro granular por endpoint no `useCartolaApi.ts`
+- [x] **2.12** `/sitemap.xml` agora serve arquivo gerado pelo scheduler (completo) em vez de gerar inline ✅
+- [x] **2.13** Endpoints `/api/og-image/jogo/:id` e `/api/og-image/time/:slug` (SVG 1200×630) + SEO props ✅
+- [x] **2.14** `apiRequest` parseia `detail` do FastAPI; `QueryClient` com `onError` global via Sonner toast ✅
 
 ---
 
