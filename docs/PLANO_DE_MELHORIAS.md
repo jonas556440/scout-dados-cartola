@@ -5,13 +5,13 @@
 
 ---
 
-## Fase 1: Quick Wins v1 (CONCLUÍDA na audit-fixes)
+## Fase 1: Quick Wins v1 (CONCLUÍDA — mergeada em main)
 
 ### Segurança
 
 - [x] **1.1** Remover API key hardcoded de `fixture_collector.py`, mover para `.env`
 - [x] **1.2** Restringir `allow_headers` no CORS de `["*"]` para lista específica
-- [x] **1.3** Adicionar `request: Request` + `@limiter.limit()` nos endpoints sem rate limit
+- [x] **1.3** Rate limiting global via middleware slowapi (200/min default, overrides em endpoints pesados)
 - [ ] **1.4** Adicionar `_verify_admin_key()` em `/api/historico/salvar` (ver nota)
 
 > **Nota 1.4:** O endpoint é chamado pelo frontend para salvar escalações do usuário. Bloquear com admin key quebraria a funcionalidade. Manter rate limit + validação Pydantic.
