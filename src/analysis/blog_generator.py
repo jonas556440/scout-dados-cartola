@@ -1056,7 +1056,7 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
         
         md.append("---\n")
         md.append(
-            f"*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) "
+            f"*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) "
             f"do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. "
             f"Dados atualizados na rodada {rodada_atual}.*"
         )

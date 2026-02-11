@@ -32,7 +32,15 @@ class DatabaseManager:
     
     def __init__(self, database_url: str = None):
         self.database_url = database_url or f"sqlite:///{settings.DATA_DIR}/cartola.db"
-        self.engine = create_engine(self.database_url, echo=False)
+        self.engine = create_engine(
+            self.database_url,
+            echo=False,
+            connect_args={"check_same_thread": False},
+            pool_size=5,
+            max_overflow=10,
+            pool_pre_ping=True,
+            pool_recycle=3600,
+        )
         
         # Ativar WAL mode para melhor concorrência
         if 'sqlite' in self.database_url:

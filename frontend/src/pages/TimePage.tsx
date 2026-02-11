@@ -78,6 +78,7 @@ const TimePage = () => {
         title={`${time.nome} - Brasileirão 2026`}
         description={`Estatísticas completas do ${time.nome} no Brasileirão 2026. ${time.posicao}º lugar com ${time.pontos} pontos. Simulação Monte Carlo, próximos jogos e probabilidades.`}
         path={`/brasileirao/time/${slug}`}
+        image={`/api/og-image/time/${slug}`}
       />
 
       {/* Voltar */}

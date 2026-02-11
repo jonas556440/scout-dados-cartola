@@ -66,6 +66,7 @@ const JogoPage = () => {
         title={`${mandante.nome} x ${visitante.nome} - Rodada ${jogo.rodada}`}
         description={`Análise completa de ${mandante.nome} x ${visitante.nome} pelo Brasileirão 2026. Previsão: ${previsao.placarProvavel}. Probabilidades 1X2, Over/Under, BTTS e placares mais prováveis.`}
         path={`/brasileirao/jogo/${id}`}
+        image={`/api/og-image/jogo/${id}`}
       />
 
       {/* Voltar */}

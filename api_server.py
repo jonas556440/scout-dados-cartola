@@ -2789,6 +2789,74 @@ def get_desfalques_geral():
         raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
 
+# ============ OG Images Dinâmicas ============
+
+def _generate_og_svg(title: str, subtitle: str, accent_color: str = "#22c55e") -> str:
+    """Gera SVG 1200x630 para OG image."""
+    # Escapar caracteres XML
+    import html as _html
+    title = _html.escape(title)
+    subtitle = _html.escape(subtitle)
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="6" fill="{accent_color}"/>
+  <text x="80" y="260" font-family="system-ui,sans-serif" font-size="52" font-weight="700" fill="#f8fafc">{title}</text>
+  <text x="80" y="330" font-family="system-ui,sans-serif" font-size="28" fill="#94a3b8">{subtitle}</text>
+  <text x="80" y="540" font-family="system-ui,sans-serif" font-size="36" font-weight="700" fill="{accent_color}">ScoutDados</text>
+  <text x="80" y="580" font-family="system-ui,sans-serif" font-size="20" fill="#64748b">Brasileirão 2026 • Análises &amp; Estatísticas</text>
+</svg>'''
+
+
+@app.get("/api/og-image/jogo/{partida_id}")
+def og_image_jogo(partida_id: int):
+    """OG image SVG dinâmica para página de jogo."""
+    try:
+        status = api.get_status_mercado()
+        mercado = api.get_mercado()
+        if not mercado:
+            raise HTTPException(status_code=503, detail="Sem dados")
+        clubes = {c["id"]: c for c in mercado.get("clubes", {}).values()} if isinstance(mercado.get("clubes"), dict) else {}
+        partidas = mercado.get("partidas", {})
+        partida = partidas.get(str(partida_id))
+        if not partida:
+            raise HTTPException(status_code=404, detail="Partida não encontrada")
+        mandante = clubes.get(partida.get("clube_casa_id"), {})
+        visitante = clubes.get(partida.get("clube_visitante_id"), {})
+        nome_m = mandante.get("nome", "Time A")
+        nome_v = visitante.get("nome", "Time B")
+        rodada = status.get("rodada_atual", "?")
+        svg = _generate_og_svg(
+            f"{nome_m}  vs  {nome_v}",
+            f"Rodada {rodada} • Previsão de placares e probabilidades",
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        svg = _generate_og_svg("Análise de Jogo", "Brasileirão 2026 • ScoutDados")
+    return FastAPIResponse(content=svg, media_type="image/svg+xml",
+                           headers={"Cache-Control": "public, max-age=3600"})
+
+
+@app.get("/api/og-image/time/{slug}")
+def og_image_time(slug: str):
+    """OG image SVG dinâmica para página de time."""
+    from src.utils.team_mapping import SERIE_A_TIMES
+    info = SERIE_A_TIMES.get(slug)
+    nome = info["nome"] if info else slug.replace("-", " ").title()
+    svg = _generate_og_svg(
+        nome,
+        "Estatísticas completas • Brasileirão 2026",
+    )
+    return FastAPIResponse(content=svg, media_type="image/svg+xml",
+                           headers={"Cache-Control": "public, max-age=3600"})
+
+
 # ============ Health, Sitemap, Métricas ============
 
 @app.get("/health")
@@ -2815,40 +2883,23 @@ def admin_metrics():
 
 @app.get("/sitemap.xml", response_class=FastAPIResponse)
 def sitemap_xml():
-    """Sitemap dinâmico para SEO."""
-    base = "https://scoutdados.com.br"
-    
-    # Páginas estáticas
-    static_pages = [
-        {"loc": "/", "changefreq": "daily", "priority": "1.0"},
-        {"loc": "/brasileirao", "changefreq": "daily", "priority": "0.9"},
-        {"loc": "/dashboard", "changefreq": "daily", "priority": "0.8"},
-        {"loc": "/escalacao", "changefreq": "daily", "priority": "0.8"},
-        {"loc": "/confrontos", "changefreq": "daily", "priority": "0.9"},
-        {"loc": "/mercado", "changefreq": "daily", "priority": "0.8"},
-        {"loc": "/scouts", "changefreq": "daily", "priority": "0.8"},
-        {"loc": "/historico", "changefreq": "weekly", "priority": "0.6"},
-        {"loc": "/estatisticas", "changefreq": "daily", "priority": "0.7"},
-        {"loc": "/sobre", "changefreq": "monthly", "priority": "0.3"},
-        {"loc": "/privacidade", "changefreq": "monthly", "priority": "0.2"},
-        {"loc": "/termos", "changefreq": "monthly", "priority": "0.2"},
-    ]
-    
-    today = datetime.now().strftime("%Y-%m-%d")
-    
-    urls_xml = ""
-    for page in static_pages:
-        urls_xml += f"""  <url>
-    <loc>{base}{page['loc']}</loc>
-    <lastmod>{today}</lastmod>
-    <changefreq>{page['changefreq']}</changefreq>
-    <priority>{page['priority']}</priority>
-  </url>\n"""
-    
-    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-{urls_xml}</urlset>"""
-    
+    """Serve o sitemap completo gerado por generate_sitemap.py (scheduler).
+    Fallback: gera um sitemap mínimo se o arquivo não existir."""
+    from pathlib import Path as _P
+    sitemap_file = _P(__file__).parent / "sitemap.xml"
+    if sitemap_file.exists():
+        xml = sitemap_file.read_text(encoding="utf-8")
+    else:
+        # Fallback mínimo — não deveria acontecer em prod
+        base = "https://scoutdados.com.br"
+        today = datetime.now().strftime("%Y-%m-%d")
+        pages = ["/", "/brasileirao", "/confrontos", "/dashboard",
+                 "/escalacao", "/mercado", "/scouts", "/blog"]
+        urls_xml = "\n".join(
+            f'  <url><loc>{base}{p}</loc><lastmod>{today}</lastmod></url>'
+            for p in pages
+        )
+        xml = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls_xml}\n</urlset>'
     return FastAPIResponse(content=xml, media_type="application/xml")
 
 

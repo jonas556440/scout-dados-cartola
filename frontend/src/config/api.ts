@@ -53,7 +53,13 @@ export async function apiRequest<T>(endpoint: string, options?: RequestInit): Pr
     });
     
     if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        // Tentar extrair detail do FastAPI para msg amigável
+        let detail: string | undefined;
+        try {
+            const body = await response.json();
+            detail = body?.detail;
+        } catch { /* corpo não é JSON */ }
+        throw new Error(detail || `Erro ${response.status}: ${response.statusText}`);
     }
     
     return response.json();

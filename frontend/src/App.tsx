@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -31,6 +32,11 @@ const queryClient = new QueryClient({
       retry: 2,
       retryDelay: 1000,
       staleTime: 1000 * 60 * 5, // 5 min default
+    },
+    mutations: {
+      onError: (error: Error) => {
+        toast.error(error.message || "Ocorreu um erro. Tente novamente.");
+      },
     },
   },
 });

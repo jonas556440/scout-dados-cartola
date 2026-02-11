@@ -88,8 +88,13 @@ def _get_team_pages() -> list:
     return [{"slug": s} for s in team_slugs]
 
 
+# Só indexar match pages que tenham sido enriquecidas (não "base")
+_INDEXABLE_LEVELS = {"pre_match", "match_day", "post_game"}
+
+
 def _get_match_pages() -> list:
-    """Lê páginas de jogos auto-geradas em data/match_pages/."""
+    """Lê páginas de jogos auto-geradas em data/match_pages/.
+    Filtra páginas com enrichment_level == 'base' para não indexar conteúdo raso."""
     match_dir = PROJECT_ROOT / "data" / "match_pages"
     entries = []
     if not match_dir.exists():
@@ -97,6 +102,9 @@ def _get_match_pages() -> list:
     for f in match_dir.glob("*.json"):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
+            level = data.get("enrichment_level", "base")
+            if level not in _INDEXABLE_LEVELS:
+                continue
             slug = data.get("slug", f.stem)
             date = data.get("date", data.get("data", datetime.now().strftime("%Y-%m-%d")))
             entries.append({"slug": slug, "date": date})

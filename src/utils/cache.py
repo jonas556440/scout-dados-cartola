@@ -251,27 +251,26 @@ circuit_breakers = {
 
 
 def with_circuit_breaker(source_name: str):
-    """Decorator para aplicar circuit breaker a uma função."""
+    """Decorator síncrono para aplicar circuit breaker a uma função."""
     def decorator(func):
         @wraps(func)
-        async def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs):
             cb = circuit_breakers.get(source_name)
             if cb is None:
-                return await func(*args, **kwargs)
-            
+                return func(*args, **kwargs)
+
             if not cb.can_execute():
                 raise CircuitOpenError(
                     f"Circuit breaker [{source_name}] está ABERTO. "
                     f"Retry em {cb.get_status()['time_until_retry']:.0f}s"
                 )
-            
+
             try:
-                result = await func(*args, **kwargs)
+                result = func(*args, **kwargs)
                 cb.record_success()
                 return result
-            except Exception as e:
+            except Exception:
                 cb.record_failure()
-                # Registrar em métricas
                 try:
                     from src.utils.metrics import metrics
                     metrics.record_fonte_error(source_name)
