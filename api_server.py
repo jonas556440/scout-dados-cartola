@@ -210,7 +210,7 @@ app.add_middleware(
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type", "X-Admin-Key", "X-Blog-Key", "Authorization"],
     max_age=3600,  # Cache preflight por 1 hora
 )
 
@@ -1075,6 +1075,7 @@ def get_historico_rodadas():
     """
     Lista todas as rodadas salvas no histórico
     """
+    session = None
     try:
         session = history.get_session()
         
@@ -1097,13 +1098,14 @@ def get_historico_rodadas():
                 "data_criacao": times[0].created_at.isoformat() if times else None
             })
         
-        session.close()
         return result
         
     except Exception as e:
         logger.error(f"Erro ao buscar histórico: {e}", exc_info=True)
-
         raise HTTPException(status_code=500, detail="Erro interno do servidor")
+    finally:
+        if session:
+            session.close()
 
 
 @app.get("/api/historico/rodada/{rodada}")
@@ -1111,6 +1113,7 @@ def get_historico_rodada(rodada: int):
     """
     Retorna escalações salvas de uma rodada específica
     """
+    session = None
     try:
         session = history.get_session()
         
@@ -1139,15 +1142,16 @@ def get_historico_rodada(rodada: int):
                 "atualizadoEm": time.updated_at.isoformat() if time.updated_at else None
             })
         
-        session.close()
         return result
         
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Erro ao buscar rodada: {e}", exc_info=True)
-
         raise HTTPException(status_code=500, detail="Erro interno do servidor")
+    finally:
+        if session:
+            session.close()
 
 
 @app.get("/api/historico/status")
@@ -1155,6 +1159,7 @@ def get_historico_status():
     """
     Retorna estatísticas do histórico
     """
+    session = None
     try:
         session = history.get_session()
         
@@ -1174,8 +1179,6 @@ def get_historico_status():
             TimeHistorico.created_at.desc()
         ).first()
         
-        session.close()
-        
         return {
             "total_times_salvos": total,
             "total_rodadas": rodadas,
@@ -1185,8 +1188,10 @@ def get_historico_status():
         
     except Exception as e:
         logger.error(f"Erro ao buscar status: {e}", exc_info=True)
-
         raise HTTPException(status_code=500, detail="Erro interno do servidor")
+    finally:
+        if session:
+            session.close()
 
 
 @app.post("/api/historico/salvar")
@@ -1490,7 +1495,7 @@ def get_forca_times(rodada: Optional[int] = None):
                 "forcaFora": round(stats.forca_geral * 0.85, 1),  # Reduzir 15% para fora
                 "forcaGeral": round(stats.forca_geral, 1),
                 "forma": stats.forma_sequencia,
-                "escudo": clube_info.get("escudo", {}).get("60x60") if isinstance(clube_info.get("escudo"), dict) else None
+                "escudo": clube_info.get("escudos", {}).get("60x60") if isinstance(clube_info.get("escudos"), dict) else None
             })
         
         # Ordenar por força geral
@@ -1556,8 +1561,8 @@ def get_xg_por_time(rodada: Optional[int] = None):
         for clube_id, stats in match_analyzer.estatisticas_times.items():
             clube_info = clubes.get(str(clube_id), {})
             escudo = None
-            if isinstance(clube_info.get("escudo"), dict):
-                escudo = clube_info["escudo"].get("60x60")
+            if isinstance(clube_info.get("escudos"), dict):
+                escudo = clube_info["escudos"].get("60x60")
             
             # Calcular xG base com forças relativas
             forca_ataque = stats.forca_geral / 50 if stats.forca_geral else 1.0
@@ -1624,6 +1629,9 @@ def get_xg_por_time(rodada: Optional[int] = None):
 
 # Sistema de cache in-memory genérico para endpoints pesados
 import time as _time
+import threading
+
+_cache_lock = threading.Lock()
 
 _endpoint_caches = {
     "classificacao": {"data": None, "timestamp": 0, "ttl": 600},   # 10 min
@@ -1639,30 +1647,32 @@ _endpoint_caches = {
 
 def _cache_get(name: str, key: str = "") -> Any:
     """Retorna dados cacheados ou None se expirado."""
-    if key:
-        entry = _endpoint_caches.get(name, {}).get(key)
-    else:
-        entry = _endpoint_caches.get(name)
-    if entry and entry.get("data") is not None:
-        if _time.time() - entry["timestamp"] < entry["ttl"]:
-            return entry["data"]
-    return None
+    with _cache_lock:
+        if key:
+            entry = _endpoint_caches.get(name, {}).get(key)
+        else:
+            entry = _endpoint_caches.get(name)
+        if entry and entry.get("data") is not None:
+            if _time.time() - entry["timestamp"] < entry["ttl"]:
+                return entry["data"]
+        return None
 
 
 def _cache_set(name: str, data: Any, key: str = ""):
     """Salva dados no cache."""
-    if key:
-        if name not in _endpoint_caches:
-            _endpoint_caches[name] = {}
-        _endpoint_caches[name][key] = {
-            "data": data,
-            "timestamp": _time.time(),
-            "ttl": 900,  # 15 min para caches keyed
-        }
-    else:
-        cache = _endpoint_caches[name]
-        cache["data"] = data
-        cache["timestamp"] = _time.time()
+    with _cache_lock:
+        if key:
+            if name not in _endpoint_caches:
+                _endpoint_caches[name] = {}
+            _endpoint_caches[name][key] = {
+                "data": data,
+                "timestamp": _time.time(),
+                "ttl": 900,  # 15 min para caches keyed
+            }
+        else:
+            cache = _endpoint_caches[name]
+            cache["data"] = data
+            cache["timestamp"] = _time.time()
 
 
 # Cache in-memory para classificação (TTL 10 min)
@@ -1715,8 +1725,8 @@ def get_classificacao():
         for clube_id, stats in match_analyzer.estatisticas_times.items():
             clube_info = clubes.get(str(clube_id), {})
             escudo = None
-            if isinstance(clube_info.get("escudo"), dict):
-                escudo = clube_info["escudo"].get("60x60")
+            if isinstance(clube_info.get("escudos"), dict):
+                escudo = clube_info["escudos"].get("60x60")
             
             classificacao.append({
                 "id": clube_id,
@@ -2364,8 +2374,8 @@ def get_time_detalhado(slug: str):
 
         clube_info = clubes.get(str(time_id), {})
         escudo = None
-        if isinstance(clube_info.get("escudo"), dict):
-            escudo = clube_info["escudo"].get("60x60")
+        if isinstance(clube_info.get("escudos"), dict):
+            escudo = clube_info["escudos"].get("60x60")
 
         result = {
             "slug": slug,
@@ -2783,7 +2793,7 @@ def get_desfalques_geral():
 # ============ Health, Sitemap, Métricas ============
 
 @app.get("/health")
-async def health_check():
+def health_check():
     """Health check para UptimeRobot/monitoramento."""
     return {
         "status": "ok",
@@ -2794,7 +2804,7 @@ async def health_check():
 
 
 @app.get("/api/admin/metrics")
-async def admin_metrics():
+def admin_metrics():
     """Métricas internas agregadas (últimas 24h)."""
     data = metrics.get_metrics()
     data["cache_backend"] = cache.backend_name
@@ -2805,7 +2815,7 @@ async def admin_metrics():
 
 
 @app.get("/sitemap.xml", response_class=FastAPIResponse)
-async def sitemap_xml():
+def sitemap_xml():
     """Sitemap dinâmico para SEO."""
     base = "https://scoutdados.com.br"
     

@@ -178,6 +178,8 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
         
         forca_m = forcas.get(mandante_id, {}).get("forca_ataque", 50)
         forca_v = forcas.get(visitante_id, {}).get("forca_ataque", 50)
+        fdef_m = forcas.get(mandante_id, {}).get("forca_defesa", 50)
+        fdef_v = forcas.get(visitante_id, {}).get("forca_defesa", 50)
         
         # Previsão via ScorePredictor
         try:
@@ -192,6 +194,10 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
                 visitante_id=visitante_id,
                 forca_mandante=forca_m,
                 forca_visitante=forca_v,
+                forca_ataque_mandante=forca_m,
+                forca_defesa_mandante=fdef_m,
+                forca_ataque_visitante=forca_v,
+                forca_defesa_visitante=fdef_v,
                 rodada=rodada,
                 dias_descanso_mandante=desc_m,
                 dias_descanso_visitante=desc_v,
@@ -681,14 +687,16 @@ def get_post_by_slug(slug: str) -> Optional[Dict[str, Any]]:
 # ========== POSTS POR TIME ==========
 
 # Mapa de slugs para nomes dos 20 times do Brasileirão 2026
+# NOTA: Atualizar esta lista a cada temporada com os 20 times da Série A.
+# Temporada atual: Brasileirão 2025
 TIMES_MAP = {
     "atletico-mg": {"nome": "Atlético-MG", "abrev": "CAM"},
     "athletico-pr": {"nome": "Athletico-PR", "abrev": "CAP"},
     "bahia": {"nome": "Bahia", "abrev": "BAH"},
     "botafogo": {"nome": "Botafogo", "abrev": "BOT"},
+    "ceara": {"nome": "Ceará", "abrev": "CEA"},
     "corinthians": {"nome": "Corinthians", "abrev": "COR"},
     "cruzeiro": {"nome": "Cruzeiro", "abrev": "CRU"},
-    "cuiaba": {"nome": "Cuiabá", "abrev": "CUI"},
     "flamengo": {"nome": "Flamengo", "abrev": "FLA"},
     "fluminense": {"nome": "Fluminense", "abrev": "FLU"},
     "fortaleza": {"nome": "Fortaleza", "abrev": "FOR"},
@@ -697,16 +705,12 @@ TIMES_MAP = {
     "juventude": {"nome": "Juventude", "abrev": "JUV"},
     "mirassol": {"nome": "Mirassol", "abrev": "MIR"},
     "palmeiras": {"nome": "Palmeiras", "abrev": "PAL"},
+    "red-bull-bragantino": {"nome": "Red Bull Bragantino", "abrev": "RBB"},
     "santos": {"nome": "Santos", "abrev": "SAN"},
     "sao-paulo": {"nome": "São Paulo", "abrev": "SAO"},
     "sport": {"nome": "Sport", "abrev": "SPO"},
     "vasco": {"nome": "Vasco", "abrev": "VAS"},
     "vitoria": {"nome": "Vitória", "abrev": "VIT"},
-    # Times adicionais da classificação atual
-    "red-bull-bragantino": {"nome": "Red Bull Bragantino", "abrev": "RBB"},
-    "chapecoense": {"nome": "Chapecoense", "abrev": "CHA"},
-    "coritiba": {"nome": "Coritiba", "abrev": "CFC"},
-    "remo": {"nome": "Remo", "abrev": "REM"},
 }
 
 
@@ -777,6 +781,8 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
         # Classificação completa para posição
         classificacao = []
         forca_times = {}
+        forca_ataque_times = {}
+        forca_defesa_times = {}
         for cid, s in ma.estatisticas_times.items():
             classificacao.append({
                 "id": cid,
@@ -791,6 +797,8 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
                 "gols_contra": s.gols_contra,
             })
             forca_times[cid] = s.forca_geral
+            forca_ataque_times[cid] = s.forca_ataque
+            forca_defesa_times[cid] = s.forca_defesa
         
         classificacao.sort(
             key=lambda x: (x["pontos"], x["vitorias"],
@@ -805,7 +813,7 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
         prob_sula = 0.0
         prob_z4 = 0.0
         try:
-            mc = MonteCarloSimulator(score_predictor=None, n_simulacoes=1000)
+            mc = MonteCarloSimulator(score_predictor=ScorePredictor(), n_simulacoes=1000)
             time_ids = [t["id"] for t in classificacao]
             n = len(time_ids)
             jogos_restantes = []
@@ -852,6 +860,10 @@ def gerar_post_time(time_slug: str, api: Optional[CartolaAPI] = None) -> Dict[st
                             mandante_id=casa, visitante_id=fora,
                             forca_mandante=forca_times.get(casa, 50),
                             forca_visitante=forca_times.get(fora, 50),
+                            forca_ataque_mandante=forca_ataque_times.get(casa) if forca_ataque_times else None,
+                            forca_defesa_mandante=forca_defesa_times.get(casa) if forca_defesa_times else None,
+                            forca_ataque_visitante=forca_ataque_times.get(fora) if forca_ataque_times else None,
+                            forca_defesa_visitante=forca_defesa_times.get(fora) if forca_defesa_times else None,
                             rodada=r,
                         )
                         eh_casa = casa == time_id
