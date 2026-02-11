@@ -157,6 +157,7 @@ export function FormationDisplay({ team, onPlayerClick, className }: FormationDi
                       src={player.clubeEscudo} 
                       alt={player.clubeAbrev} 
                       className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
+                      loading="lazy"
                     />
                   ) : (
                     <span>{player.apelido.substring(0, 2).toUpperCase()}</span>

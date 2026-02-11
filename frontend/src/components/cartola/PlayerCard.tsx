@@ -52,6 +52,7 @@ export function PlayerCard({
                 src={player.clubeEscudo} 
                 alt={player.clubeAbrev} 
                 className="w-5 h-5 object-contain"
+                loading="lazy"
               />
             )}
             <span>{player.clubeAbrev}</span>

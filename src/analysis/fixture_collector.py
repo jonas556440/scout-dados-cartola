@@ -98,8 +98,7 @@ class FixtureCollector:
             except Exception:
                 pass
         if not key:
-            # Fallback hardcoded (dev only — mover pra env em produção)
-            key = "d354c8d1f1d70486fe3b6b69cc905381"
+            logger.warning("APIFOOTBALL_KEY não configurada! Defina via variável de ambiente ou config/settings.py")
         return key
 
     @property

@@ -232,7 +232,7 @@ const Brasileirao = () => {
                             className="flex items-center gap-2 group"
                           >
                             {time.escudo && (
-                              <img src={time.escudo} alt={time.abrev} className="w-5 h-5" />
+                              <img src={time.escudo} alt={time.abrev} className="w-5 h-5" loading="lazy" />
                             )}
                             <span className="font-semibold text-xs md:text-sm text-primary group-hover:text-primary/80 underline decoration-dotted decoration-1 underline-offset-2 transition-colors">
                               {time.nome || time.abrev}

@@ -2212,17 +2212,14 @@ def get_acuracia_geral():
 
 # ============ Página por Time ============
 
+# Mapeamento slug→abreviação Cartola (Série A 2025)
 TEAM_SLUGS = {
     "atletico-mg": "CAM", "athletico-pr": "CAP", "bahia": "BAH", "botafogo": "BOT",
-    "corinthians": "COR", "cruzeiro": "CRU", "cuiaba": "CUI", "flamengo": "FLA",
+    "ceara": "CEA", "corinthians": "COR", "cruzeiro": "CRU", "flamengo": "FLA",
     "fluminense": "FLU", "fortaleza": "FOR", "gremio": "GRE", "internacional": "INT",
-    "juventude": "JUV", "mirassol": "MIR", "palmeiras": "PAL", "santos": "SAN",
-    "sao-paulo": "SAO", "sport": "SPO", "vasco": "VAS", "vitoria": "VIT",
-    # Times adicionais da classificação atual
+    "juventude": "JUV", "mirassol": "MIR", "palmeiras": "PAL",
     "red-bull-bragantino": "RBB", "bragantino": "RBB",
-    "chapecoense": "CHA",
-    "coritiba": "CFC",
-    "remo": "REM",
+    "santos": "SAN", "sao-paulo": "SAO", "sport": "SPO", "vasco": "VAS", "vitoria": "VIT",
 }
 
 

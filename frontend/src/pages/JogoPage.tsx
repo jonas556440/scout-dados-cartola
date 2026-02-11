@@ -98,7 +98,7 @@ const JogoPage = () => {
             className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
           >
             {mandante.escudo && (
-              <img src={mandante.escudo} alt={mandante.abrev} className="w-16 h-16 md:w-20 md:h-20" />
+              <img src={mandante.escudo} alt={mandante.abrev} className="w-16 h-16 md:w-20 md:h-20" loading="lazy" />
             )}
             <span className="font-display font-bold text-sm md:text-base text-center">
               {mandante.nome}
@@ -141,7 +141,7 @@ const JogoPage = () => {
             className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
           >
             {visitante.escudo && (
-              <img src={visitante.escudo} alt={visitante.abrev} className="w-16 h-16 md:w-20 md:h-20" />
+              <img src={visitante.escudo} alt={visitante.abrev} className="w-16 h-16 md:w-20 md:h-20" loading="lazy" />
             )}
             <span className="font-display font-bold text-sm md:text-base text-center">
               {visitante.nome}

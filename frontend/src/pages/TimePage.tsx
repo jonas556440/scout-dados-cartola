@@ -96,7 +96,7 @@ const TimePage = () => {
       >
         <div className="flex items-center gap-4 mb-4">
           {time.escudo && (
-            <img src={time.escudo} alt={time.abrev} className="w-16 h-16" />
+            <img src={time.escudo} alt={time.abrev} className="w-16 h-16" loading="lazy" />
           )}
           <div>
             <h1 className="font-display text-3xl md:text-4xl font-bold">

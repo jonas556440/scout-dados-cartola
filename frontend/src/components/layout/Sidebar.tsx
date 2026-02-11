@@ -97,7 +97,7 @@ export function Sidebar() {
             <span className="text-lg font-bold text-primary-foreground">S</span>
           </div>
           <div>
-            <h1 className="font-display text-lg font-bold">ScoutDados</h1>
+            <span className="font-display text-lg font-bold" role="banner">ScoutDados</span>
             <p className="text-xs text-muted-foreground">Estatísticas & Cartola</p>
           </div>
         </div>
