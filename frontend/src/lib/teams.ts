@@ -10,6 +10,7 @@ const ABREV_TO_SLUG: Record<string, string> = {
   CEA: "ceara",
   COR: "corinthians",
   CRU: "cruzeiro",
+  CUI: "cuiaba",
   FLA: "flamengo",
   FLU: "fluminense",
   FOR: "fortaleza",
@@ -24,6 +25,12 @@ const ABREV_TO_SLUG: Record<string, string> = {
   SPO: "sport",
   VAS: "vasco",
   VIT: "vitoria",
+  CHA: "chapecoense",
+  CFC: "coritiba",
+  REM: "remo",
+  GOI: "goias",
+  AME: "america-mg",
+  CRB: "crb",
 };
 
 /**

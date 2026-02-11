@@ -7,8 +7,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
 import { Disclaimer } from "@/components/Disclaimer";
+import { Link } from "react-router-dom";
 
 // Mapa de scouts para labels amigáveis
 const SCOUT_LABELS: Record<string, string> = {
@@ -167,6 +169,14 @@ const Scouts = () => {
                 <p className="font-semibold">Nenhum scout disponível para esta rodada</p>
                 <p className="text-sm mt-2">Os scouts são atualizados após o encerramento de cada rodada do Brasileirão.</p>
                 <p className="text-xs mt-1 text-muted-foreground/70">Volte após os jogos para conferir os destaques.</p>
+                <div className="flex items-center justify-center gap-3 mt-6">
+                  <Button asChild variant="default" size="sm">
+                    <Link to="/brasileirao"><Trophy className="w-4 h-4 mr-1.5" />Ver Classificação</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/escalacao"><Users className="w-4 h-4 mr-1.5" />Gerar Escalação</Link>
+                  </Button>
+                </div>
               </div>
             )}
           </motion.div>
@@ -206,7 +216,14 @@ const Scouts = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-center py-6 text-muted-foreground text-sm">Nenhum gol registrado</p>
+                <p className="text-center py-6 text-muted-foreground text-sm">
+                  Nenhum gol registrado
+                  <span className="block mt-3">
+                    <Button asChild variant="outline" size="sm">
+                      <Link to="/confrontos">Ver Confrontos da Rodada</Link>
+                    </Button>
+                  </span>
+                </p>
               )}
             </div>
 
@@ -237,7 +254,14 @@ const Scouts = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-center py-6 text-muted-foreground text-sm">Nenhuma assistência registrada</p>
+                <p className="text-center py-6 text-muted-foreground text-sm">
+                  Nenhuma assistência registrada
+                  <span className="block mt-3">
+                    <Button asChild variant="outline" size="sm">
+                      <Link to="/confrontos">Ver Confrontos da Rodada</Link>
+                    </Button>
+                  </span>
+                </p>
               )}
             </div>
           </motion.div>
@@ -333,6 +357,11 @@ const Scouts = () => {
               <div className="glass-card p-12 text-center text-muted-foreground">
                 <ShieldAlert className="w-12 h-12 mx-auto mb-4 opacity-30" />
                 <p>Nenhum desfalque registrado</p>
+                <div className="flex items-center justify-center gap-3 mt-4">
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/brasileirao"><Trophy className="w-4 h-4 mr-1.5" />Ver Classificação</Link>
+                  </Button>
+                </div>
               </div>
             )}
           </motion.div>

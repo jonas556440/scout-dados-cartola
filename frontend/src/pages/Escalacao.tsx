@@ -58,11 +58,10 @@ const Escalacao = () => {
 
   // Função para regenerar time
   const handleRegenerar = async () => {
-    try {
-      await gerarEscalacao.mutateAsync({ esquema, cartoletas: queryOrcamento });
+    try {      setQueryOrcamento(userOrcamento);      await gerarEscalacao.mutateAsync({ esquema, cartoletas: userOrcamento });
       toast({
         title: "Time regenerado!",
-        description: `Nova escalação ${esquema} gerada com sucesso.`,
+        description: `Nova escalação ${esquema} gerada com C$${userOrcamento.toFixed(2)}.`,
       });
     } catch (error) {
       toast({
@@ -116,6 +115,22 @@ const Escalacao = () => {
           </div>
           
           <div className="flex items-center gap-3">
+            {/* Input Patrimônio */}
+             <div className="relative w-28">
+               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-bold font-display">C$</div>
+               <Input 
+                 type="number"
+                 step="0.1"
+                 min="50"
+                 max="300"
+                 value={userOrcamento}
+                 onChange={(e) => setUserOrcamento(Number(e.target.value))}
+                 className="pl-8 h-10 font-bold bg-background/50 border-input font-display rounded-lg focus:ring-1 focus:ring-primary"
+                 placeholder="C$"
+                 title="Defina seu patrimônio para gerar o time"
+               />
+             </div>
+
             <Select value={esquema} onValueChange={setEsquema}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Esquema" />
@@ -211,14 +226,16 @@ const Escalacao = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Time */}
         <div className="lg:col-span-2">
-          <FormationDisplay 
-            team={{...teamData, esquema}} 
-            onPlayerClick={setSelectedPlayer}
-          />
+          <div className="lg:max-w-[500px] lg:mx-auto">
+            <FormationDisplay 
+              team={{...teamData, esquema}} 
+              onPlayerClick={setSelectedPlayer}
+            />
+          </div>
         </div>
 
         {/* Player Selection */}
-        <div className="glass-card p-4 h-fit max-h-[800px] overflow-hidden flex flex-col">
+        <div className="glass-card p-4 h-fit max-h-[calc(100vh-200px)] overflow-hidden flex flex-col">
           <div className="flex items-center gap-2 mb-4">
             <Users className="w-5 h-5 text-primary" />
             <h3 className="font-display text-lg font-bold">Mercado</h3>
@@ -231,7 +248,7 @@ const Escalacao = () => {
               <Input
                 placeholder="Buscar jogador..."
                 value={busca}
-                onChange={(e) => setBusca(e.target.value)}
+                onChange={(e) => { setBusca(e.target.value); setLimiteExibicao(30); }}
                 className="pl-9"
               />
             </div>
@@ -240,7 +257,7 @@ const Escalacao = () => {
               <Button
                 size="sm"
                 variant={filtroPos === 'TODOS' ? 'default' : 'outline'}
-                onClick={() => setFiltroPos('TODOS')}
+                onClick={() => { setFiltroPos('TODOS'); setLimiteExibicao(30); }}
                 className="text-xs"
               >
                 Todos
@@ -250,7 +267,7 @@ const Escalacao = () => {
                   key={pos}
                   size="sm"
                   variant={filtroPos === pos ? 'default' : 'outline'}
-                  onClick={() => setFiltroPos(pos)}
+                    onClick={() => { setFiltroPos(pos); setLimiteExibicao(30); }}
                   className="text-xs px-2"
                 >
                   {pos}
@@ -260,11 +277,14 @@ const Escalacao = () => {
           </div>
 
           {/* Players List */}
+          <div className="text-xs text-muted-foreground mb-1">
+            {jogadoresFiltrados.length} jogadores encontrados
+          </div>
           <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-            {jogadoresFiltrados.map((player) => {
-              const isInTeam = teamData.titulares.some(p => p.id === player.id) ||
-                               teamData.reservas.some(p => p.id === player.id);
-              const isCaptain = teamData.capitao?.id === player.id;
+            {jogadoresFiltrados.slice(0, limiteExibicao).map((player) => {
+              const isInTeam = teamData?.titulares?.some(p => p.id === player.id) ||
+                               teamData?.reservas?.some(p => p.id === player.id);
+              const isCaptain = teamData?.capitao?.id === player.id;
               
               return (
                 <PlayerCard
@@ -277,6 +297,16 @@ const Escalacao = () => {
                 />
               );
             })}
+            {jogadoresFiltrados.length > limiteExibicao && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-muted-foreground hover:text-foreground mt-2"
+                onClick={() => setLimiteExibicao(prev => prev + 30)}
+              >
+                Ver mais ({jogadoresFiltrados.length - limiteExibicao} restantes)
+              </Button>
+            )}
           </div>
         </div>
       </div>
