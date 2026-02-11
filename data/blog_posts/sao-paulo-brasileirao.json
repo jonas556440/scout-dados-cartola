@@ -1,0 +1,17 @@
+{
+  "slug": "sao-paulo-brasileirao",
+  "title": "São Paulo no Brasileirão: Probabilidades e Análise",
+  "date": "2026-02-08",
+  "excerpt": "Análise completa do São Paulo na rodada 3 do Brasileirão 2026. Atualmente em 6º lugar com 4 pontos. Probabilidade de título: 9.4%.",
+  "content": "## São Paulo — Situação Atual\n\nNa **rodada 3**, o São Paulo ocupa a **6ª posição** com **4 pontos** em 2 jogos (1V 1E 0D), na pré-Libertadores.\n\n- Gols pró: **3** | Gols contra: **1** | Saldo: **+2**\n- Forma recente: **VE**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **9.4%** |\n| 🌎 Libertadores (G4) | **41.0%** |\n| 🏅 Sul-Americana | **47.1%** |\n| ⚠️ Rebaixamento | **2.6%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | GRE | Casa | **1x2** | 55.9% | 1.88 |\n| 4 | CFC | Fora | **0x3** | 54.9% | 1.97 |\n| 5 | CHA | Casa | **3x0** | 79.8% | 2.99 |\n| 6 | RBB | Fora | **1x0** | 24.1% | 1.32 |\n| 7 | CAM | Fora | **1x0** | 26.3% | 1.38 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "tags": [
+    "São Paulo",
+    "Brasileirão",
+    "Probabilidades"
+  ],
+  "readTime": 4,
+  "rodada": 3,
+  "tipo": "analise_time",
+  "time": "sao-paulo",
+  "geradoEm": "2026-02-08T06:01:18.836510"
+}

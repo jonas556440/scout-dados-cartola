@@ -145,15 +145,20 @@ class CartolaAPI:
         """
         return self._make_request(settings.ENDPOINT_STATUS, use_cache=False)
     
-    def get_atletas_pontuados(self) -> Dict[str, Any]:
+    def get_atletas_pontuados(self, rodada: Optional[int] = None) -> Dict[str, Any]:
         """
         Obtém pontuação e scouts dos atletas após a rodada
+        
+        Args:
+            rodada: Número da rodada (None = rodada atual/mais recente)
         
         Returns:
             Dict onde a chave é o atleta_id e valor contém:
             - pontuacao: Pontuação total
             - scout: Dict com os scouts individuais
         """
+        if rodada:
+            return self._make_request(f"{settings.ENDPOINT_PONTUADOS}/{rodada}", use_cache=False)
         return self._make_request(settings.ENDPOINT_PONTUADOS, use_cache=False)
     
     def get_partidas(self, rodada: Optional[int] = None) -> Dict[str, Any]:

@@ -683,11 +683,11 @@ class TeamSelector:
             ]
         
         # Ordenar por critérios de valorização usando SCORE calculado!
-        # v9: Desempate por preço (mais barato = MPV menor = mais fácil valorizar)
+        # v10: Desempate por pontuação recente → preço (mais barato = MPV menor)
         elegiveis_com_score = [
             (a, self._calcular_score_valorizacao(a)) for a in elegiveis
         ]
-        elegiveis_com_score.sort(key=lambda x: (x[1], -x[0].preco), reverse=True)
+        elegiveis_com_score.sort(key=lambda x: (x[1], getattr(x[0], 'pontos_rodada', 0) or 0, -x[0].preco), reverse=True)
         elegiveis = [a for a, score in elegiveis_com_score]
         
         return self._montar_time(
@@ -783,8 +783,8 @@ class TeamSelector:
             por_posicao[atleta.posicao_abrev].append((atleta, score))
         
         for pos in por_posicao:
-            # v9: Ordenar por score decrescente, desempate por preço (mais barato = melhor)
-            por_posicao[pos].sort(key=lambda x: (x[1], -x[0].preco), reverse=True)
+            # v10: Ordenar por score decrescente, desempate por pts última rodada → preço
+            por_posicao[pos].sort(key=lambda x: (x[1], getattr(x[0], 'pontos_rodada', 0) or 0, -x[0].preco), reverse=True)
         
         # === FASE 1: Montar time inicial com melhores por posição ===
         # Que cabem no orçamento usando algoritmo guloso inteligente
@@ -973,13 +973,14 @@ class TeamSelector:
                         break
         
         # Capitão: jogador com maior SCORE (não maior preço!)
-        # v7: Validar capitão com critérios mínimos na R2+
-        capitao = max(titulares, key=lambda x: self._calcular_score_pontuacao(x))
+        # v10: TEC não pode ser capitão
+        candidatos_capitao = [t for t in titulares if t.posicao_abrev != "TEC"]
+        capitao = max(candidatos_capitao, key=lambda x: self._calcular_score_pontuacao(x))
         
         if self.rodada_atual >= 2:
             candidatos_capitao = [
                 t for t in titulares
-                if t.media >= 3.0 and t.jogos_num >= 1
+                if t.media >= 3.0 and t.jogos_num >= 1 and t.posicao_abrev != "TEC"
             ]
             if candidatos_capitao:
                 capitao = max(candidatos_capitao, key=lambda x: self._calcular_score_pontuacao(x))
@@ -1105,18 +1106,21 @@ class TeamSelector:
                 posicoes_reserva_preenchidas.add(pos)
         
         # v7: Escolher capitão CORRETAMENTE
-        # Usar _calcular_score_valorizacao ao invés de pontuacao_esperada
-        # (pontuacao_esperada pode ser 0 para jogadores sem dados → seleção aleatória)
+        # v10: TEC não pode ser capitão
+        candidatos_iniciais = [t for t in titulares if t.posicao_abrev != "TEC"]
+        if not candidatos_iniciais:
+            candidatos_iniciais = titulares  # fallback extremo
+        
         if tipo == "valorizacao":
-            capitao = max(titulares, key=lambda x: self._calcular_score_valorizacao(x))
+            capitao = max(candidatos_iniciais, key=lambda x: self._calcular_score_valorizacao(x))
         else:
-            capitao = max(titulares, key=lambda x: self._calcular_score_pontuacao(x))
+            capitao = max(candidatos_iniciais, key=lambda x: self._calcular_score_pontuacao(x))
         
         # v7: Validar capitão mínimo (R2+: deve ter média >= 3.0 ou jogos >= 2)
         if self.rodada_atual >= 2:
             candidatos_capitao = [
                 t for t in titulares
-                if t.media >= 3.0 and t.jogos_num >= 1
+                if t.media >= 3.0 and t.jogos_num >= 1 and t.posicao_abrev != "TEC"
             ]
             if candidatos_capitao:
                 if tipo == "valorizacao":
@@ -1246,37 +1250,36 @@ class TeamSelector:
         
         custo_referencia = time_valor.custo_total if time_valor else 85.0
         
-        # v9: Multiplicadores mais generosos — time de pontuação precisa de jogadores melhores
-        # Antes: [1.15, 1.25, 1.35, 2.0] — muito restritivo, forçava jogadores ruins baratos
-        # Agora: [1.4, 1.6, 1.8, 2.5] — permite investir em qualidade
-        multiplicadores = [1.4, 1.6, 1.8, 2.5]
+        # v10: Orçamento do usuário como prioridade — tenta teto real PRIMEIRO
+        # Depois reduz progressivamente apenas se falhar por restrições de clube/posição
+        tentativas_orcamento = [orcamento_original]  # Sempre tenta o teto real primeiro
+        
+        # Adicionar tentativas progressivas como fallback
+        if time_valor:
+            for mult in [1.8, 1.4]:
+                piso = 100.0 if orcamento_original >= 110 else 95.0
+                orc_prog = min(orcamento_original, max(custo_referencia * mult, piso))
+                if orc_prog < orcamento_original - 1:  # Só se for significativamente menor
+                    tentativas_orcamento.append(orc_prog)
         
         time_pontos = None
         
-        for mult in multiplicadores:
-            # v9: Piso mínimo de C$95 para pontuação — nunca menos que isso
-            if self.orcamento < 110:
-                orcamento_tentativa = min(orcamento_original, max(custo_referencia * mult, 95.0))
-            else:
-                orcamento_tentativa = min(orcamento_original, max(custo_referencia * mult, 100.0))
-            
+        for orcamento_tentativa in tentativas_orcamento:
             self.orcamento = orcamento_tentativa
             
             # Tentar gerar com verificação de conflitos (Estrito)
             time_pontos = self.selecionar_time_pontuacao(atletas_analisados, esquema, evitar_conflitos=True)
             
             if time_pontos:
-                # Sucesso com restrições e orçamento atual
                 break
                 
-            # Se falhou, tentar sem verificação de conflitos (Permissivo) mas com orçamento atual
+            # Se falhou, tentar sem verificação de conflitos (Permissivo)
             time_pontos = self.selecionar_time_pontuacao(atletas_analisados, esquema, evitar_conflitos=False)
             
             if time_pontos:
-                # Sucesso sem restrições mas com orçamento atual
                 break
         
-        # 3. Fallback Final: Se tudo falhou (muito improvável), tenta com orçamento total
+        # Fallback Final: Se tudo falhou, tenta com orçamento total sem restrições
         if time_pontos is None:
             self.orcamento = orcamento_original
             time_pontos = self.selecionar_time_pontuacao(atletas_analisados, esquema, evitar_conflitos=False)

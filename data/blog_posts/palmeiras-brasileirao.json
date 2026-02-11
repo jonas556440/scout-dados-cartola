@@ -1,0 +1,17 @@
+{
+  "slug": "palmeiras-brasileirao",
+  "title": "Palmeiras no Brasileirão: Probabilidades e Análise",
+  "date": "2026-02-08",
+  "excerpt": "Análise completa do Palmeiras na rodada 3 do Brasileirão 2026. Atualmente em 5º lugar com 4 pontos. Probabilidade de título: 30.3%.",
+  "content": "## Palmeiras — Situação Atual\n\nNa **rodada 3**, o Palmeiras ocupa a **5ª posição** com **4 pontos** em 2 jogos (1V 1E 0D), na pré-Libertadores.\n\n- Gols pró: **3** | Gols contra: **1** | Saldo: **+2**\n- Forma recente: **EV**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **30.3%** |\n| 🌎 Libertadores (G4) | **70.9%** |\n| 🏅 Sul-Americana | **27.6%** |\n| ⚠️ Rebaixamento | **0.3%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | INT | Fora | **1x2** | 50.4% | 1.58 |\n| 4 | FLU | Casa | **1x0** | 65.5% | 2.04 |\n| 5 | VAS | Fora | **0x3** | 58.6% | 1.95 |\n| 6 | MIR | Casa | **3x0** | 88.4% | 3.5 |\n| 7 | BOT | Casa | **1x0** | 69.1% | 2.26 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "tags": [
+    "Palmeiras",
+    "Brasileirão",
+    "Probabilidades"
+  ],
+  "readTime": 4,
+  "rodada": 3,
+  "tipo": "analise_time",
+  "time": "palmeiras",
+  "geradoEm": "2026-02-08T06:01:08.331248"
+}

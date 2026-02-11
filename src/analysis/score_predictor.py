@@ -148,15 +148,15 @@ class ScorePredictor:
     4. Normalizar e retornar distribuição completa
 
     Calibração:
-    - Ataque/defesa: normalizados contra baseline da liga (55 = média)
+    - Ataque/defesa: normalizados contra baseline da liga (44 = baseline V5)
     - Fator casa: parâmetro estável por liga (~1.22-1.40)
-    - Dixon-Coles τ: ~0.12 (calibrado, Karlis & Ntzoufras 2009)
+    - Dixon-Coles τ: ~0.05 (calibrado para ligas sul-americanas)
     - Decaimento temporal: peso exponencial em forma recente
     """
 
     MAX_GOLS = 7
-    TAU = 0.12              # Dixon-Coles correlation parameter
-    FORCA_BASELINE = 55.0   # Time médio da liga = 55
+    TAU = 0.05              # Dixon-Coles correlation parameter (calibrado)
+    FORCA_BASELINE = 44.0   # Baseline V5 (rankings comprimidos 65-87)
     DECAY_RATE = 0.85       # Decaimento temporal por jogo
 
     def __init__(self):
@@ -212,25 +212,27 @@ class ScorePredictor:
         forma_recente: str = "",
         posicao: int = 10,
         dias_descanso: int = -1,
+        h2h_ajuste: float = 1.0,
     ) -> float:
         """
         Calcula λ (taxa de gols esperados) para um time.
 
         Fórmula (estilo Maher/Dixon-Coles):
-            λ = média_liga/2 × α_ataque × β_fraqueza_def_adv × γ_casa × δ_descanso
+            λ = média_liga/2 × α_ataque × β_fraqueza_def_adv × γ_casa × δ_descanso × ε_h2h
 
         Onde:
             α = forca_ataque / BASELINE (normalizado, centro=1.0)
-            β = (110 - forca_defesa_adv) / BASELINE
+            β = (100 - forca_defesa_adv) / BASELINE
             γ = fator de mando (>1 se mandante, 1.0 se visitante)
             δ = fator de descanso (ref: FiveThirtyEight, Clark 2005)
+            ε = fator H2H (histórico de confrontos diretos, ±8% máx)
         """
         camp = campeonato.lower()
         media_liga = MEDIA_GOLS_POR_LIGA.get(camp, 2.50) / 2.0
         fator_casa = FATOR_CASA_POR_LIGA.get(camp, 1.33) if eh_mandante else 1.0
 
-        alfa = max(0.35, min(2.0, forca_ataque / self.FORCA_BASELINE))
-        beta = max(0.3, min(2.0, (110.0 - forca_defesa_adversario) / self.FORCA_BASELINE))
+        alfa = max(0.35, min(2.5, forca_ataque / self.FORCA_BASELINE))
+        beta = max(0.2, min(2.0, (100.0 - forca_defesa_adversario) / self.FORCA_BASELINE))
 
         lam = media_liga * alfa * beta * fator_casa
 
@@ -244,6 +246,10 @@ class ScorePredictor:
         # Ajuste dias de descanso (±5% máx)
         if dias_descanso >= 0:
             lam *= self._ajuste_descanso(dias_descanso)
+
+        # Ajuste H2H (confrontos diretos, ±8% máx)
+        if h2h_ajuste != 1.0:
+            lam *= max(0.92, min(1.08, h2h_ajuste))
 
         return max(0.2, min(4.0, lam))
 
@@ -476,6 +482,12 @@ class ScorePredictor:
         modo: ModoPrevisao = None,
         dias_descanso_mandante: int = -1,
         dias_descanso_visitante: int = -1,
+        forca_ataque_mandante: float = None,
+        forca_defesa_mandante: float = None,
+        forca_ataque_visitante: float = None,
+        forca_defesa_visitante: float = None,
+        h2h_ajuste_mandante: float = 1.0,
+        h2h_ajuste_visitante: float = 1.0,
     ) -> PrevisaoPlacar:
         """
         Previsão completa de um confronto.
@@ -493,24 +505,32 @@ class ScorePredictor:
             campeonato, eh_classico, eh_decisao
         )
 
-        # 2. Calcular λ
+        # 2. Resolver forças de ataque/defesa separadas (V5)
+        atk_m = forca_ataque_mandante if forca_ataque_mandante is not None else forca_mandante
+        def_m = forca_defesa_mandante if forca_defesa_mandante is not None else forca_mandante
+        atk_v = forca_ataque_visitante if forca_ataque_visitante is not None else forca_visitante
+        def_v = forca_defesa_visitante if forca_defesa_visitante is not None else forca_visitante
+
+        # 3. Calcular λ (ataque do time × fraqueza defensiva do adversário)
         lambda_casa = self.calcular_lambda(
-            forca_ataque=forca_mandante,
-            forca_defesa_adversario=forca_visitante,
+            forca_ataque=atk_m,
+            forca_defesa_adversario=def_v,
             eh_mandante=True,
             campeonato=campeonato,
             forma_recente=forma_mandante,
             posicao=posicao_mandante,
             dias_descanso=dias_descanso_mandante,
+            h2h_ajuste=h2h_ajuste_mandante,
         )
         lambda_fora = self.calcular_lambda(
-            forca_ataque=forca_visitante,
-            forca_defesa_adversario=forca_mandante,
+            forca_ataque=atk_v,
+            forca_defesa_adversario=def_m,
             eh_mandante=False,
             campeonato=campeonato,
             forma_recente=forma_visitante,
             posicao=posicao_visitante,
             dias_descanso=dias_descanso_visitante,
+            h2h_ajuste=h2h_ajuste_visitante,
         )
 
         # 3. Ajuste de clássico (tensão → -5% gols)
@@ -518,11 +538,30 @@ class ScorePredictor:
             lambda_casa *= 0.95
             lambda_fora *= 0.95
 
-        # 4. Probabilidades de cada placar
-        probs_placar = self.calcular_probabilidades_placar(lambda_casa, lambda_fora, usar_dc)
+        # 4. Top 5 placares — seleção inteligente (Poisson + desempate xG)
+        #    Usa Poisson puro (sem viés DC) para probabilidades base.
+        #    Quando vários placares têm prob similar (cluster ≤ 1.5pp),
+        #    escolhe o mais próximo dos gols esperados (xG),
+        #    como fazem sites especialistas (FiveThirtyEight, Forebet).
+        #    DC continua para V/E/D e mercados de gols (bem calibrados).
+        probs_placar = self.calcular_probabilidades_placar(lambda_casa, lambda_fora, False)
+        all_sorted = sorted(probs_placar.items(), key=lambda x: x[1], reverse=True)
+        max_prob = all_sorted[0][1]
 
-        # 5. Top 5
-        top5 = sorted(probs_placar.items(), key=lambda x: x[1], reverse=True)[:5]
+        # Cluster: placares com prob próxima do máximo (≤ 1.5pp)
+        CLUSTER_THRESHOLD = 0.015
+        cluster = [(p, pr) for p, pr in all_sorted if max_prob - pr <= CLUSTER_THRESHOLD]
+
+        if len(cluster) > 1:
+            # Desempate: placar mais próximo do xG (distância euclidiana²)
+            def _xg_dist(placar: str) -> float:
+                gc, gf = map(int, placar.split('x'))
+                return (gc - lambda_casa) ** 2 + (gf - lambda_fora) ** 2
+            best = min(cluster, key=lambda x: _xg_dist(x[0]))
+            top5 = [best] + [(p, pr) for p, pr in all_sorted if p != best[0]][:4]
+        else:
+            top5 = all_sorted[:5]
+
         placar_top = top5[0][0]
         prob_top = top5[0][1]
         gc_top, gf_top = map(int, placar_top.split('x'))
@@ -591,15 +630,20 @@ class ScorePredictor:
         partidas: List[Dict],
         estatisticas_times: Dict[int, Any],
         descanso: Dict[int, Optional[int]] = None,
+        h2h_ajustes: Dict[str, Tuple[float, float]] = None,
     ) -> List[PrevisaoPlacar]:
         """Prevê todos os confrontos de uma rodada.
 
         Args:
             descanso: Dict {clube_id: dias_descanso} - se fornecido,
                       injeta automaticamente nos cálculos de λ.
+            h2h_ajustes: Dict {"mandante_abrev-visitante_abrev": (ajuste_mandante, ajuste_visitante)}
+                         Multiplicadores H2H para λ de cada time (1.0 = neutro).
         """
         if descanso is None:
             descanso = {}
+        if h2h_ajustes is None:
+            h2h_ajustes = {}
         previsoes = []
         for partida in partidas:
             mandante_id = partida.get("clube_casa_id")
@@ -613,6 +657,11 @@ class ScorePredictor:
             va = partida.get("clube_visitante_abrev", getattr(sv, 'abreviacao', "???"))
             fm = getattr(sm, 'forca_geral', 50)
             fv = getattr(sv, 'forca_geral', 50)
+            # V5: Forças separadas de ataque/defesa
+            fatk_m = getattr(sm, 'forca_ataque', fm)
+            fdef_m = getattr(sm, 'forca_defesa', fm)
+            fatk_v = getattr(sv, 'forca_ataque', fv)
+            fdef_v = getattr(sv, 'forca_defesa', fv)
             pm = partida.get("clube_casa_posicao", getattr(sm, 'posicao', 10)) or 10
             pv = partida.get("clube_visitante_posicao", getattr(sv, 'posicao', 10)) or 10
             frm = getattr(sm, 'forma_sequencia', "")
@@ -620,14 +669,22 @@ class ScorePredictor:
             dm = descanso.get(mandante_id, -1) or -1
             dv = descanso.get(visitante_id, -1) or -1
 
+            # H2H: lookup por chave "MANDxVISIT"
+            h2h_key = f"{ma}-{va}"
+            h2h_m, h2h_v = h2h_ajustes.get(h2h_key, (1.0, 1.0))
+
             previsoes.append(self.prever_confronto(
                 mandante=ma, visitante=va,
                 mandante_id=mandante_id, visitante_id=visitante_id,
                 forca_mandante=fm, forca_visitante=fv,
+                forca_ataque_mandante=fatk_m, forca_defesa_mandante=fdef_m,
+                forca_ataque_visitante=fatk_v, forca_defesa_visitante=fdef_v,
                 posicao_mandante=pm, posicao_visitante=pv,
                 forma_mandante=frm, forma_visitante=frv,
                 dias_descanso_mandante=dm,
                 dias_descanso_visitante=dv,
+                h2h_ajuste_mandante=h2h_m,
+                h2h_ajuste_visitante=h2h_v,
             ))
         return previsoes
 

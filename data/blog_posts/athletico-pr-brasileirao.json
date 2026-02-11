@@ -1,0 +1,17 @@
+{
+  "slug": "athletico-pr-brasileirao",
+  "title": "Athletico-PR no Brasileirão: Probabilidades e Análise",
+  "date": "2026-02-08",
+  "excerpt": "Análise completa do Athletico-PR na rodada 3 do Brasileirão 2026. Atualmente em 8º lugar com 3 pontos. Probabilidade de título: 0.8%.",
+  "content": "## Athletico-PR — Situação Atual\n\nNa **rodada 3**, o Athletico-PR ocupa a **8ª posição** com **3 pontos** em 1 jogos (1V 0E 0D), na briga por Sul-Americana.\n\n- Gols pró: **2** | Gols contra: **0** | Saldo: **+2**\n- Forma recente: **V**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.8%** |\n| 🌎 Libertadores (G4) | **9.3%** |\n| 🏅 Sul-Americana | **49.3%** |\n| ⚠️ Rebaixamento | **14.3%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | SAN | Casa | **1x2** | 51.9% | 1.87 |\n| 4 | RBB | Fora | **1x0** | 15.7% | 1.08 |\n| 5 | BOT | Casa | **0x3** | 32.0% | 1.4 |\n| 6 | FLU | Fora | **1x0** | 7.7% | 0.9 |\n| 7 | CRU | Casa | **1x0** | 67.7% | 2.63 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "tags": [
+    "Athletico-PR",
+    "Brasileirão",
+    "Probabilidades"
+  ],
+  "readTime": 4,
+  "rodada": 3,
+  "tipo": "analise_time",
+  "time": "athletico-pr",
+  "geradoEm": "2026-02-08T06:00:14.927945"
+}

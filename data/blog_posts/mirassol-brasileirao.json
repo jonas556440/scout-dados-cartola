@@ -1,0 +1,17 @@
+{
+  "slug": "mirassol-brasileirao",
+  "title": "Mirassol no Brasileirão: Probabilidades e Análise",
+  "date": "2026-02-08",
+  "excerpt": "Análise completa do Mirassol na rodada 3 do Brasileirão 2026. Atualmente em 2º lugar com 4 pontos. Probabilidade de título: 0.8%.",
+  "content": "## Mirassol — Situação Atual\n\nNa **rodada 3**, o Mirassol ocupa a **2ª posição** com **4 pontos** em 2 jogos (1V 1E 0D), na zona de classificação para a Libertadores (G4).\n\n- Gols pró: **3** | Gols contra: **1** | Saldo: **+2**\n- Forma recente: **VE**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.8%** |\n| 🌎 Libertadores (G4) | **6.6%** |\n| 🏅 Sul-Americana | **42.8%** |\n| ⚠️ Rebaixamento | **21.4%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | CRU | Casa | **1x2** | 48.7% | 1.79 |\n| 4 | FLA | Fora | **3x0** | 7.9% | 0.82 |\n| 5 | SAN | Casa | **1x0** | 53.5% | 2.06 |\n| 6 | PAL | Fora | **3x0** | 3.2% | 0.6 |\n| 7 | CFC | Casa | **1x0** | 71.4% | 2.76 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "tags": [
+    "Mirassol",
+    "Brasileirão",
+    "Probabilidades"
+  ],
+  "readTime": 4,
+  "rodada": 3,
+  "tipo": "analise_time",
+  "time": "mirassol",
+  "geradoEm": "2026-02-08T06:01:03.309063"
+}

@@ -65,6 +65,9 @@ diagnostico.html
 # Production configs (keep templates, ignore copies with real data)
 *.conf.local
 *.env.production
+.env
+.env.local
+!.env.example
 
 # Apache/Nginx configs with real paths
 apache_production.conf

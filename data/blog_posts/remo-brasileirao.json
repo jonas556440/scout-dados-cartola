@@ -1,0 +1,17 @@
+{
+  "slug": "remo-brasileirao",
+  "title": "Remo no Brasileirão: Probabilidades e Análise",
+  "date": "2026-02-08",
+  "excerpt": "Análise completa do Remo na rodada 3 do Brasileirão 2026. Atualmente em 18º lugar com 1 pontos. Probabilidade de título: 0.0%.",
+  "content": "## Remo — Situação Atual\n\nNa **rodada 3**, o Remo ocupa a **18ª posição** com **1 pontos** em 2 jogos (0V 1E 1D), na zona de rebaixamento (Z4).\n\n- Gols pró: **2** | Gols contra: **3** | Saldo: **-1**\n- Forma recente: **DE**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.0%** |\n| 🌎 Libertadores (G4) | **0.0%** |\n| 🏅 Sul-Americana | **1.5%** |\n| ⚠️ Rebaixamento | **92.6%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | CAM | Fora | **1x2** | 7.0% | 0.64 |\n| 4 | INT | Casa | **0x3** | 19.6% | 1.0 |\n| 5 | FLU | Casa | **0x3** | 13.8% | 0.85 |\n| 6 | CFC | Fora | **1x0** | 11.9% | 0.92 |\n| 7 | FLA | Fora | **3x0** | 2.5% | 0.51 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "tags": [
+    "Remo",
+    "Brasileirão",
+    "Probabilidades"
+  ],
+  "readTime": 4,
+  "rodada": 3,
+  "tipo": "analise_time",
+  "time": "remo",
+  "geradoEm": "2026-02-08T06:01:55.841500"
+}

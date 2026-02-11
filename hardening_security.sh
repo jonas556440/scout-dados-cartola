@@ -43,7 +43,7 @@ echo ""
 # ============================================
 echo -e "${YELLOW}[1/8] Atualizando dependências...${NC}"
 
-cd /root/cartolafc2026
+cd /www/wwwroot/scoutdados.com.br
 source venv/bin/activate 2>/dev/null || python3 -m venv venv && source venv/bin/activate
 
 pip install --upgrade pip -q
@@ -85,7 +85,7 @@ def setup_rate_limiting(app):
     return limiter
 RATE_EOF
 
-mv /tmp/rate_limiter.py /root/cartolafc2026/src/utils/rate_limiter.py
+mv /tmp/rate_limiter.py /www/wwwroot/scoutdados.com.br/src/utils/rate_limiter.py
 
 echo -e "${GREEN}✅ Rate limiting configurado${NC}"
 echo ""
@@ -103,7 +103,7 @@ if [ -z "$DOMAIN" ]; then
 fi
 
 # Backup do arquivo original
-cp /root/cartolafc2026/api_server.py /root/cartolafc2026/api_server.py.backup
+cp /www/wwwroot/scoutdados.com.br/api_server.py /www/wwwroot/scoutdados.com.br/api_server.py.backup
 
 # Criar configuração segura de CORS
 cat > /tmp/cors_config.txt << CORS_EOF
@@ -133,16 +133,16 @@ echo -e "${YELLOW}[4/8] Criando usuário dedicado...${NC}"
 
 # Criar usuário se não existir
 if ! id "cartolafc" &>/dev/null; then
-    useradd -r -s /bin/false -d /root/cartolafc2026 cartolafc
+    useradd -r -s /bin/false -d /www/wwwroot/scoutdados.com.br cartolafc
     echo -e "${GREEN}✅ Usuário 'cartolafc' criado${NC}"
 else
     echo -e "${YELLOW}⚠️  Usuário 'cartolafc' já existe${NC}"
 fi
 
 # Ajustar permissões
-chown -R cartolafc:cartolafc /root/cartolafc2026
-chmod 750 /root/cartolafc2026
-chmod 640 /root/cartolafc2026/data/cartola.db
+chown -R cartolafc:cartolafc /www/wwwroot/scoutdados.com.br
+chmod 750 /www/wwwroot/scoutdados.com.br
+chmod 640 /www/wwwroot/scoutdados.com.br/data/cartola.db
 
 echo -e "${GREEN}✅ Permissões ajustadas${NC}"
 echo ""
@@ -215,7 +215,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 HEADERS_EOF
 
-mv /tmp/security_headers.py /root/cartolafc2026/src/utils/security_headers.py
+mv /tmp/security_headers.py /www/wwwroot/scoutdados.com.br/src/utils/security_headers.py
 
 echo -e "${GREEN}✅ Headers de segurança configurados${NC}"
 echo ""
@@ -233,7 +233,7 @@ cat > /usr/local/bin/backup_cartolafc.sh << 'BACKUP_EOF'
 #!/bin/bash
 BACKUP_DIR="/var/backups/cartolafc"
 DATE=$(date +%Y%m%d_%H%M%S)
-DB_PATH="/root/cartolafc2026/data/cartola.db"
+DB_PATH="/www/wwwroot/scoutdados.com.br/data/cartola.db"
 
 # Criar backup do banco
 sqlite3 "$DB_PATH" ".backup '$BACKUP_DIR/cartola_$DATE.db'"
@@ -320,5 +320,5 @@ echo ""
 echo "⚠️  IMPORTANTE: Sistema ainda NÃO está 100% seguro!"
 echo "   Complete os passos acima antes de produção."
 echo ""
-echo "📖 Documentação completa: /root/cartolafc2026/AUDITORIA_SEGURANCA.md"
+echo "📖 Documentação completa: /www/wwwroot/scoutdados.com.br/AUDITORIA_SEGURANCA.md"
 echo ""

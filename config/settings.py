@@ -110,6 +110,12 @@ class Settings(BaseSettings):
 # Instância global de configurações
 settings = Settings()
 
+# Validar SECRET_KEY em produção
+if settings.ENV == "production" and settings.SECRET_KEY == "dev-secret-key":
+    raise ValueError(
+        "SECRET_KEY não pode ser 'dev-secret-key' em produção! "
+        "Defina SECRET_KEY no arquivo .env ou como variável de ambiente."
+    )
 
 # Criar diretórios necessários
 settings.DATA_DIR.mkdir(exist_ok=True)

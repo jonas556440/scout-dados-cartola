@@ -1,0 +1,1 @@
+{"timestamp": 1770788977.9288096, "data": {"rodadaAtual": 3, "totalRodadas": 2, "totalJogos": 19, "totalAcertos": 4, "acuraciaGeral": 21.1, "rodadas": [{"rodada": 1, "totalPartidas": 10, "acertos": 1, "acuracia": 10.0}, {"rodada": 2, "totalPartidas": 9, "acertos": 3, "acuracia": 33.3}], "metodologia": "Poisson V3 + Frequências contextuais"}}

@@ -1,0 +1,17 @@
+{
+  "slug": "vitoria-brasileirao",
+  "title": "Vitória no Brasileirão: Probabilidades e Análise",
+  "date": "2026-02-08",
+  "excerpt": "Análise completa do Vitória na rodada 3 do Brasileirão 2026. Atualmente em 11º lugar com 3 pontos. Probabilidade de título: 0.0%.",
+  "content": "## Vitória — Situação Atual\n\nNa **rodada 3**, o Vitória ocupa a **11ª posição** com **3 pontos** em 2 jogos (1V 0E 1D), na briga por Sul-Americana.\n\n- Gols pró: **3** | Gols contra: **2** | Saldo: **+1**\n- Forma recente: **VD**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.0%** |\n| 🌎 Libertadores (G4) | **2.6%** |\n| 🏅 Sul-Americana | **25.8%** |\n| ⚠️ Rebaixamento | **37.3%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | FLA | Casa | **1x2** | 19.8% | 1.04 |\n| 4 | BOT | Fora | **3x0** | 5.2% | 0.71 |\n| 5 | BAH | Fora | **1x0** | 9.8% | 0.95 |\n| 6 | CAM | Casa | **1x1** | 40.0% | 1.77 |\n| 7 | GRE | Fora | **1x0** | 7.4% | 0.94 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "tags": [
+    "Vitória",
+    "Brasileirão",
+    "Probabilidades"
+  ],
+  "readTime": 4,
+  "rodada": 3,
+  "tipo": "analise_time",
+  "time": "vitoria",
+  "geradoEm": "2026-02-08T06:01:29.901972"
+}

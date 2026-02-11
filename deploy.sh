@@ -58,7 +58,27 @@ step "Build do frontend (Bun + Vite)"
 cd "$FRONTEND_DIR"
 export PATH="$PATH:/snap/bin"
 bun install --frozen-lockfile 2>/dev/null || bun install
-bun run build
+
+# Backup do dist atual para rollback
+if [ -d "$DIST_DIR" ]; then
+    step "Backup do dist anterior (rollback)"
+    rm -rf "$DIST_DIR.bak"
+    cp -r "$DIST_DIR" "$DIST_DIR.bak"
+    log "Backup criado: $DIST_DIR.bak"
+fi
+
+# Build com rollback automático se falhar
+if ! bun run build; then
+    err_msg="Build falhou!"
+    if [ -d "$DIST_DIR.bak" ]; then
+        echo -e "${RED}❌ $err_msg Restaurando backup...${NC}"
+        rm -rf "$DIST_DIR"
+        mv "$DIST_DIR.bak" "$DIST_DIR"
+        echo -e "${YELLOW}⚠️  Rollback aplicado — versão anterior restaurada${NC}"
+        exit 1
+    fi
+    err "$err_msg"
+fi
 log "Build concluído → $DIST_DIR"
 
 # ── 2b. SSG Pre-render (gera HTML estático com dados para SEO)

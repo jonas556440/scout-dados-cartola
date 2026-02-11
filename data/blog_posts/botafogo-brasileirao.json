@@ -1,0 +1,17 @@
+{
+  "slug": "botafogo-brasileirao",
+  "title": "Botafogo no Brasileirão: Probabilidades e Análise",
+  "date": "2026-02-08",
+  "excerpt": "Análise completa do Botafogo na rodada 3 do Brasileirão 2026. Atualmente em 9º lugar com 3 pontos. Probabilidade de título: 16.0%.",
+  "content": "## Botafogo — Situação Atual\n\nNa **rodada 3**, o Botafogo ocupa a **9ª posição** com **3 pontos** em 2 jogos (1V 0E 1D), na briga por Sul-Americana.\n\n- Gols pró: **3** | Gols contra: **2** | Saldo: **+1**\n- Forma recente: **VD**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **16.0%** |\n| 🌎 Libertadores (G4) | **52.4%** |\n| 🏅 Sul-Americana | **41.7%** |\n| ⚠️ Rebaixamento | **0.7%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | FLU | Fora | **1x2** | 29.9% | 1.17 |\n| 4 | VIT | Casa | **3x0** | 84.2% | 3.17 |\n| 5 | CAP | Fora | **0x3** | 44.4% | 1.69 |\n| 6 | FLA | Casa | **1x0** | 62.4% | 2.18 |\n| 7 | PAL | Fora | **1x0** | 12.7% | 0.85 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "tags": [
+    "Botafogo",
+    "Brasileirão",
+    "Probabilidades"
+  ],
+  "readTime": 4,
+  "rodada": 3,
+  "tipo": "analise_time",
+  "time": "botafogo",
+  "geradoEm": "2026-02-08T06:00:25.907261"
+}

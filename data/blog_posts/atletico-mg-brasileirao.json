@@ -1,0 +1,17 @@
+{
+  "slug": "atletico-mg-brasileirao",
+  "title": "Atlético-MG no Brasileirão: Probabilidades e Análise",
+  "date": "2026-02-08",
+  "excerpt": "Análise completa do Atlético-MG na rodada 3 do Brasileirão 2026. Atualmente em 16º lugar com 1 pontos. Probabilidade de título: 2.8%.",
+  "content": "## Atlético-MG — Situação Atual\n\nNa **rodada 3**, o Atlético-MG ocupa a **16ª posição** com **1 pontos** em 2 jogos (0V 1E 1D), na meio de tabela.\n\n- Gols pró: **2** | Gols contra: **3** | Saldo: **-1**\n- Forma recente: **ED**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **2.8%** |\n| 🌎 Libertadores (G4) | **17.8%** |\n| 🏅 Sul-Americana | **52.7%** |\n| ⚠️ Rebaixamento | **9.6%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | REM | Casa | **1x2** | 79.0% | 2.58 |\n| 4 | GRE | Fora | **1x0** | 23.3% | 1.24 |\n| 5 | INT | Casa | **1x0** | 55.2% | 2.04 |\n| 6 | VIT | Fora | **1x1** | 37.7% | 1.71 |\n| 7 | SAO | Casa | **1x0** | 52.1% | 2.01 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "tags": [
+    "Atlético-MG",
+    "Brasileirão",
+    "Probabilidades"
+  ],
+  "readTime": 4,
+  "rodada": 3,
+  "tipo": "analise_time",
+  "time": "atletico-mg",
+  "geradoEm": "2026-02-08T06:00:09.522766"
+}
