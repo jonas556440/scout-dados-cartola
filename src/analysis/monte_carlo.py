@@ -59,6 +59,16 @@ class ResultadoSimulacao:
     posicao_media: float = 0
 
 
+@dataclass
+class PontosNecessarios:
+    """Pontos mínimos necessários para cada objetivo por probabilidade."""
+    probabilidade: int  # 50, 70, 80, 90, 95, 99, 100
+    titulo: int = 0
+    libertadores: int = 0       # G4
+    sulamericana: int = 0       # G5-G12
+    permanencia: int = 0        # Fora do Z4
+
+
 class MonteCarloSimulator:
     """
     Simula o restante do Campeonato Brasileiro usando Monte Carlo.
@@ -95,25 +105,36 @@ class MonteCarloSimulator:
         classificacao_atual: List[Dict],
         jogos_restantes: List[Dict],
         forca_times: Dict[int, float],
+        forca_ataque_times: Optional[Dict[int, float]] = None,
+        forca_defesa_times: Optional[Dict[int, float]] = None,
+        xg_cache: Optional[Dict[Tuple[int, int], Tuple[float, float]]] = None,
     ) -> List[ResultadoSimulacao]:
         """
         Executa N simulações Monte Carlo.
         
         Args:
             classificacao_atual: Lista com dados atuais de cada time
-                [{"id": 1, "nome": "Flamengo", "abrev": "FLA", "pontos": 30, 
-                  "jogos": 15, "vitorias": 9, ...}]
             jogos_restantes: Partidas que ainda não ocorreram
-                [{"mandante_id": 1, "visitante_id": 2, "rodada": 16}]
             forca_times: Dict[time_id] -> força geral (0-100)
+            forca_ataque_times: Dict[time_id] -> força de ataque (V5)
+            forca_defesa_times: Dict[time_id] -> força de defesa (V5)
         
         Returns:
             Lista de ResultadoSimulacao ordenada por posição média
         """
         n = self.n_simulacoes
-        
+
+        # Garantir que xg_cache existe para evitar recalcular prever_confronto
+        # em cada simulação (380 jogos × 300 sims = 114k chamadas redundantes)
+        if xg_cache is None:
+            xg_cache = {}
+
         # Contadores por time
         contadores: Dict[int, Dict] = {}
+        # Rastrear distribuição pontos × posição para "Pontos Necessários"
+        # pontos_posicao[pontos] = {"titulo": count, "g4": count, "sula": count, "z4": count, "total": count}
+        pontos_posicao: Dict[int, Dict[str, int]] = {}
+        
         for time_data in classificacao_atual:
             tid = time_data["id"]
             contadores[tid] = {
@@ -156,26 +177,43 @@ class MonteCarloSimulator:
                 
                 fm = forca_times.get(mid, 50)
                 fv = forca_times.get(vid, 50)
-                
-                # Calcular xG com fator casa
-                xg_m = max(0.3, (fm / 50) * 1.2 + random.gauss(0, 0.15))
-                xg_v = max(0.3, (fv / 50) * 0.9 + random.gauss(0, 0.15))
-                
-                # Se temos ScorePredictor, usamos xG dele
-                if self.score_predictor:
-                    try:
-                        previsao = self.score_predictor.prever_confronto(
-                            mandante=times[mid].abrev,
-                            visitante=times[vid].abrev,
-                            mandante_id=mid,
-                            visitante_id=vid,
-                            forca_mandante=fm,
-                            forca_visitante=fv,
-                        )
-                        xg_m = previsao.xg_mandante
-                        xg_v = previsao.xg_visitante
-                    except Exception:
-                        pass
+
+                # Usar cache de xG quando disponível (evita chamadas repetidas ao predictor)
+                cache_key = (mid, vid)
+                if xg_cache and cache_key in xg_cache:
+                    xg_m, xg_v = xg_cache[cache_key]
+                else:
+                    # Calcular xG determinístico com fator casa (variância vem do Poisson)
+                    xg_m = max(0.3, (fm / 50) * 1.2)
+                    xg_v = max(0.3, (fv / 50) * 0.9)
+                    
+                    # Se temos ScorePredictor, usamos xG dele (V5: forças separadas)
+                    if self.score_predictor:
+                        try:
+                            # V5: Extrair forças ataque/defesa separadas se disponíveis
+                            fatk_m = forca_ataque_times.get(mid, fm) if forca_ataque_times else fm
+                            fdef_m = forca_defesa_times.get(mid, fm) if forca_defesa_times else fm
+                            fatk_v = forca_ataque_times.get(vid, fv) if forca_ataque_times else fv
+                            fdef_v = forca_defesa_times.get(vid, fv) if forca_defesa_times else fv
+                            previsao = self.score_predictor.prever_confronto(
+                                mandante=times[mid].abrev,
+                                visitante=times[vid].abrev,
+                                mandante_id=mid,
+                                visitante_id=vid,
+                                forca_mandante=fm,
+                                forca_visitante=fv,
+                                forca_ataque_mandante=fatk_m,
+                                forca_defesa_mandante=fdef_m,
+                                forca_ataque_visitante=fatk_v,
+                                forca_defesa_visitante=fdef_v,
+                            )
+                            xg_m = previsao.xg_mandante
+                            xg_v = previsao.xg_visitante
+                        except Exception:
+                            pass
+                    # Cachear para reutilizar nas próximas simulações
+                    if xg_cache is not None:
+                        xg_cache[cache_key] = (xg_m, xg_v)
                 
                 gols_m = self._gols_poisson(xg_m)
                 gols_v = self._gols_poisson(xg_v)
@@ -226,6 +264,22 @@ class MonteCarloSimulator:
                     c["sula"] += 1
                 if pos >= 17:  # Z4 do Brasileirão
                     c["z4"] += 1
+                
+                # Rastrear distribuição pontos × posição
+                pts = time.pontos
+                if pts not in pontos_posicao:
+                    pontos_posicao[pts] = {"titulo": 0, "g4": 0, "g12": 0, "z4": 0, "permanencia": 0, "total": 0}
+                pontos_posicao[pts]["total"] += 1
+                if pos == 1:
+                    pontos_posicao[pts]["titulo"] += 1
+                if pos <= 4:
+                    pontos_posicao[pts]["g4"] += 1
+                if pos <= 12:
+                    pontos_posicao[pts]["g12"] += 1  # G-12 = Sul-Americana ou melhor
+                if pos >= 17:
+                    pontos_posicao[pts]["z4"] += 1
+                if pos <= 16:
+                    pontos_posicao[pts]["permanencia"] += 1
         
         # Montar resultados
         resultados = []
@@ -246,7 +300,65 @@ class MonteCarloSimulator:
             ))
         
         resultados.sort(key=lambda r: r.posicao_media)
-        return resultados
+        
+        # Calcular pontos necessários por probabilidade
+        pontos_necessarios = self._calcular_pontos_necessarios(pontos_posicao, n)
+        
+        return resultados, pontos_necessarios
+    
+    def _calcular_pontos_necessarios(
+        self, 
+        pontos_posicao: Dict[int, Dict[str, int]], 
+        n_simulacoes: int
+    ) -> List[PontosNecessarios]:
+        """
+        Calcula os pontos mínimos necessários para cada objetivo em cada faixa de probabilidade.
+        
+        Para cada faixa de probabilidade (50%, 70%, 80%, 90%, 95%, 99%, 100%),
+        calcula quantos pontos são necessários para ter pelo menos essa probabilidade
+        de atingir cada objetivo (título, G4, sulamericana, permanência).
+        """
+        faixas = [50, 70, 80, 90, 95, 99, 100]
+        objetivos = ["titulo", "g4", "g12", "permanencia"]
+        
+        # Ordenar pontos decrescente
+        pontos_ordenados = sorted(pontos_posicao.keys(), reverse=True)
+        
+        resultado = []
+        for faixa in faixas:
+            pn = PontosNecessarios(probabilidade=faixa)
+            
+            for objetivo in objetivos:
+                # Acumular de cima para baixo: encontrar o menor pontos
+                # onde a probabilidade acumulada >= faixa%
+                acum_objetivo = 0
+                acum_total = 0
+                pontos_encontrado = 0
+                
+                for pts in pontos_ordenados:
+                    dados = pontos_posicao[pts]
+                    acum_objetivo += dados.get(objetivo, 0)
+                    acum_total += dados["total"]
+                    
+                    if acum_total > 0:
+                        prob = (acum_objetivo / acum_total) * 100
+                        if prob >= faixa:
+                            pontos_encontrado = pts
+                
+                # Para permanência, queremos o mínimo de pontos para ficar fora do Z4
+                # Para os demais, queremos o mínimo de pontos para atingir o objetivo
+                if objetivo == "titulo":
+                    pn.titulo = pontos_encontrado
+                elif objetivo == "g4":
+                    pn.libertadores = pontos_encontrado
+                elif objetivo == "g12":
+                    pn.sulamericana = pontos_encontrado
+                elif objetivo == "permanencia":
+                    pn.permanencia = pontos_encontrado
+            
+            resultado.append(pn)
+        
+        return resultado
 
 
 if __name__ == "__main__":
@@ -269,7 +381,7 @@ if __name__ == "__main__":
     
     forcas = {1: 70, 2: 65, 3: 40, 4: 30}
     
-    resultados = sim.simular_campeonato(times_teste, jogos, forcas)
+    resultados, pontos_nec = sim.simular_campeonato(times_teste, jogos, forcas)
     
     print(f"{'Time':<10} {'Pos Média':>10} {'Pts Médio':>10} {'Título':>8} {'G4':>8} {'Z4':>8}")
     print("-" * 60)

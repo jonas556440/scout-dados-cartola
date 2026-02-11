@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 import sys
+import json
 import logging
 from pathlib import Path
 
@@ -1679,32 +1680,75 @@ def _cache_set(name: str, data: Any, key: str = ""):
 
 # Cache in-memory para classificação (TTL 10 min)
 _classificacao_cache = _endpoint_caches["classificacao"]
+_classificacao_disk = Path(__file__).parent / "data" / "cache" / "classificacao_response.json"
+_confrontos_disk = Path(__file__).parent / "data" / "cache" / "confrontos_realizados.json"
+
+
+def _load_confrontos_disk() -> tuple:
+    """Carrega confrontos realizados do disco. Retorna (set, last_rodada)."""
+    try:
+        if _confrontos_disk.exists():
+            data = json.loads(_confrontos_disk.read_text(encoding="utf-8"))
+            confrontos = {tuple(c) for c in data.get("confrontos", [])}
+            return confrontos, data.get("last_rodada", 0)
+    except Exception:
+        pass
+    return set(), 0
+
+
+def _save_confrontos_disk(confrontos: set, rodada: int):
+    """Salva confrontos realizados em disco."""
+    try:
+        _confrontos_disk.parent.mkdir(parents=True, exist_ok=True)
+        _confrontos_disk.write_text(json.dumps({
+            "confrontos": [list(c) for c in confrontos],
+            "last_rodada": rodada,
+        }, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
+
 
 @app.get("/api/brasileirao/classificacao")
 def get_classificacao():
     """
     Retorna classificação do Brasileirão + simulação Monte Carlo.
     Combina dados reais da API Cartola com simulação de probabilidades.
-    Cache de 10 minutos para evitar sobrecarga.
+    Cache de 10 minutos (memória) + disk cache para sobreviver restarts.
     """
     import time as _time
-    
-    # Verificar cache
+
+    # 1. Cache em memória (rápido)
     if (
         _classificacao_cache["data"] is not None
         and _time.time() - _classificacao_cache["timestamp"] < _classificacao_cache["ttl"]
     ):
         return _classificacao_cache["data"]
-    
+
+    # 2. Disk cache fallback (sobrevive a restarts — stale-while-revalidate)
+    disk_stale = None
+    try:
+        if _classificacao_disk.exists():
+            raw = json.loads(_classificacao_disk.read_text(encoding="utf-8"))
+            ts = raw.pop("_cache_ts", 0)
+            if _time.time() - ts < 900:  # 15 min: fresco o suficiente
+                _classificacao_cache["data"] = raw
+                _classificacao_cache["timestamp"] = _time.time()
+                return raw
+            disk_stale = raw  # manter como fallback
+    except Exception:
+        pass
+
     try:
         from src.analysis.monte_carlo import MonteCarloSimulator
-        
+
         mercado = api.get_mercado()
         status = api.get_status_mercado()
-        
+
         if not mercado:
+            if disk_stale:
+                return disk_stale
             raise HTTPException(status_code=503, detail="API Cartola indisponível")
-        
+
         clubes = mercado.get("clubes", {})
         rodada_atual = status.get("rodada_atual", 1) if status else 1
         
@@ -1765,24 +1809,28 @@ def get_classificacao():
         predictor = None
         try:
             predictor = ScorePredictor()
-            mc = MonteCarloSimulator(score_predictor=predictor, n_simulacoes=500)
-            
+            mc = MonteCarloSimulator(score_predictor=predictor, n_simulacoes=300)
+
+            # Cache de xG para evitar recalcular prever_confronto em cada simulação
+            xg_cache = {}
+
             # Gerar jogos restantes com round-robin completo
             jogos_restantes = []
             time_ids = [t["id"] for t in classificacao]
             n_times = len(time_ids)
-            
-            # Coletar confrontos já realizados usando partidas já carregadas
-            # (evita N chamadas extras à API Cartola)
-            confrontos_realizados = set()
-            # Partidas da rodada atual já foram carregadas acima
+
+            # Coletar confrontos já realizados — disk cache + incremental
+            confrontos_realizados, last_cached_rod = _load_confrontos_disk()
+
+            # Partidas da rodada atual (já carregadas acima)
             for p in partidas:
                 m_id = p.get("clube_casa_id")
                 v_id = p.get("clube_visitante_id")
                 if m_id and v_id:
                     confrontos_realizados.add((m_id, v_id))
-            # Buscar rodadas passadas (apenas se necessário)
-            for rod in range(1, rodada_atual):
+
+            # Buscar APENAS rodadas que ainda não temos em cache
+            for rod in range(max(1, last_cached_rod + 1), rodada_atual):
                 try:
                     p_resp = api.get_partidas(rod)
                     if isinstance(p_resp, dict):
@@ -1798,7 +1846,10 @@ def get_classificacao():
                             confrontos_realizados.add((m_id, v_id))
                 except Exception:
                     pass
-            
+
+            # Salvar confrontos em disco para próximas requests
+            _save_confrontos_disk(confrontos_realizados, rodada_atual)
+
             # Gerar jogos restantes (turno e returno completos)
             rodada_futura = rodada_atual + 1
             jogos_pendentes = []
@@ -1810,7 +1861,7 @@ def get_classificacao():
                     v = time_ids[j_t]
                     if (m, v) not in confrontos_realizados:
                         jogos_pendentes.append({"mandante_id": m, "visitante_id": v})
-            
+
             # Distribuir em rodadas
             jogos_por_rodada = max(n_times // 2, 1)
             for idx, jogo in enumerate(jogos_pendentes):
@@ -1818,7 +1869,9 @@ def get_classificacao():
                 jogos_restantes.append(jogo)
             
             if jogos_restantes:
-                resultados, pontos_necessarios_mc = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
+                resultados, pontos_necessarios_mc = mc.simular_campeonato(
+                    classificacao, jogos_restantes, forca_times, xg_cache=xg_cache
+                )
                 simulacao = [
                     {
                         "id": r.time_id,
@@ -2029,18 +2082,35 @@ def get_classificacao():
             "jogosRealizados": ultima_rodada_jogos,
         }
         
-        # Cachear resultado
+        # Cachear resultado em memória
         _classificacao_cache["data"] = response
         _classificacao_cache["timestamp"] = _time.time()
-        
+
+        # Salvar em disco para sobreviver restarts
+        try:
+            _classificacao_disk.parent.mkdir(parents=True, exist_ok=True)
+            disk_data = dict(response)
+            disk_data["_cache_ts"] = _time.time()
+            _classificacao_disk.write_text(
+                json.dumps(disk_data, ensure_ascii=False, default=str),
+                encoding="utf-8",
+            )
+        except Exception:
+            pass
+
         return response
-    
+
     except HTTPException:
         raise
     except Exception as e:
         import traceback
         traceback.print_exc()
         logger.error(f"Erro classificação: {e}", exc_info=True)
+
+        # Fallback: retornar dados stale do disco
+        if disk_stale:
+            logger.warning("Retornando classificação stale do disco")
+            return disk_stale
 
         raise HTTPException(status_code=500, detail="Erro interno do servidor")
 
@@ -2306,7 +2376,7 @@ def get_time_detalhado(slug: str):
                     if r % 2 == 0: m, v = v, m
                     jogos_restantes.append({"mandante_id": m, "visitante_id": v, "rodada": r})
             if jogos_restantes:
-                resultados, _ = mc.simular_campeonato(classificacao, jogos_restantes, forca_times)
+                resultados, _ = mc.simular_campeonato(classificacao, jogos_restantes, forca_times, xg_cache={})
                 for res in resultados:
                     if res.time_id == time_id:
                         prob = {
