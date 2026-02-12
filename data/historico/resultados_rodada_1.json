@@ -1,6 +1,6 @@
 {
   "rodada": 1,
-  "timestamp": "2026-02-08T17:09:56.680952",
+  "timestamp": "2026-02-12T18:51:32.810809",
   "resultados": [
     {
       "partida_id": 346240,
@@ -14,10 +14,10 @@
       "data_jogo": "2026-01-28 19:00:00",
       "timestamp": 1769637600,
       "local": "Arena MRV",
-      "posicao_mandante": 15,
-      "posicao_visitante": 2,
-      "aproveitamento_mandante": ",,,e,d",
-      "aproveitamento_visitante": ",,,e,v"
+      "posicao_mandante": 14,
+      "posicao_visitante": 6,
+      "aproveitamento_mandante": ",,e,d,e",
+      "aproveitamento_visitante": ",,e,v,e"
     },
     {
       "partida_id": 346241,
@@ -32,9 +32,9 @@
       "timestamp": 1769637600,
       "local": "Beira-Rio",
       "posicao_mandante": 16,
-      "posicao_visitante": 10,
-      "aproveitamento_mandante": ",,,d,e",
-      "aproveitamento_visitante": ",,,,v"
+      "posicao_visitante": 11,
+      "aproveitamento_mandante": ",,d,e,e",
+      "aproveitamento_visitante": ",,,v,e"
     },
     {
       "partida_id": 346242,
@@ -48,10 +48,10 @@
       "data_jogo": "2026-01-28 19:00:00",
       "timestamp": 1769637600,
       "local": "Couto Pereira",
-      "posicao_mandante": 11,
-      "posicao_visitante": 1,
-      "aproveitamento_mandante": ",,,d,v",
-      "aproveitamento_visitante": ",,,v,v"
+      "posicao_mandante": 8,
+      "posicao_visitante": 3,
+      "aproveitamento_mandante": ",,d,v,e",
+      "aproveitamento_visitante": ",,v,v,e"
     },
     {
       "partida_id": 346243,
@@ -65,10 +65,10 @@
       "data_jogo": "2026-01-28 19:00:00",
       "timestamp": 1769637600,
       "local": "Barradão",
-      "posicao_mandante": 12,
-      "posicao_visitante": 18,
-      "aproveitamento_mandante": ",,,v,d",
-      "aproveitamento_visitante": ",,,d,e"
+      "posicao_mandante": 13,
+      "posicao_visitante": 15,
+      "aproveitamento_mandante": ",,v,d,d",
+      "aproveitamento_visitante": ",,d,e,e"
     },
     {
       "partida_id": 346235,
@@ -82,10 +82,10 @@
       "data_jogo": "2026-01-28 19:30:00",
       "timestamp": 1769639400,
       "local": "Maracanã",
-      "posicao_mandante": 5,
-      "posicao_visitante": 9,
-      "aproveitamento_mandante": ",,,v,e",
-      "aproveitamento_visitante": ",,,d,v"
+      "posicao_mandante": 7,
+      "posicao_visitante": 12,
+      "aproveitamento_mandante": ",,v,e,e",
+      "aproveitamento_visitante": ",,d,v,d"
     },
     {
       "partida_id": 346238,
@@ -99,10 +99,10 @@
       "data_jogo": "2026-01-28 20:00:00",
       "timestamp": 1769641200,
       "local": "Vila Belmiro",
-      "posicao_mandante": 19,
-      "posicao_visitante": 6,
-      "aproveitamento_mandante": ",,,,d",
-      "aproveitamento_visitante": ",,,v,e"
+      "posicao_mandante": 20,
+      "posicao_visitante": 2,
+      "aproveitamento_mandante": ",,,d,e",
+      "aproveitamento_visitante": ",,v,e,v"
     },
     {
       "partida_id": 346244,
@@ -116,10 +116,10 @@
       "data_jogo": "2026-01-28 20:00:00",
       "timestamp": 1769641200,
       "local": "Arena Condá",
-      "posicao_mandante": 3,
+      "posicao_mandante": 4,
       "posicao_visitante": 17,
-      "aproveitamento_mandante": ",,,v,e",
-      "aproveitamento_visitante": ",,,d,e"
+      "aproveitamento_mandante": ",,v,e,e",
+      "aproveitamento_visitante": ",,d,e,e"
     },
     {
       "partida_id": 346237,
@@ -133,10 +133,10 @@
       "data_jogo": "2026-01-28 21:30:00",
       "timestamp": 1769646600,
       "local": "Morumbis",
-      "posicao_mandante": 7,
-      "posicao_visitante": 14,
-      "aproveitamento_mandante": ",,,v,e",
-      "aproveitamento_visitante": ",,,d,e"
+      "posicao_mandante": 1,
+      "posicao_visitante": 9,
+      "aproveitamento_mandante": ",,v,e,v",
+      "aproveitamento_visitante": ",,d,e,v"
     },
     {
       "partida_id": 346239,
@@ -150,10 +150,10 @@
       "data_jogo": "2026-01-29 20:00:00",
       "timestamp": 1769727600,
       "local": "Maião",
-      "posicao_mandante": 4,
-      "posicao_visitante": 13,
-      "aproveitamento_mandante": ",,,v,e",
-      "aproveitamento_visitante": ",,,d,e"
+      "posicao_mandante": 5,
+      "posicao_visitante": 18,
+      "aproveitamento_mandante": ",,v,e,e",
+      "aproveitamento_visitante": ",,d,e,d"
     },
     {
       "partida_id": 346236,
@@ -167,10 +167,10 @@
       "data_jogo": "2026-01-29 21:30:00",
       "timestamp": 1769733000,
       "local": "Nilton Santos (Engenhão)",
-      "posicao_mandante": 8,
-      "posicao_visitante": 20,
-      "aproveitamento_mandante": ",,,v,d",
-      "aproveitamento_visitante": ",,,d,d"
+      "posicao_mandante": 10,
+      "posicao_visitante": 19,
+      "aproveitamento_mandante": ",,v,d,e",
+      "aproveitamento_visitante": ",,d,d,e"
     }
   ]
 }

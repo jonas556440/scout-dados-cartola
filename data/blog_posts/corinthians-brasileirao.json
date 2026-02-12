@@ -1,17 +1,18 @@
 {
   "slug": "corinthians-brasileirao",
-  "title": "Corinthians no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Corinthians na rodada 3 do Brasileirão 2026. Atualmente em 19º lugar com 0 pontos. Probabilidade de título: 0.8%.",
-  "content": "## Corinthians — Situação Atual\n\nNa **rodada 3**, o Corinthians ocupa a **19ª posição** com **0 pontos** em 1 jogos (0V 0E 1D), na zona de rebaixamento (Z4).\n\n- Gols pró: **1** | Gols contra: **2** | Saldo: **-1**\n- Forma recente: **D**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.8%** |\n| 🌎 Libertadores (G4) | **5.4%** |\n| 🏅 Sul-Americana | **43.0%** |\n| ⚠️ Rebaixamento | **24.1%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | RBB | Casa | **1x2** | 38.7% | 1.51 |\n| 4 | CRU | Fora | **1x0** | 29.4% | 1.43 |\n| 5 | CFC | Casa | **1x0** | 72.8% | 2.7 |\n| 6 | SAN | Fora | **1x0** | 22.2% | 1.37 |\n| 7 | CHA | Fora | **1x0** | 27.4% | 1.49 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Corinthians: quais as chances de escapar do Z4?",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Corinthians na rodada 3 do Brasileirão 2026. Atualmente em 18º lugar com 1 pontos. Probabilidade de título: 0.2%.",
+  "content": "## Corinthians — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Corinthians ocupa a **18ª posição** com **1 pontos** em 1 jogos (0V 1E 1D), na zona de rebaixamento (Z4).\n\n- Gols pró: **1** | Gols contra: **2** | Saldo: **-1**\n- Aproveitamento: **33.3%** | Média de gols: **1.0/jogo**\n- Forma recente: 🔴🟡 (DE)\n\n## Análise\n\nO Corinthians faz campanha regular até aqui, com 0V 1E 1D em 1 jogos. A defesa precisa melhorar: média de 2.0 gols sofridos por partida. Alerta: as simulações apontam **30.0%** de risco de rebaixamento.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.2%** |\n| 🌎 Libertadores (G4) | **1.9%** |\n| 🏅 Sul-Americana | **32.3%** |\n| ⚠️ Rebaixamento | **30.0%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | RBB | Casa | **1x1** | 33.2% | 0.98 |\n| 4 | CRU | Fora | **1x1** | 35.2% | 1.16 |\n| 5 | CFC | Casa | **1x1** | 47.0% | 1.36 |\n| 6 | SAN | Fora | **1x1** | 32.6% | 1.09 |\n| 7 | CHA | Fora | **1x1** | 26.1% | 0.92 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** RBB, SAN, CHA — probabilidades de vitória abaixo de 35%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Corinthians ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Corinthians tem **0.2%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **1.9%**.\n\n### Qual a posição atual do Corinthians no Brasileirão?\n\nO Corinthians está na **18ª posição** com **1 pontos** em 1 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Corinthians?\n\nO próximo jogo é contra o **RBB** (Casa) na rodada 3. O placar provável é **1x1** com 33.2% de chance de vitória.\n\n### O Corinthians corre risco de rebaixamento?\n\nSim, as simulações indicam **30.0%** de risco de rebaixamento. É preciso atenção.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Corinthians",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "zona de rebaixamento"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "corinthians",
-  "geradoEm": "2026-02-08T06:00:31.321442"
+  "geradoEm": "2026-02-12T06:00:24.148424"
 }

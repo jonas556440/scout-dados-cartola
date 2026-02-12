@@ -1,17 +1,18 @@
 {
   "slug": "flamengo-brasileirao",
-  "title": "Flamengo no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Flamengo na rodada 3 do Brasileirão 2026. Atualmente em 13º lugar com 1 pontos. Probabilidade de título: 8.6%.",
-  "content": "## Flamengo — Situação Atual\n\nNa **rodada 3**, o Flamengo ocupa a **13ª posição** com **1 pontos** em 2 jogos (0V 1E 1D), na meio de tabela.\n\n- Gols pró: **2** | Gols contra: **3** | Saldo: **-1**\n- Forma recente: **DE**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **8.6%** |\n| 🌎 Libertadores (G4) | **37.0%** |\n| 🏅 Sul-Americana | **49.7%** |\n| ⚠️ Rebaixamento | **3.1%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | VIT | Fora | **1x2** | 58.5% | 1.95 |\n| 4 | MIR | Casa | **3x0** | 78.8% | 2.86 |\n| 5 | CRU | Casa | **3x0** | 80.0% | 2.97 |\n| 6 | BOT | Fora | **1x0** | 17.8% | 1.08 |\n| 7 | REM | Casa | **3x0** | 89.7% | 3.5 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Flamengo no Brasileirão: Probabilidades e Análise Completa",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Flamengo na rodada 3 do Brasileirão 2026. Atualmente em 11º lugar com 4 pontos. Probabilidade de título: 21.8%.",
+  "content": "## Flamengo — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Flamengo ocupa a **11ª posição** com **4 pontos** em 3 jogos (1V 1E 1D), na briga por Sul-Americana.\n\n- Gols pró: **4** | Gols contra: **4** | Saldo: **+0**\n- Aproveitamento: **44.4%** | Média de gols: **1.33/jogo**\n- Forma recente: 🔴🟡🟢 (DEV)\n\n## Análise\n\nO Flamengo vem tropeçando com muitos empates (1E em 3 jogos), o que dificulta a subida na tabela. As simulações Monte Carlo projetam **68.9%** de chance de classificação para a Libertadores.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **21.8%** |\n| 🌎 Libertadores (G4) | **68.9%** |\n| 🏅 Sul-Americana | **30.2%** |\n| ⚠️ Rebaixamento | **0.1%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | VIT | Fora | **0x1** | 48.9% | 1.32 |\n| 4 | MIR | Casa | **1x0** | 55.3% | 1.4 |\n| 5 | CRU | Casa | **2x0** | 68.2% | 1.86 |\n| 6 | BOT | Fora | **0x0** | 28.4% | 0.78 |\n| 7 | REM | Casa | **2x0** | 70.4% | 1.95 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** BOT — probabilidades de vitória abaixo de 35%.\n\n✅ **Jogos favoráveis:** CRU, REM — probabilidades de vitória acima de 60%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Flamengo ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Flamengo tem **21.8%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **68.9%**.\n\n### Qual a posição atual do Flamengo no Brasileirão?\n\nO Flamengo está na **11ª posição** com **4 pontos** em 3 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Flamengo?\n\nO próximo jogo é contra o **VIT** (Fora) na rodada 3. O placar provável é **0x1** com 48.9% de chance de vitória.\n\n### O Flamengo corre risco de rebaixamento?\n\nNão. O risco de rebaixamento é mínimo (**0.1%**) segundo as simulações.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Flamengo",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "briga por Sul-Americana"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "flamengo",
-  "geradoEm": "2026-02-08T06:00:42.029574"
+  "geradoEm": "2026-02-12T06:00:32.231657"
 }

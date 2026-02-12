@@ -1,0 +1,225 @@
+{
+  "_data": [
+    {
+      "jogador": "Carlos Vinícius",
+      "jogador_id": 37833,
+      "time": "Grêmio",
+      "time_id": 1767,
+      "gols": 4,
+      "assists": null,
+      "penaltis": 1,
+      "jogos": 3,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Danilo dos Santos de Oliveira",
+      "jogador_id": 149704,
+      "time": "Botafogo",
+      "time_id": 1770,
+      "gols": 4,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 2,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Breno Lopes",
+      "jogador_id": 169022,
+      "time": "Coritiba",
+      "time_id": 4241,
+      "gols": 3,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 3,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Walter Clar",
+      "jogador_id": 105065,
+      "time": "Chapecoense",
+      "time_id": 1772,
+      "gols": 2,
+      "assists": 1,
+      "penaltis": 1,
+      "jogos": 3,
+      "nacionalidade": "Paraguay"
+    },
+    {
+      "jogador": "Jean Carlos",
+      "jogador_id": 13922,
+      "time": "Chapecoense",
+      "time_id": 1772,
+      "gols": 2,
+      "assists": 2,
+      "penaltis": null,
+      "jogos": 3,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Alef Manga",
+      "jogador_id": 90803,
+      "time": "Clube do Remo",
+      "time_id": 4287,
+      "gols": 2,
+      "assists": 1,
+      "penaltis": null,
+      "jogos": 3,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Nathan",
+      "jogador_id": 13939,
+      "time": "Mirassol",
+      "time_id": 4364,
+      "gols": 2,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 3,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Jonathan Calleri",
+      "jogador_id": 3137,
+      "time": "São Paulo",
+      "time_id": 1776,
+      "gols": 2,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 3,
+      "nacionalidade": "Argentina"
+    },
+    {
+      "jogador": "José Manuel López",
+      "jogador_id": 170698,
+      "time": "Palmeiras",
+      "time_id": 1769,
+      "gols": 1,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 2,
+      "nacionalidade": "Argentina"
+    },
+    {
+      "jogador": "Victor Hugo Gomes",
+      "jogador_id": 178854,
+      "time": "Mineiro",
+      "time_id": 1766,
+      "gols": 1,
+      "assists": 1,
+      "penaltis": null,
+      "jogos": 3,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Vítor Roque",
+      "jogador_id": 181439,
+      "time": "Palmeiras",
+      "time_id": 1769,
+      "gols": 1,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 2,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Juninho Capixaba",
+      "jogador_id": 1439,
+      "time": "Bragantino",
+      "time_id": 4286,
+      "gols": 1,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 2,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Stiven Mendoza",
+      "jogador_id": 8606,
+      "time": "Paranaense",
+      "time_id": 1768,
+      "gols": 1,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 1,
+      "nacionalidade": "Colombia"
+    },
+    {
+      "jogador": "Renato Kayzer",
+      "jogador_id": 12837,
+      "time": "Vitória",
+      "time_id": 1782,
+      "gols": 1,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 2,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Gabriel Baralhas",
+      "jogador_id": 61447,
+      "time": "Vitória",
+      "time_id": 1782,
+      "gols": 1,
+      "assists": 1,
+      "penaltis": null,
+      "jogos": 3,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Nonato",
+      "jogador_id": 61369,
+      "time": "Fluminense",
+      "time_id": 1765,
+      "gols": 1,
+      "assists": 1,
+      "penaltis": null,
+      "jogos": 2,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Luciano Acosta",
+      "jogador_id": 76910,
+      "time": "Fluminense",
+      "time_id": 1765,
+      "gols": 1,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 2,
+      "nacionalidade": "Argentina"
+    },
+    {
+      "jogador": "Gabriel Menino",
+      "jogador_id": 139933,
+      "time": "Santos",
+      "time_id": 6685,
+      "gols": 1,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 2,
+      "nacionalidade": "Brazil"
+    },
+    {
+      "jogador": "Álvaro Barreal",
+      "jogador_id": 83705,
+      "time": "Santos",
+      "time_id": 6685,
+      "gols": 1,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 2,
+      "nacionalidade": "Argentina"
+    },
+    {
+      "jogador": "Higor Meritao",
+      "jogador_id": 171073,
+      "time": "Chapecoense",
+      "time_id": 1772,
+      "gols": 1,
+      "assists": null,
+      "penaltis": null,
+      "jogos": 3,
+      "nacionalidade": "Brazil"
+    }
+  ],
+  "_cached_at": "2026-02-12T06:36:39.358623"
+}

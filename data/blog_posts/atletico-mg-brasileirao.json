@@ -1,17 +1,18 @@
 {
   "slug": "atletico-mg-brasileirao",
-  "title": "Atlético-MG no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Atlético-MG na rodada 3 do Brasileirão 2026. Atualmente em 16º lugar com 1 pontos. Probabilidade de título: 2.8%.",
-  "content": "## Atlético-MG — Situação Atual\n\nNa **rodada 3**, o Atlético-MG ocupa a **16ª posição** com **1 pontos** em 2 jogos (0V 1E 1D), na meio de tabela.\n\n- Gols pró: **2** | Gols contra: **3** | Saldo: **-1**\n- Forma recente: **ED**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **2.8%** |\n| 🌎 Libertadores (G4) | **17.8%** |\n| 🏅 Sul-Americana | **52.7%** |\n| ⚠️ Rebaixamento | **9.6%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | REM | Casa | **1x2** | 79.0% | 2.58 |\n| 4 | GRE | Fora | **1x0** | 23.3% | 1.24 |\n| 5 | INT | Casa | **1x0** | 55.2% | 2.04 |\n| 6 | VIT | Fora | **1x1** | 37.7% | 1.71 |\n| 7 | SAO | Casa | **1x0** | 52.1% | 2.01 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Atlético-MG: o que esperar no resto do Brasileirão 2026?",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Atlético-MG na rodada 3 do Brasileirão 2026. Atualmente em 14º lugar com 2 pontos. Probabilidade de título: 0.6%.",
+  "content": "## Atlético-MG — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Atlético-MG ocupa a **14ª posição** com **2 pontos** em 3 jogos (0V 2E 1D), na meio de tabela.\n\n- Gols pró: **5** | Gols contra: **6** | Saldo: **-1**\n- Aproveitamento: **22.2%** | Média de gols: **1.67/jogo**\n- Forma recente: 🟡🔴🟡 (EDE)\n\n## Análise\n\nO Atlético-MG atravessa momento difícil no Brasileirão, com apenas 0 vitória(s) em 3 jogos. O ataque é um ponto forte: média de 1.67 gols por jogo. A defesa precisa melhorar: média de 2.0 gols sofridos por partida.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.6%** |\n| 🌎 Libertadores (G4) | **5.4%** |\n| 🏅 Sul-Americana | **54.2%** |\n| ⚠️ Rebaixamento | **12.4%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | REM | Casa | **1x1** | 56.3% | 1.72 |\n| 4 | GRE | Fora | **1x1** | 27.0% | 0.99 |\n| 5 | INT | Casa | **1x1** | 35.4% | 1.05 |\n| 6 | VIT | Fora | **1x1** | 33.1% | 1.16 |\n| 7 | SAO | Casa | **0x1** | 28.3% | 0.9 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** GRE, VIT, SAO — probabilidades de vitória abaixo de 35%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Atlético-MG ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Atlético-MG tem **0.6%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **5.4%**.\n\n### Qual a posição atual do Atlético-MG no Brasileirão?\n\nO Atlético-MG está na **14ª posição** com **2 pontos** em 3 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Atlético-MG?\n\nO próximo jogo é contra o **REM** (Casa) na rodada 3. O placar provável é **1x1** com 56.3% de chance de vitória.\n\n### O Atlético-MG corre risco de rebaixamento?\n\nSim, as simulações indicam **12.4%** de risco de rebaixamento. É preciso atenção.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Atlético-MG",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "meio de tabela"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "atletico-mg",
-  "geradoEm": "2026-02-08T06:00:09.522766"
+  "geradoEm": "2026-02-12T06:00:07.935710"
 }

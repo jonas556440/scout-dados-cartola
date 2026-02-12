@@ -330,13 +330,13 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
                 af_m = CARTOLA_TO_APIFOOTBALL.get(j.get("mandante_id", 0))
                 af_v = CARTOLA_TO_APIFOOTBALL.get(j.get("visitante_id", 0))
                 
-                # Forma e desempenho dos times (BSA 2024)
+                # Forma e desempenho dos times (BSA 2026)
                 ts_m = enriched_data.get("team_stats", {}).get(af_m) if af_m else None
                 ts_v = enriched_data.get("team_stats", {}).get(af_v) if af_v else None
                 
                 if ts_m or ts_v:
                     liga_ref = ts_m.get("league", ts_v.get("league", "Série A")) if ts_m else ts_v.get("league", "Série A")
-                    md_lines.append(f"**Retrospecto ({liga_ref} 2024):**\n")
+                    md_lines.append(f"**Retrospecto ({liga_ref} 2026):**\n")
                     if ts_m:
                         forma_m = (ts_m.get("forma") or "")[-5:]
                         fe = "".join("🟢" if c == "W" else ("🟡" if c == "D" else "🔴") for c in forma_m)
@@ -467,7 +467,7 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
             md_lines.append("")
     
     # Classificação ATUAL (football-data.org 2025/26) — prioridade
-    # Fallback: API-Football 2024
+    # Fallback: API-Football (dados mais antigos)
     standings_atual = fdo_classificacao if fdo_classificacao else None
     standings_ref = enriched_data.get("standings") if enriched_data else None
 
@@ -486,7 +486,7 @@ def gerar_post_rodada(rodada: int, api: Optional[CartolaAPI] = None) -> Dict[str
         md_lines.append("")
     elif standings_ref:
         md_lines.append("---\n")
-        md_lines.append("## Classificação — Série A 2024 (Referência)\n")
+        md_lines.append("## Classificação — Série A (Referência)\n")
         md_lines.append("| Pos | Time | P | J | V | E | D | GP | GC | SG |")
         md_lines.append("|-----|------|---|---|---|---|---|----|----|-----|")
         for t in standings_ref[:10]:

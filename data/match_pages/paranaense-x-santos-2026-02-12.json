@@ -14,22 +14,123 @@
   "arbitro": "",
   "competicao": "Campeonato Brasileiro Série A",
   "status": "TIMED",
-  "posicao_mandante": null,
-  "posicao_visitante": null,
-  "pontos_mandante": null,
-  "pontos_visitante": null,
-  "forma_mandante": null,
-  "forma_visitante": null,
-  "artilheiro_mandante": null,
-  "artilheiro_visitante": null,
-  "h2h": null,
-  "insights": [],
+  "posicao_mandante": 11,
+  "posicao_visitante": 17,
+  "pontos_mandante": 3,
+  "pontos_visitante": 1,
+  "forma_mandante": "W",
+  "forma_visitante": "D,L",
+  "artilheiro_mandante": {
+    "jogador": "Stiven Mendoza",
+    "jogador_id": 8606,
+    "time": "Paranaense",
+    "time_id": 1768,
+    "gols": 1,
+    "assists": null,
+    "penaltis": null,
+    "jogos": 1,
+    "nacionalidade": "Colombia"
+  },
+  "artilheiro_visitante": {
+    "jogador": "Gabriel Menino",
+    "jogador_id": 139933,
+    "time": "Santos",
+    "time_id": 6685,
+    "gols": 1,
+    "assists": null,
+    "penaltis": null,
+    "jogos": 2,
+    "nacionalidade": "Brazil"
+  },
+  "h2h": {
+    "match_id": 554760,
+    "total_jogos": 10,
+    "vitorias_casa": 0,
+    "empates": 3,
+    "vitorias_fora": 0,
+    "home_team": "CA Paranaense",
+    "away_team": "Santos FC",
+    "ultimos": [
+      {
+        "data": "2023-12-03",
+        "mandante": "Paranaense",
+        "visitante": "Santos",
+        "gols_m": 3,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2023-08-05",
+        "mandante": "Santos",
+        "visitante": "Paranaense",
+        "gols_m": 1,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2022-09-28",
+        "mandante": "Santos",
+        "visitante": "Paranaense",
+        "gols_m": 2,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2022-06-04",
+        "mandante": "Paranaense",
+        "visitante": "Santos",
+        "gols_m": 2,
+        "gols_v": 2,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2021-10-30",
+        "mandante": "Paranaense",
+        "visitante": "Santos",
+        "gols_m": 0,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2021-07-06",
+        "mandante": "Santos",
+        "visitante": "Paranaense",
+        "gols_m": 2,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2020-11-21",
+        "mandante": "Paranaense",
+        "visitante": "Santos",
+        "gols_m": 1,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2020-08-16",
+        "mandante": "Santos",
+        "visitante": "Paranaense",
+        "gols_m": 3,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      }
+    ],
+    "_cached_at": "2026-02-12T06:30:15.219218"
+  },
+  "insights": [
+    "Paranaense não vence há 4 jogos.",
+    "Paranaense já perdeu 8 vezes em casa nesta temporada.",
+    "Histórico equilibrado: 0 vitórias do Paranaense, 3 empates e 0 do Santos nos últimos 10 jogos.",
+    "Último confronto: Paranaense 3x0 Santos (2023-12-03).",
+    "Santos tem defesa sólida: 18 jogos sem sofrer gol (47%)."
+  ],
   "placar_mandante": null,
   "placar_visitante": null,
   "created_at": "2026-02-08T15:29:43.778819-03:00",
-  "updated_at": "2026-02-08T15:29:43.778836-03:00",
-  "last_enrichment": null,
-  "enrichment_level": "base",
+  "updated_at": "2026-02-12T15:30:00.041779-03:00",
+  "last_enrichment": "2026-02-12T15:30:00.041740-03:00",
+  "enrichment_level": "match_day",
   "title": "Paranaense x Santos — Brasileirão 2026 Rodada 3",
   "description": "Análise completa de Paranaense x Santos pela rodada 3 do Brasileirão 2026. Classificação, confronto direto, artilheiros e mais."
 }

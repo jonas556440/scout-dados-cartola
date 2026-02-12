@@ -1,17 +1,18 @@
 {
   "slug": "bahia-brasileirao",
-  "title": "Bahia no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Bahia na rodada 3 do Brasileirão 2026. Atualmente em 3º lugar com 4 pontos. Probabilidade de título: 4.2%.",
-  "content": "## Bahia — Situação Atual\n\nNa **rodada 3**, o Bahia ocupa a **3ª posição** com **4 pontos** em 2 jogos (1V 1E 0D), na zona de classificação para a Libertadores (G4).\n\n- Gols pró: **3** | Gols contra: **1** | Saldo: **+2**\n- Forma recente: **VE**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **4.2%** |\n| 🌎 Libertadores (G4) | **23.6%** |\n| 🏅 Sul-Americana | **53.3%** |\n| ⚠️ Rebaixamento | **6.5%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | VAS | Fora | **1x2** | 38.5% | 1.52 |\n| 4 | CHA | Casa | **1x0** | 71.8% | 2.61 |\n| 5 | VIT | Casa | **1x0** | 76.0% | 2.83 |\n| 6 | INT | Fora | **1x0** | 18.5% | 1.23 |\n| 7 | RBB | Casa | **1x0** | 58.6% | 2.24 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Bahia no Brasileirão 2026 — Na briga pelo G4",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Bahia na rodada 3 do Brasileirão 2026. Atualmente em 2º lugar com 7 pontos. Probabilidade de título: 8.7%.",
+  "content": "## Bahia — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Bahia ocupa a **2ª posição** com **7 pontos** em 3 jogos (2V 1E 0D), na zona de classificação para a Libertadores (G4).\n\n- Gols pró: **4** | Gols contra: **2** | Saldo: **+2**\n- Aproveitamento: **77.8%** | Média de gols: **1.33/jogo**\n- Forma recente: 🟢🟡🟢 (VEV)\n\n## Análise\n\nO Bahia vive excelente fase no campeonato, com 2 vitórias em 3 jogos.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **8.7%** |\n| 🌎 Libertadores (G4) | **46.7%** |\n| 🏅 Sul-Americana | **49.9%** |\n| ⚠️ Rebaixamento | **0.8%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | VAS | Fora | **0x1** | 40.6% | 1.12 |\n| 4 | CHA | Casa | **1x0** | 52.5% | 1.38 |\n| 5 | VIT | Casa | **1x0** | 61.4% | 1.67 |\n| 6 | INT | Fora | **1x0** | 29.6% | 0.83 |\n| 7 | RBB | Casa | **1x0** | 42.7% | 1.09 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** INT — probabilidades de vitória abaixo de 35%.\n\n✅ **Jogos favoráveis:** VIT — probabilidades de vitória acima de 60%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Bahia ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Bahia tem **8.7%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **46.7%**.\n\n### Qual a posição atual do Bahia no Brasileirão?\n\nO Bahia está na **2ª posição** com **7 pontos** em 3 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Bahia?\n\nO próximo jogo é contra o **VAS** (Fora) na rodada 3. O placar provável é **0x1** com 40.6% de chance de vitória.\n\n### O Bahia corre risco de rebaixamento?\n\nNão. O risco de rebaixamento é mínimo (**0.8%**) segundo as simulações.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Bahia",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "zona de classificação para a Libertadores"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "bahia",
-  "geradoEm": "2026-02-08T06:00:20.418892"
+  "geradoEm": "2026-02-12T06:00:15.916698"
 }

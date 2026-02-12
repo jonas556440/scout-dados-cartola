@@ -1,17 +1,18 @@
 {
   "slug": "gremio-brasileirao",
-  "title": "Grêmio no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Grêmio na rodada 3 do Brasileirão 2026. Atualmente em 10º lugar com 3 pontos. Probabilidade de título: 3.4%.",
-  "content": "## Grêmio — Situação Atual\n\nNa **rodada 3**, o Grêmio ocupa a **10ª posição** com **3 pontos** em 2 jogos (1V 0E 1D), na briga por Sul-Americana.\n\n- Gols pró: **3** | Gols contra: **2** | Saldo: **+1**\n- Forma recente: **DV**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **3.4%** |\n| 🌎 Libertadores (G4) | **20.0%** |\n| 🏅 Sul-Americana | **57.2%** |\n| ⚠️ Rebaixamento | **6.5%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | SAO | Fora | **1x2** | 21.7% | 1.09 |\n| 4 | CAM | Casa | **1x0** | 55.2% | 2.01 |\n| 5 | RBB | Casa | **1x0** | 54.3% | 2.01 |\n| 6 | CHA | Fora | **1x1** | 35.3% | 1.66 |\n| 7 | VIT | Casa | **1x0** | 80.7% | 3.22 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Grêmio no Brasileirão: Probabilidades e Análise Completa",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Grêmio na rodada 3 do Brasileirão 2026. Atualmente em 12º lugar com 3 pontos. Probabilidade de título: 0.0%.",
+  "content": "## Grêmio — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Grêmio ocupa a **12ª posição** com **3 pontos** em 3 jogos (1V 0E 2D), na briga por Sul-Americana.\n\n- Gols pró: **6** | Gols contra: **7** | Saldo: **-1**\n- Aproveitamento: **33.3%** | Média de gols: **2.0/jogo**\n- Forma recente: 🔴🟢🔴 (DVD)\n\n## Análise\n\nO Grêmio faz campanha regular até aqui, com 1V 0E 2D em 3 jogos. O ataque é um ponto forte: média de 2.0 gols por jogo. A defesa precisa melhorar: média de 2.33 gols sofridos por partida. Alerta: as simulações apontam **16.0%** de risco de rebaixamento.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.0%** |\n| 🌎 Libertadores (G4) | **3.9%** |\n| 🏅 Sul-Americana | **48.6%** |\n| ⚠️ Rebaixamento | **16.0%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | SAO | Fora | **1x0** | 15.8% | 0.65 |\n| 4 | CAM | Casa | **1x1** | 44.4% | 1.35 |\n| 5 | RBB | Casa | **1x1** | 33.2% | 1.01 |\n| 6 | CHA | Fora | **1x1** | 25.9% | 0.95 |\n| 7 | VIT | Casa | **1x1** | 51.4% | 1.54 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** SAO, RBB, CHA — probabilidades de vitória abaixo de 35%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Grêmio ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Grêmio tem **0.0%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **3.9%**.\n\n### Qual a posição atual do Grêmio no Brasileirão?\n\nO Grêmio está na **12ª posição** com **3 pontos** em 3 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Grêmio?\n\nO próximo jogo é contra o **SAO** (Fora) na rodada 3. O placar provável é **1x0** com 15.8% de chance de vitória.\n\n### O Grêmio corre risco de rebaixamento?\n\nSim, as simulações indicam **16.0%** de risco de rebaixamento. É preciso atenção.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Grêmio",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "briga por Sul-Americana"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "gremio",
-  "geradoEm": "2026-02-08T06:00:52.323654"
+  "geradoEm": "2026-02-12T06:00:40.536665"
 }

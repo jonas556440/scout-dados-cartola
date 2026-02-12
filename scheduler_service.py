@@ -284,6 +284,17 @@ class CartolaScheduler:
         )
         logger.info("✅ Job 'enriquecer_dados' agendado (06:30 diariamente)")
         
+        # Tarefa 17.1: Enriquecer dados via football-data.org (a cada 2h)
+        # FDO é fonte PRIMÁRIA para 2026 (API-Football free não suporta 2026)
+        self.scheduler.add_job(
+            func=self.enriquecer_dados_fdo,
+            trigger=IntervalTrigger(hours=2),
+            id='enriquecer_fdo',
+            name='Enriquecer Dados via football-data.org',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'enriquecer_fdo' agendado (a cada 2h)")
+        
         # Tarefa 18: Descobrir jogos e criar páginas (diariamente 04:00)
         self.scheduler.add_job(
             func=self.descobrir_paginas_jogos,
@@ -313,6 +324,17 @@ class CartolaScheduler:
             replace_existing=True
         )
         logger.info("✅ Job 'preaquecer_cache_escalacao' agendado (a cada 20 min)")
+        
+        # Tarefa 21: Coletar odds de mercado via The Odds API (a cada 4h)
+        # Free tier: 500 créditos/mês, 2 markets × 6x/dia = 12/dia = ~360/mês
+        self.scheduler.add_job(
+            func=self.coletar_odds_mercado,
+            trigger=CronTrigger(hour='1,5,9,13,17,21', minute=45),
+            id='coletar_odds',
+            name='Coletar Odds do Mercado',
+            replace_existing=True
+        )
+        logger.info("✅ Job 'coletar_odds' agendado (a cada 4h)")
         
         # Iniciar scheduler
         self.scheduler.start()
@@ -665,7 +687,47 @@ class CartolaScheduler:
             simulacao_data = []
             try:
                 simulator = MonteCarloSimulator(score_predictor=predictor, n_simulacoes=1000)
-                resultados, _ = simulator.simular_campeonato()
+                
+                # Construir args obrigatórios a partir de analyzer.estatisticas_times
+                classificacao_mc = []
+                forca_times_mc = {}
+                forca_ataque_times_mc = {}
+                forca_defesa_times_mc = {}
+                for cid, stats in analyzer.estatisticas_times.items():
+                    classificacao_mc.append({
+                        "id": cid,
+                        "nome": stats.nome,
+                        "abrev": stats.abreviacao,
+                        "posicao": stats.posicao or 0,
+                        "pontos": stats.vitorias * 3 + stats.empates,
+                        "jogos": stats.jogos,
+                        "vitorias": stats.vitorias,
+                        "empates": stats.empates,
+                        "derrotas": stats.derrotas,
+                        "gols_pro": stats.gols_pro,
+                        "gols_contra": stats.gols_contra,
+                    })
+                    forca_times_mc[cid] = stats.forca_geral
+                    forca_ataque_times_mc[cid] = getattr(stats, 'forca_ataque', stats.forca_geral)
+                    forca_defesa_times_mc[cid] = getattr(stats, 'forca_defesa', stats.forca_geral)
+                
+                # Gerar jogos restantes (round-robin completo menos já jogados)
+                time_ids_mc = [t["id"] for t in classificacao_mc]
+                jogos_restantes_mc = []
+                for i_t in range(len(time_ids_mc)):
+                    for j_t in range(len(time_ids_mc)):
+                        if i_t != j_t:
+                            jogos_restantes_mc.append({
+                                "mandante_id": time_ids_mc[i_t],
+                                "visitante_id": time_ids_mc[j_t],
+                                "rodada": self.rodada_atual + 1
+                            })
+                
+                resultados, _ = simulator.simular_campeonato(
+                    classificacao_mc, jogos_restantes_mc, forca_times_mc,
+                    forca_ataque_times=forca_ataque_times_mc,
+                    forca_defesa_times=forca_defesa_times_mc
+                )
                 for r in resultados:
                     simulacao_data.append({
                         "time": r.nome,
@@ -831,6 +893,75 @@ class CartolaScheduler:
             
         except Exception as e:
             logger.error(f"❌ Erro no enriquecimento: {e}", exc_info=True)
+    
+    def enriquecer_dados_fdo(self):
+        """
+        Enriquece dados via football-data.org (fonte PRIMÁRIA para 2026).
+        
+        Coleta: classificação, jogos da rodada atual, artilheiros.
+        API-Football free NÃO suporta 2026 — FDO é a única fonte real.
+        Rate limit: 10 req/min (plano free).
+        """
+        try:
+            from src.analysis.football_data_client import FootballDataClient
+            
+            fdo = FootballDataClient()
+            
+            # 1. Classificação (inclui posição, pontos, gols, forma)
+            classificacao = fdo.classificacao()
+            if classificacao:
+                logger.info(f"⚽ FDO: classificação BSA 2026 — {len(classificacao)} times")
+            else:
+                logger.warning("⚠️ FDO: falha ao obter classificação")
+            
+            # 2. Artilheiros (exclusivo FDO — API-Football free não tem)
+            artilheiros = fdo.artilheiros(limit=20)
+            if artilheiros:
+                logger.info(f"🏆 FDO: {len(artilheiros)} artilheiros BSA 2026")
+            
+            # 3. Jogos da rodada atual (se disponível)
+            if self.rodada_atual:
+                jogos = fdo.jogos_rodada(self.rodada_atual)
+                if jogos:
+                    logger.info(f"📅 FDO: {len(jogos)} jogos rodada {self.rodada_atual}")
+            
+            # 4. Resumo do cache
+            cache_status = fdo.resumo_cache()
+            logger.info(f"📊 FDO cache: {cache_status}")
+            
+        except Exception as e:
+            logger.error(f"❌ Erro no enriquecimento FDO: {e}", exc_info=True)
+    
+    def coletar_odds_mercado(self):
+        """
+        Coleta odds do Brasileirão via The Odds API e salva em cache interno.
+        
+        ⚠️ Dados EXCLUSIVAMENTE para calibração do modelo.
+        NUNCA expor em endpoints públicos (compliance AdSense).
+        
+        Budget: 500 créditos/mês free tier.
+        A cada 4h × 2 markets = ~12 créditos/dia = ~360/mês.
+        """
+        try:
+            from src.analysis.odds_collector import OddsCollector
+            
+            collector = OddsCollector()
+            
+            # Verificar créditos antes de gastar
+            creditos = collector.creditos_restantes()
+            if creditos >= 0 and creditos < 20:
+                logger.warning(f"⚠️ Odds API: apenas {creditos} créditos restantes, pulando")
+                return
+            
+            data = collector.coletar_odds_brasileirao()
+            if data:
+                jogos = data.get("jogos", [])
+                logger.info(f"📊 Odds coletadas: {len(jogos)} jogos BSA | créditos restantes: {creditos}")
+            else:
+                logger.warning("⚠️ Odds: nenhum dado disponível (sem jogos ou erro)")
+                
+        except Exception as e:
+            logger.error(f"❌ Erro coletando odds: {e}", exc_info=True)
     
     def descobrir_paginas_jogos(self):
         """
@@ -1038,13 +1169,19 @@ class CartolaScheduler:
                     if visit_id and p.get("clube_visitante_posicao"):
                         posicoes[visit_id] = p.get("clube_visitante_posicao")
                 
-                logger.info(f"✅ Classificação atualizada: {len(posicoes)} times")
-                
-                # Log detalhado das posições
-                for clube_id, posicao in sorted(posicoes.items(), key=lambda x: x[1]):
-                    logger.debug(f"   Time {clube_id}: {posicao}º lugar")
+                logger.info(f"✅ Classificação Cartola: {len(posicoes)} times")
             else:
-                logger.info("⏳ Sem partidas disponíveis para atualizar classificação")
+                logger.info("⏳ Sem partidas Cartola para classificação")
+            
+            # Complementar com football-data.org (fonte PRIMÁRIA 2026)
+            try:
+                from src.analysis.football_data_client import FootballDataClient
+                fdo = FootballDataClient()
+                fdo_class = fdo.classificacao()
+                if fdo_class:
+                    logger.info(f"⚽ FDO classificação: {len(fdo_class)} times (fonte real 2026)")
+            except Exception as fdo_err:
+                logger.debug(f"FDO classificação indisponível: {fdo_err}")
                 
         except Exception as e:
             logger.error(f"❌ Erro ao atualizar classificação: {e}", exc_info=True)

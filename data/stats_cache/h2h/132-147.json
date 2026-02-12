@@ -1,0 +1,209 @@
+{
+  "pair": "132-147",
+  "team1_id": 132,
+  "team2_id": 147,
+  "team1_name": "Chapecoense-sc",
+  "team2_name": "Coritiba",
+  "total": 14,
+  "stats": {
+    "team1_wins": 5,
+    "team2_wins": 5,
+    "draws": 3
+  },
+  "ultimos_5": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "Coritiba",
+      "mandante_id": 147,
+      "visitante": "Chapecoense-sc",
+      "visitante_id": 132,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-11",
+      "liga": "Serie A",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 3,
+      "gols_visitante": 3
+    },
+    {
+      "data": "2025-08-09",
+      "liga": "Serie B",
+      "mandante": "Coritiba",
+      "mandante_id": 147,
+      "visitante": "Chapecoense-sc",
+      "visitante_id": 132,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2025-04-12",
+      "liga": "Serie B",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2024-11-17",
+      "liga": "Serie B",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    }
+  ],
+  "todos": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "Coritiba",
+      "mandante_id": 147,
+      "visitante": "Chapecoense-sc",
+      "visitante_id": 132,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-11",
+      "liga": "Serie A",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 3,
+      "gols_visitante": 3
+    },
+    {
+      "data": "2025-08-09",
+      "liga": "Serie B",
+      "mandante": "Coritiba",
+      "mandante_id": 147,
+      "visitante": "Chapecoense-sc",
+      "visitante_id": 132,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2025-04-12",
+      "liga": "Serie B",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2024-11-17",
+      "liga": "Serie B",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2024-07-27",
+      "liga": "Serie B",
+      "mandante": "Coritiba",
+      "mandante_id": 147,
+      "visitante": "Chapecoense-sc",
+      "visitante_id": 132,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2017-12-03",
+      "liga": "Serie A",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2017-08-06",
+      "liga": "Serie A",
+      "mandante": "Coritiba",
+      "mandante_id": 147,
+      "visitante": "Chapecoense-sc",
+      "visitante_id": 132,
+      "gols_mandante": 2,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2016-09-11",
+      "liga": "Serie A",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2016-06-02",
+      "liga": "Serie A",
+      "mandante": "Coritiba",
+      "mandante_id": 147,
+      "visitante": "Chapecoense-sc",
+      "visitante_id": 132,
+      "gols_mandante": 3,
+      "gols_visitante": 4
+    },
+    {
+      "data": "2015-08-23",
+      "liga": "Serie A",
+      "mandante": "Coritiba",
+      "mandante_id": 147,
+      "visitante": "Chapecoense-sc",
+      "visitante_id": 132,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2015-05-09",
+      "liga": "Serie A",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2014-09-11",
+      "liga": "Serie A",
+      "mandante": "Coritiba",
+      "mandante_id": 147,
+      "visitante": "Chapecoense-sc",
+      "visitante_id": 132,
+      "gols_mandante": 3,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2014-04-20",
+      "liga": "Serie A",
+      "mandante": "Chapecoense-sc",
+      "mandante_id": 132,
+      "visitante": "Coritiba",
+      "visitante_id": 147,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    }
+  ],
+  "fonte": "api-football",
+  "_cached_at": "2026-02-12T20:00:14.284392"
+}

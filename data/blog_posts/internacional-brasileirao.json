@@ -1,17 +1,18 @@
 {
   "slug": "internacional-brasileirao",
-  "title": "Internacional no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Internacional na rodada 3 do Brasileirão 2026. Atualmente em 17º lugar com 1 pontos. Probabilidade de título: 2.2%.",
-  "content": "## Internacional — Situação Atual\n\nNa **rodada 3**, o Internacional ocupa a **17ª posição** com **1 pontos** em 2 jogos (0V 1E 1D), na zona de rebaixamento (Z4).\n\n- Gols pró: **2** | Gols contra: **3** | Saldo: **-1**\n- Forma recente: **DE**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **2.2%** |\n| 🌎 Libertadores (G4) | **17.9%** |\n| 🏅 Sul-Americana | **53.1%** |\n| ⚠️ Rebaixamento | **9.5%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | PAL | Casa | **1x2** | 24.4% | 1.02 |\n| 4 | REM | Fora | **0x3** | 58.2% | 1.89 |\n| 5 | CAM | Fora | **1x0** | 23.5% | 1.27 |\n| 6 | BAH | Casa | **1x0** | 62.7% | 2.37 |\n| 7 | SAN | Fora | **1x1** | 29.9% | 1.53 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Análise Internacional: probabilidades e próximos jogos",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Internacional na rodada 3 do Brasileirão 2026. Atualmente em 15º lugar com 2 pontos. Probabilidade de título: 0.6%.",
+  "content": "## Internacional — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Internacional ocupa a **15ª posição** com **2 pontos** em 2 jogos (0V 2E 1D), na meio de tabela.\n\n- Gols pró: **1** | Gols contra: **2** | Saldo: **-1**\n- Aproveitamento: **33.3%** | Média de gols: **0.5/jogo**\n- Forma recente: 🔴🟡🟡 (DEE)\n\n## Análise\n\nO Internacional faz campanha regular até aqui, com 0V 2E 1D em 2 jogos. O ataque é uma preocupação, com média de apenas 0.5 gol por jogo.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.6%** |\n| 🌎 Libertadores (G4) | **6.9%** |\n| 🏅 Sul-Americana | **61.5%** |\n| ⚠️ Rebaixamento | **9.8%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | PAL | Casa | **0x0** | 23.1% | 0.61 |\n| 4 | REM | Fora | **1x1** | 43.2% | 1.25 |\n| 5 | CAM | Fora | **1x1** | 32.9% | 1.0 |\n| 6 | BAH | Casa | **1x0** | 35.7% | 0.94 |\n| 7 | SAN | Fora | **1x1** | 38.2% | 1.13 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** PAL, CAM — probabilidades de vitória abaixo de 35%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Internacional ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Internacional tem **0.6%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **6.9%**.\n\n### Qual a posição atual do Internacional no Brasileirão?\n\nO Internacional está na **15ª posição** com **2 pontos** em 2 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Internacional?\n\nO próximo jogo é contra o **PAL** (Casa) na rodada 3. O placar provável é **0x0** com 23.1% de chance de vitória.\n\n### O Internacional corre risco de rebaixamento?\n\nO risco é baixo mas existe: **9.8%** segundo as simulações Monte Carlo.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Internacional",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "meio de tabela"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "internacional",
-  "geradoEm": "2026-02-08T06:00:57.728851"
+  "geradoEm": "2026-02-12T06:00:44.700715"
 }

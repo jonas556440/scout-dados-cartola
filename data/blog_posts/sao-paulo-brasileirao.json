@@ -1,17 +1,18 @@
 {
   "slug": "sao-paulo-brasileirao",
-  "title": "São Paulo no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do São Paulo na rodada 3 do Brasileirão 2026. Atualmente em 6º lugar com 4 pontos. Probabilidade de título: 9.4%.",
-  "content": "## São Paulo — Situação Atual\n\nNa **rodada 3**, o São Paulo ocupa a **6ª posição** com **4 pontos** em 2 jogos (1V 1E 0D), na pré-Libertadores.\n\n- Gols pró: **3** | Gols contra: **1** | Saldo: **+2**\n- Forma recente: **VE**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **9.4%** |\n| 🌎 Libertadores (G4) | **41.0%** |\n| 🏅 Sul-Americana | **47.1%** |\n| ⚠️ Rebaixamento | **2.6%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | GRE | Casa | **1x2** | 55.9% | 1.88 |\n| 4 | CFC | Fora | **0x3** | 54.9% | 1.97 |\n| 5 | CHA | Casa | **3x0** | 79.8% | 2.99 |\n| 6 | RBB | Fora | **1x0** | 24.1% | 1.32 |\n| 7 | CAM | Fora | **1x0** | 26.3% | 1.38 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "São Paulo no Brasileirão 2026 — Na briga pelo G4",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do São Paulo na rodada 3 do Brasileirão 2026. Atualmente em 1º lugar com 7 pontos. Probabilidade de título: 15.9%.",
+  "content": "## São Paulo — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o São Paulo ocupa a **1ª posição** com **7 pontos** em 3 jogos (2V 1E 0D), na zona de classificação para a Libertadores (G4).\n\n- Gols pró: **5** | Gols contra: **2** | Saldo: **+3**\n- Aproveitamento: **77.8%** | Média de gols: **1.67/jogo**\n- Forma recente: 🟢🟡🟢 (VEV)\n\n## Análise\n\nO São Paulo vive excelente fase no campeonato, com 2 vitórias em 3 jogos. O ataque é um ponto forte: média de 1.67 gols por jogo. As simulações Monte Carlo projetam **55.6%** de chance de classificação para a Libertadores.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **15.9%** |\n| 🌎 Libertadores (G4) | **55.6%** |\n| 🏅 Sul-Americana | **42.4%** |\n| ⚠️ Rebaixamento | **0.3%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | GRE | Casa | **1x0** | 56.6% | 1.48 |\n| 4 | CFC | Fora | **0x1** | 42.5% | 1.16 |\n| 5 | CHA | Casa | **1x0** | 55.1% | 1.44 |\n| 6 | RBB | Fora | **1x0** | 29.8% | 0.84 |\n| 7 | CAM | Fora | **0x1** | 40.1% | 1.12 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** RBB — probabilidades de vitória abaixo de 35%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do São Paulo ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o São Paulo tem **15.9%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **55.6%**.\n\n### Qual a posição atual do São Paulo no Brasileirão?\n\nO São Paulo está na **1ª posição** com **7 pontos** em 3 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do São Paulo?\n\nO próximo jogo é contra o **GRE** (Casa) na rodada 3. O placar provável é **1x0** com 56.6% de chance de vitória.\n\n### O São Paulo corre risco de rebaixamento?\n\nNão. O risco de rebaixamento é mínimo (**0.3%**) segundo as simulações.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "São Paulo",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "zona de classificação para a Libertadores"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "sao-paulo",
-  "geradoEm": "2026-02-08T06:01:18.836510"
+  "geradoEm": "2026-02-12T06:01:05.314241"
 }

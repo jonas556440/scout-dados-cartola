@@ -402,8 +402,11 @@ class StatsEnricher:
         """
         Coleta histórico de confrontos entre dois times.
 
+        Estratégia com fallback:
+          1. Tenta API-Football (sem param `last`que é bloqueado no free tier)
+          2. Se falhar, usa football-data.org como fallback (sem restrição)
+
         Retorna últimos confrontos com placar, competição e data.
-        O parâmetro `last` limita aos N jogos mais recentes (padrão 20).
         """
         # Ordenar IDs para cache consistente
         pair = f"{min(team1_afid, team2_afid)}-{max(team1_afid, team2_afid)}"
@@ -413,15 +416,33 @@ class StatsEnricher:
         if cached:
             return cached
 
-        params = {"h2h": f"{team1_afid}-{team2_afid}", "last": str(last)}
+        # ── 1. Tentar API-Football (fonte primária) ──
+        params = {"h2h": f"{team1_afid}-{team2_afid}"}
+        # Nota: parâmetro "last" requer plano pago — não enviar
         resp = self._get("fixtures/headtohead", params)
-        if not resp:
-            return None
 
-        fixtures = resp.get("response", [])
-        if not fixtures:
-            return {"pair": pair, "total": 0, "jogos": []}
+        if resp:
+            fixtures = resp.get("response", [])
+            if fixtures:
+                result = self._processar_h2h_apifootball(fixtures, team1_afid, team2_afid, pair)
+                self._cache_set("h2h", cache_key, result)
+                logger.info(f"🤝 H2H (AF): {result['team1_name']} vs {result['team2_name']}: {result['total']} jogos")
+                return result
 
+        # ── 2. Fallback: football-data.org ──
+        logger.info(f"🔄 H2H AF indisponível para {pair}, tentando FDO...")
+        result = self._fallback_h2h_fdo(team1_afid, team2_afid, pair)
+        if result:
+            self._cache_set("h2h", cache_key, result)
+            logger.info(f"🤝 H2H (FDO): {result['team1_name']} vs {result['team2_name']}: {result['total']} jogos")
+            return result
+
+        # Ambas falharam — retornar vazio
+        logger.warning(f"⚠️ H2H: nenhuma fonte disponível para {pair}")
+        return {"pair": pair, "total": 0, "jogos": [], "stats": {"team1_wins": 0, "team2_wins": 0, "draws": 0}}
+
+    def _processar_h2h_apifootball(self, fixtures: list, team1_afid: int, team2_afid: int, pair: str) -> Dict:
+        """Processa resposta H2H do API-Football para formato padrão."""
         jogos = []
         stats = {"team1_wins": 0, "team2_wins": 0, "draws": 0}
 
@@ -458,7 +479,6 @@ class StatsEnricher:
                 "gols_visitante": ga,
             })
 
-        # Ordenar por data (mais recente primeiro)
         jogos.sort(key=lambda x: x["data"], reverse=True)
 
         result = {
@@ -471,9 +491,9 @@ class StatsEnricher:
             "stats": stats,
             "ultimos_5": jogos[:5],
             "todos": jogos,
+            "fonte": "api-football",
         }
 
-        # Preencher nomes
         for j in jogos:
             if j["mandante_id"] == team1_afid:
                 result["team1_name"] = j["mandante"]
@@ -484,9 +504,94 @@ class StatsEnricher:
                 result["team2_name"] = j["mandante"]
                 break
 
-        self._cache_set("h2h", cache_key, result)
-        logger.info(f"🤝 H2H: {result['team1_name']} vs {result['team2_name']}: {len(jogos)} jogos")
         return result
+
+    def _fallback_h2h_fdo(self, team1_afid: int, team2_afid: int, pair: str) -> Optional[Dict]:
+        """
+        Fallback H2H via football-data.org quando API-Football falha.
+
+        Mapeia af_id → fdo_id, encontra um jogo entre os times no FDO,
+        e usa o endpoint H2H do FDO para obter o histórico completo.
+        Calcula stats manualmente dos jogos (aggregates FDO podem ser imprecisos).
+        """
+        try:
+            from src.utils.team_mapping import SERIE_A_TIMES
+            from src.analysis.football_data_client import FootballDataClient
+
+            # Mapear af_id → fdo_id
+            af_to_fdo = {info["af_id"]: info["fdo_id"] for info in SERIE_A_TIMES.values()}
+            af_to_nome = {info["af_id"]: info["nome"] for info in SERIE_A_TIMES.values()}
+            fdo_to_af = {info["fdo_id"]: info["af_id"] for info in SERIE_A_TIMES.values()}
+
+            fdo_id1 = af_to_fdo.get(team1_afid)
+            fdo_id2 = af_to_fdo.get(team2_afid)
+
+            if not fdo_id1 or not fdo_id2:
+                logger.debug(f"H2H FDO: sem mapeamento AF→FDO para {team1_afid} ou {team2_afid}")
+                return None
+
+            fdo = FootballDataClient()
+            fdo_h2h = fdo.h2h_por_times(fdo_id1, fdo_id2)
+            if not fdo_h2h:
+                return None
+
+            # Converter lista de jogos e calcular stats manualmente
+            # (aggregates FDO podem vir zerados — bug da API)
+            jogos = []
+            stats = {"team1_wins": 0, "team2_wins": 0, "draws": 0}
+
+            for match in fdo_h2h.get("ultimos", []):
+                m_fdo_id = match.get("mandante_id")
+                v_fdo_id = match.get("visitante_id")
+                gm = match.get("gols_m")
+                gv = match.get("gols_v")
+
+                # Calcular stats: quem venceu cada jogo?
+                if gm is not None and gv is not None:
+                    # Determinar qual af_id venceu
+                    mandante_af = fdo_to_af.get(m_fdo_id, m_fdo_id)
+                    if gm > gv:
+                        # Mandante venceu
+                        if mandante_af == team1_afid:
+                            stats["team1_wins"] += 1
+                        else:
+                            stats["team2_wins"] += 1
+                    elif gv > gm:
+                        # Visitante venceu
+                        visitante_af = fdo_to_af.get(v_fdo_id, v_fdo_id)
+                        if visitante_af == team1_afid:
+                            stats["team1_wins"] += 1
+                        else:
+                            stats["team2_wins"] += 1
+                    else:
+                        stats["draws"] += 1
+
+                jogos.append({
+                    "data": match.get("data", ""),
+                    "liga": match.get("competicao", "Brasileirão"),
+                    "mandante": match.get("mandante", ""),
+                    "mandante_id": fdo_to_af.get(m_fdo_id, m_fdo_id),
+                    "visitante": match.get("visitante", ""),
+                    "visitante_id": fdo_to_af.get(v_fdo_id, v_fdo_id),
+                    "gols_mandante": gm,
+                    "gols_visitante": gv,
+                })
+
+            return {
+                "pair": pair,
+                "team1_id": team1_afid,
+                "team2_id": team2_afid,
+                "team1_name": af_to_nome.get(team1_afid, fdo_h2h.get("home_team", "")),
+                "team2_name": af_to_nome.get(team2_afid, fdo_h2h.get("away_team", "")),
+                "total": fdo_h2h.get("total_jogos", len(jogos)),
+                "stats": stats,
+                "ultimos_5": jogos[:5],
+                "todos": jogos,
+                "fonte": "football-data.org",
+            }
+        except Exception as e:
+            logger.debug(f"FDO H2H fallback falhou: {e}")
+            return None
 
     # ──────────────────── Standings ────────────────────
 
@@ -719,6 +824,19 @@ class StatsEnricher:
                 requests_used += 1
 
         logger.info(f"📊 Rodada enriquecida: {len(result['team_stats'])} teams, {len(result['h2h'])} h2h, ~{requests_used} requests")
+        
+        # 4. Complementar com football-data.org (fonte PRIMÁRIA para 2026)
+        # API-Football free tier só suporta 2022-2024, então FDO é essencial
+        try:
+            from src.analysis.football_data_client import FootballDataClient
+            fdo = FootballDataClient()
+            fdo_standings = fdo.classificacao()
+            if fdo_standings:
+                result["fdo_standings"] = fdo_standings
+                logger.info(f"⚽ FDO: {len(fdo_standings)} times classificação 2026 (complemento)")
+        except Exception as fdo_err:
+            logger.debug(f"FDO complemento indisponível: {fdo_err}")
+        
         return result
 
     # ──────────────────── Helpers para Blog ────────────────────

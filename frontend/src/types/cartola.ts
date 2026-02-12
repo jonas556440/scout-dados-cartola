@@ -22,8 +22,15 @@ export interface Player {
   potencial?: number;
   valorizacao?: number;
   mpv_score?: number; // Score de valorização calculado pelo MPVCalculator
-  xG?: number;
+  xG?: number;        // xG individual estimado a partir de finalizações
   xA?: number;
+  consistencia?: number; // 0-100: índice de consistência (desvio padrão / média)
+  confronto?: {        // Análise de confronto do time na rodada
+    dificuldade?: string;
+    score?: number;
+    mandante?: boolean;
+    adversario?: string;
+  };
 }
 
 export interface Scouts {

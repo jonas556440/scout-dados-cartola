@@ -1,17 +1,18 @@
 {
   "slug": "cruzeiro-brasileirao",
-  "title": "Cruzeiro no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Cruzeiro na rodada 3 do Brasileirão 2026. Atualmente em 20º lugar com 0 pontos. Probabilidade de título: 0.4%.",
-  "content": "## Cruzeiro — Situação Atual\n\nNa **rodada 3**, o Cruzeiro ocupa a **20ª posição** com **0 pontos** em 2 jogos (0V 0E 2D), na zona de rebaixamento (Z4).\n\n- Gols pró: **2** | Gols contra: **4** | Saldo: **-2**\n- Forma recente: **DD**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.4%** |\n| 🌎 Libertadores (G4) | **3.2%** |\n| 🏅 Sul-Americana | **23.0%** |\n| ⚠️ Rebaixamento | **42.6%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | MIR | Fora | **1x2** | 28.2% | 1.31 |\n| 4 | COR | Casa | **1x0** | 48.2% | 1.88 |\n| 5 | FLA | Fora | **3x0** | 7.4% | 0.83 |\n| 6 | VAS | Casa | **1x0** | 59.7% | 2.35 |\n| 7 | CAP | Fora | **1x0** | 15.3% | 1.2 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Situação do Cruzeiro no Brasileirão 2026 — Análise completa",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Cruzeiro na rodada 3 do Brasileirão 2026. Atualmente em 20º lugar com 1 pontos. Probabilidade de título: 0.1%.",
+  "content": "## Cruzeiro — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Cruzeiro ocupa a **20ª posição** com **1 pontos** em 3 jogos (0V 1E 2D), na zona de rebaixamento (Z4).\n\n- Gols pró: **3** | Gols contra: **8** | Saldo: **-5**\n- Aproveitamento: **11.1%** | Média de gols: **1.0/jogo**\n- Forma recente: 🔴🔴🟡 (DDE)\n\n## Análise\n\nO Cruzeiro atravessa momento difícil no Brasileirão, com apenas 0 vitória(s) em 3 jogos. A defesa precisa melhorar: média de 2.67 gols sofridos por partida. Alerta: as simulações apontam **59.9%** de risco de rebaixamento.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.1%** |\n| 🌎 Libertadores (G4) | **0.3%** |\n| 🏅 Sul-Americana | **11.5%** |\n| ⚠️ Rebaixamento | **59.9%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | MIR | Fora | **1x0** | 18.3% | 0.83 |\n| 4 | COR | Casa | **1x1** | 35.4% | 1.16 |\n| 5 | FLA | Fora | **2x0** | 10.0% | 0.56 |\n| 6 | VAS | Casa | **1x1** | 40.1% | 1.29 |\n| 7 | CAP | Fora | **1x0** | 17.4% | 0.78 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** MIR, FLA, CAP — probabilidades de vitória abaixo de 35%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Cruzeiro ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Cruzeiro tem **0.1%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **0.3%**.\n\n### Qual a posição atual do Cruzeiro no Brasileirão?\n\nO Cruzeiro está na **20ª posição** com **1 pontos** em 3 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Cruzeiro?\n\nO próximo jogo é contra o **MIR** (Fora) na rodada 3. O placar provável é **1x0** com 18.3% de chance de vitória.\n\n### O Cruzeiro corre risco de rebaixamento?\n\nSim, as simulações indicam **59.9%** de risco de rebaixamento. É preciso atenção.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Cruzeiro",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "zona de rebaixamento"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "cruzeiro",
-  "geradoEm": "2026-02-08T06:00:36.517957"
+  "geradoEm": "2026-02-12T06:00:28.249645"
 }

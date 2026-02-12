@@ -43,7 +43,7 @@ CACHE_TTL = {
 
 # Competição BSA
 BSA = "BSA"
-BSA_SEASON = 2025  # temporada 2025/26
+BSA_SEASON = 2026  # temporada 2026 do Brasileirão Série A
 
 
 class FootballDataClient:
@@ -270,6 +270,8 @@ class FootballDataClient:
         result = {
             "match_id": match_id,
             "total_jogos": agg.get("numberOfMatches", 0),
+            "home_team_id": agg.get("homeTeam", {}).get("id"),
+            "away_team_id": agg.get("awayTeam", {}).get("id"),
             "vitorias_casa": agg.get("homeTeam", {}).get("wins", 0),
             "empates": agg.get("homeTeam", {}).get("draws", 0),
             "vitorias_fora": agg.get("awayTeam", {}).get("wins", 0),
@@ -285,7 +287,9 @@ class FootballDataClient:
             result["ultimos"].append({
                 "data": m.get("utcDate", "")[:10],
                 "mandante": ht.get("shortName", ht.get("name", "?")),
+                "mandante_id": ht.get("id"),
                 "visitante": at.get("shortName", at.get("name", "?")),
+                "visitante_id": at.get("id"),
                 "gols_m": sc.get("home"),
                 "gols_v": sc.get("away"),
                 "competicao": m.get("competition", {}).get("name", "?"),
@@ -293,6 +297,48 @@ class FootballDataClient:
 
         self._cache_set("h2h", cache_key, result)
         logger.info(f"⚔️ H2H match {match_id}: {result['total_jogos']} jogos")
+        return result
+
+    def h2h_por_times(self, fdo_id1: int, fdo_id2: int, limit: int = 10) -> Optional[Dict]:
+        """
+        Busca H2H entre dois times por FDO team IDs.
+
+        Encontra automaticamente um match_id entre os times,
+        depois chama h2h(match_id) para obter o histórico completo.
+        Funciona com jogos FINISHED ou SCHEDULED.
+        """
+        # Cache por par de times (ordenado)
+        pair_key = f"pair_{min(fdo_id1, fdo_id2)}_{max(fdo_id1, fdo_id2)}"
+        cached = self._cache_get("h2h", pair_key)
+        if cached:
+            return cached
+
+        # Buscar jogos finalizados de um dos times para encontrar um match_id
+        match_id = None
+        for status in ["FINISHED", "SCHEDULED"]:
+            data = self._get(f"teams/{fdo_id1}/matches", {
+                "status": status,
+                "limit": 50,
+            })
+            if data:
+                for m in data.get("matches", []):
+                    ht_id = m.get("homeTeam", {}).get("id")
+                    at_id = m.get("awayTeam", {}).get("id")
+                    if {ht_id, at_id} == {fdo_id1, fdo_id2}:
+                        match_id = m.get("id")
+                        break
+            if match_id:
+                break
+
+        if not match_id:
+            logger.info(f"FDO H2H: nenhum jogo encontrado entre {fdo_id1} e {fdo_id2}")
+            return None
+
+        # Buscar H2H usando o match_id
+        result = self.h2h(match_id, limit=limit)
+        if result:
+            # Cache por par de times também
+            self._cache_set("h2h", pair_key, result)
         return result
 
     # ──────────────────── Standings ────────────────────

@@ -14,22 +14,126 @@
   "arbitro": "",
   "competicao": "Campeonato Brasileiro Série A",
   "status": "TIMED",
-  "posicao_mandante": null,
-  "posicao_visitante": null,
-  "pontos_mandante": null,
-  "pontos_visitante": null,
-  "forma_mandante": null,
-  "forma_visitante": null,
-  "artilheiro_mandante": null,
-  "artilheiro_visitante": null,
-  "h2h": null,
-  "insights": [],
+  "posicao_mandante": 20,
+  "posicao_visitante": 3,
+  "pontos_mandante": 0,
+  "pontos_visitante": 6,
+  "forma_mandante": "L",
+  "forma_visitante": "W,W",
+  "artilheiro_mandante": {
+    "jogador": "Bidon",
+    "jogador_id": 179054,
+    "time": "Corinthians",
+    "time_id": 1779,
+    "gols": 1,
+    "assists": null,
+    "penaltis": null,
+    "jogos": 1,
+    "nacionalidade": "Brazil"
+  },
+  "artilheiro_visitante": {
+    "jogador": "Juninho Capixaba",
+    "jogador_id": 1439,
+    "time": "Bragantino",
+    "time_id": 4286,
+    "gols": 1,
+    "assists": null,
+    "penaltis": null,
+    "jogos": 2,
+    "nacionalidade": "Brazil"
+  },
+  "h2h": {
+    "match_id": 554763,
+    "total_jogos": 10,
+    "vitorias_casa": 0,
+    "empates": 1,
+    "vitorias_fora": 0,
+    "home_team": "SC Corinthians Paulista",
+    "away_team": "RB Bragantino",
+    "ultimos": [
+      {
+        "data": "2025-11-05",
+        "mandante": "Bragantino",
+        "visitante": "Corinthians",
+        "gols_m": 2,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2025-07-13",
+        "mandante": "Corinthians",
+        "visitante": "Bragantino",
+        "gols_m": 1,
+        "gols_v": 2,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2024-08-11",
+        "mandante": "Corinthians",
+        "visitante": "Bragantino",
+        "gols_m": 1,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2024-04-20",
+        "mandante": "Bragantino",
+        "visitante": "Corinthians",
+        "gols_m": 1,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2023-11-05",
+        "mandante": "Bragantino",
+        "visitante": "Corinthians",
+        "gols_m": 1,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2023-07-02",
+        "mandante": "Corinthians",
+        "visitante": "Bragantino",
+        "gols_m": 0,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2022-08-30",
+        "mandante": "Corinthians",
+        "visitante": "Bragantino",
+        "gols_m": 1,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2022-05-08",
+        "mandante": "Bragantino",
+        "visitante": "Corinthians",
+        "gols_m": 0,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      }
+    ],
+    "_cached_at": "2026-02-12T06:30:06.209410"
+  },
+  "insights": [
+    "Corinthians vem embalado com 9 vitórias consecutivas.",
+    "Corinthians está invicto há 10 jogos.",
+    "Bragantino sofre fora de casa: 10 derrotas em 19 jogos como visitante.",
+    "Histórico equilibrado: 0 vitórias do Corinthians, 1 empates e 0 do Bragantino nos últimos 10 jogos.",
+    "Último confronto: Bragantino 2x1 Corinthians (2025-11-05).",
+    "Corinthians tem defesa sólida: 10 jogos sem sofrer gol (26%).",
+    "Corinthians marca muito mais em casa (37 gols) do que fora (17 gols).",
+    "Contraste na tabela: Corinthians (20º, zona de rebaixamento) x Bragantino (3º, briga por título/Libertadores)."
+  ],
   "placar_mandante": null,
   "placar_visitante": null,
   "created_at": "2026-02-08T15:29:43.779131-03:00",
-  "updated_at": "2026-02-08T15:29:43.779147-03:00",
-  "last_enrichment": null,
-  "enrichment_level": "base",
+  "updated_at": "2026-02-12T15:30:00.028546-03:00",
+  "last_enrichment": "2026-02-12T15:30:00.028462-03:00",
+  "enrichment_level": "match_day",
   "title": "Corinthians x Bragantino — Brasileirão 2026 Rodada 3",
   "description": "Análise completa de Corinthians x Bragantino pela rodada 3 do Brasileirão 2026. Classificação, confronto direto, artilheiros e mais."
 }

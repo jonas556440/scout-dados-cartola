@@ -1,17 +1,18 @@
 {
   "slug": "athletico-pr-brasileirao",
-  "title": "Athletico-PR no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Athletico-PR na rodada 3 do Brasileirão 2026. Atualmente em 8º lugar com 3 pontos. Probabilidade de título: 0.8%.",
-  "content": "## Athletico-PR — Situação Atual\n\nNa **rodada 3**, o Athletico-PR ocupa a **8ª posição** com **3 pontos** em 1 jogos (1V 0E 0D), na briga por Sul-Americana.\n\n- Gols pró: **2** | Gols contra: **0** | Saldo: **+2**\n- Forma recente: **V**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.8%** |\n| 🌎 Libertadores (G4) | **9.3%** |\n| 🏅 Sul-Americana | **49.3%** |\n| ⚠️ Rebaixamento | **14.3%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | SAN | Casa | **1x2** | 51.9% | 1.87 |\n| 4 | RBB | Fora | **1x0** | 15.7% | 1.08 |\n| 5 | BOT | Casa | **0x3** | 32.0% | 1.4 |\n| 6 | FLU | Fora | **1x0** | 7.7% | 0.9 |\n| 7 | CRU | Casa | **1x0** | 67.7% | 2.63 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Athletico-PR no Brasileirão: Probabilidades e Análise Completa",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Athletico-PR na rodada 3 do Brasileirão 2026. Atualmente em 9º lugar com 4 pontos. Probabilidade de título: 0.8%.",
+  "content": "## Athletico-PR — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Athletico-PR ocupa a **9ª posição** com **4 pontos** em 1 jogos (1V 1E 0D), na briga por Sul-Americana.\n\n- Gols pró: **1** | Gols contra: **0** | Saldo: **+1**\n- Aproveitamento: **133.3%** | Média de gols: **1.0/jogo**\n- Forma recente: 🟢🟡 (VE)\n\n## Análise\n\nO Athletico-PR faz campanha regular até aqui, com 1V 1E 0D em 1 jogos. A defesa tem sido destaque, sofrendo apenas 0.0 gol por jogo em média.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.8%** |\n| 🌎 Libertadores (G4) | **6.5%** |\n| 🏅 Sul-Americana | **60.6%** |\n| ⚠️ Rebaixamento | **8.4%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | SAN | Casa | **1x0** | 53.7% | 1.52 |\n| 4 | RBB | Fora | **1x0** | 22.0% | 0.74 |\n| 5 | BOT | Casa | **0x1** | 32.3% | 0.91 |\n| 6 | FLU | Fora | **1x0** | 16.5% | 0.56 |\n| 7 | CRU | Casa | **1x0** | 56.6% | 1.61 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** RBB, BOT, FLU — probabilidades de vitória abaixo de 35%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Athletico-PR ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Athletico-PR tem **0.8%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **6.5%**.\n\n### Qual a posição atual do Athletico-PR no Brasileirão?\n\nO Athletico-PR está na **9ª posição** com **4 pontos** em 1 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Athletico-PR?\n\nO próximo jogo é contra o **SAN** (Casa) na rodada 3. O placar provável é **1x0** com 53.7% de chance de vitória.\n\n### O Athletico-PR corre risco de rebaixamento?\n\nO risco é baixo mas existe: **8.4%** segundo as simulações Monte Carlo.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Athletico-PR",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "briga por Sul-Americana"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "athletico-pr",
-  "geradoEm": "2026-02-08T06:00:14.927945"
+  "geradoEm": "2026-02-12T06:00:11.845185"
 }

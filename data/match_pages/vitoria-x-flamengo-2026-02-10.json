@@ -13,7 +13,7 @@
   "estadio": "",
   "arbitro": "",
   "competicao": "Campeonato Brasileiro Série A",
-  "status": "TIMED",
+  "status": "FINISHED",
   "posicao_mandante": 15,
   "posicao_visitante": 1,
   "pontos_mandante": 45,
@@ -48,12 +48,12 @@
     "Destaque para Giorgian De Arrascaeta, artilheiro do Flamengo com 18 gols e 14 assistências na temporada.",
     "Contraste na tabela: Vitória (15º, parte inferior) x Flamengo (1º, briga por título/Libertadores)."
   ],
-  "placar_mandante": null,
-  "placar_visitante": null,
+  "placar_mandante": 1,
+  "placar_visitante": 2,
   "created_at": "2026-02-08T15:29:43.777515-03:00",
-  "updated_at": "2026-02-08T15:31:59.020388-03:00",
+  "updated_at": "2026-02-12T03:30:03.647837-03:00",
   "last_enrichment": "2026-02-08T15:31:59.020336-03:00",
-  "enrichment_level": "pre_match",
+  "enrichment_level": "post_game",
   "title": "Vitória x Flamengo — Brasileirão 2026 Rodada 3",
   "description": "Análise completa de Vitória x Flamengo pela rodada 3 do Brasileirão 2026. Classificação, confronto direto, artilheiros e mais."
 }

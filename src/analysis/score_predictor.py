@@ -27,10 +27,13 @@ Onde λ = taxa de gols esperados
 """
 
 import math
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Optional, Any
 from functools import lru_cache
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 
 # ==================== ENUMS ====================
@@ -156,11 +159,48 @@ class ScorePredictor:
 
     MAX_GOLS = 7
     TAU = 0.05              # Dixon-Coles correlation parameter (calibrado)
-    FORCA_BASELINE = 44.0   # Baseline V5 (rankings comprimidos 65-87)
+    FORCA_BASELINE = 50.0   # Baseline V5 — auto-calibrado em prever_rodada()
+    PESO_ODDS_BLEND = 0.25  # Peso das odds no blend V/E/D (25% mercado, 75% Poisson)
+
+    def calibrar_baseline(self, estatisticas_times: Dict[int, Any]):
+        """Auto-calibra FORCA_BASELINE para que α e β centrem em 1.0 para o time médio.
+        
+        α = forca_ataque / BASELINE  →  α_medio = 1.0
+        β = (100 - forca_defesa) / BASELINE  →  β_medio = 1.0
+
+        Chamado automaticamente por prever_rodada() com os dados reais.
+        """
+        ataques = []
+        defesas_inv = []
+        for stats in estatisticas_times.values():
+            atk = getattr(stats, 'forca_ataque', None) or getattr(stats, 'forca_geral', 50)
+            dfs = getattr(stats, 'forca_defesa', None) or getattr(stats, 'forca_geral', 50)
+            ataques.append(atk)
+            defesas_inv.append(100.0 - dfs)
+        
+        if ataques and defesas_inv:
+            media_atk = sum(ataques) / len(ataques)
+            media_def_inv = sum(defesas_inv) / len(defesas_inv)
+            # Média geométrica para melhor calibração em produto α×β
+            novo_baseline = (media_atk + media_def_inv) / 2.0
+            if 20 < novo_baseline < 80:  # Sanity check
+                self.FORCA_BASELINE = round(novo_baseline, 1)
     DECAY_RATE = 0.85       # Decaimento temporal por jogo
 
     def __init__(self):
         self.modo_padrao = ModoPrevisao.DIXON_COLES
+        self._media_liga_real: Optional[float] = None  # Calculada do FDO quando disponível
+        self._odds_collector = None  # Lazy-init
+    
+    def atualizar_media_liga_real(self, media_gols_por_jogo: float):
+        """Atualiza média real de gols da liga calculada dos dados FDO.
+        
+        Chamado pelo MatchAnalyzer após carregar dados reais.
+        Substitui o valor hardcoded de MEDIA_GOLS_POR_LIGA.
+        """
+        if 1.0 < media_gols_por_jogo < 5.0:  # Sanity check
+            self._media_liga_real = round(media_gols_por_jogo, 3)
+            logger.info(f"⚽ ScorePredictor: média liga real atualizada → {self._media_liga_real} gols/jogo")
 
     # ==================== POISSON ====================
 
@@ -228,7 +268,11 @@ class ScorePredictor:
             ε = fator H2H (histórico de confrontos diretos, ±8% máx)
         """
         camp = campeonato.lower()
-        media_liga = MEDIA_GOLS_POR_LIGA.get(camp, 2.50) / 2.0
+        # Priorizar média REAL da liga (FDO) sobre hardcoded
+        if self._media_liga_real and camp in ("brasileirao", "brasileiro", "serie a"):
+            media_liga = self._media_liga_real / 2.0
+        else:
+            media_liga = MEDIA_GOLS_POR_LIGA.get(camp, 2.50) / 2.0
         fator_casa = FATOR_CASA_POR_LIGA.get(camp, 1.33) if eh_mandante else 1.0
 
         alfa = max(0.35, min(2.5, forca_ataque / self.FORCA_BASELINE))
@@ -569,6 +613,34 @@ class ScorePredictor:
         # 6. Resultado
         pv_casa, p_empate, pv_fora = self.calcular_probabilidades_resultado(lambda_casa, lambda_fora)
 
+        # 6.1 Blend com odds de mercado (The Odds API) se disponível
+        odds_jogo = self._buscar_odds_mercado(mandante, visitante)
+        odds_info = {}
+        if odds_jogo:
+            peso_m = self.PESO_ODDS_BLEND
+            peso_p = 1.0 - peso_m
+            pv_casa_blend = pv_casa * peso_p + odds_jogo["prob_casa"] * peso_m
+            p_empate_blend = p_empate * peso_p + odds_jogo["prob_empate"] * peso_m
+            pv_fora_blend = pv_fora * peso_p + odds_jogo["prob_fora"] * peso_m
+            # Normalizar
+            total_blend = pv_casa_blend + p_empate_blend + pv_fora_blend
+            if total_blend > 0:
+                pv_casa = pv_casa_blend / total_blend
+                p_empate = p_empate_blend / total_blend
+                pv_fora = pv_fora_blend / total_blend
+            odds_info = {
+                "odds_mercado_casa": odds_jogo["prob_casa"],
+                "odds_mercado_empate": odds_jogo["prob_empate"],
+                "odds_mercado_fora": odds_jogo["prob_fora"],
+                "odds_num_casas": odds_jogo.get("num_casas", 0),
+                "odds_blend_peso": peso_m,
+            }
+            logger.debug(
+                f"📊 Blend odds {mandante}x{visitante}: "
+                f"Poisson={pv_casa:.2f}/{p_empate:.2f}/{pv_fora:.2f} | "
+                f"Mercado={odds_jogo['prob_casa']:.2f}/{odds_jogo['prob_empate']:.2f}/{odds_jogo['prob_fora']:.2f}"
+            )
+
         # 7. Mercados de gols
         pg = self.calcular_probabilidades_gols(lambda_casa, lambda_fora)
 
@@ -620,8 +692,27 @@ class ScorePredictor:
                 "dias_descanso_visitante": dias_descanso_visitante,
                 "modo": modo.value,
                 "modelo": "V4_Dixon-Coles",
+                **odds_info,
             }
         )
+
+    # ==================== ODDS DE MERCADO ====================
+
+    def _buscar_odds_mercado(self, mandante: str, visitante: str) -> Optional[Dict]:
+        """
+        Busca probabilidades implícitas do mercado (The Odds API).
+        
+        Lê apenas do cache interno — nunca gasta créditos.
+        Retorna dict com prob_casa/prob_empate/prob_fora ou None.
+        """
+        try:
+            if self._odds_collector is None:
+                from src.analysis.odds_collector import OddsCollector
+                self._odds_collector = OddsCollector()
+            return self._odds_collector.odds_para_jogo(mandante, visitante)
+        except Exception as e:
+            logger.debug(f"Odds indisponíveis para {mandante}x{visitante}: {e}")
+            return None
 
     # ==================== PREVISÃO DE RODADA ====================
 
@@ -644,6 +735,23 @@ class ScorePredictor:
             descanso = {}
         if h2h_ajustes is None:
             h2h_ajustes = {}
+
+        # Auto-calibrar baseline a partir dos dados reais da rodada
+        self.calibrar_baseline(estatisticas_times)
+        
+        # Auto-calcular média de gols da liga a partir dos dados reais
+        if not self._media_liga_real:
+            total_gp = 0
+            total_j = 0
+            for stats in estatisticas_times.values():
+                gp = getattr(stats, 'gols_pro', 0) or 0
+                j = getattr(stats, 'jogos', 0) or 0
+                total_gp += gp
+                total_j += j
+            if total_j >= 20:  # pelo menos ~2 jogos por time
+                media_calc = (total_gp * 2) / total_j  # *2 porque gols_pro conta cada time
+                self.atualizar_media_liga_real(media_calc)
+
         previsoes = []
         for partida in partidas:
             mandante_id = partida.get("clube_casa_id")
@@ -657,11 +765,11 @@ class ScorePredictor:
             va = partida.get("clube_visitante_abrev", getattr(sv, 'abreviacao', "???"))
             fm = getattr(sm, 'forca_geral', 50)
             fv = getattr(sv, 'forca_geral', 50)
-            # V5: Forças separadas de ataque/defesa
-            fatk_m = getattr(sm, 'forca_ataque', fm)
-            fdef_m = getattr(sm, 'forca_defesa', fm)
-            fatk_v = getattr(sv, 'forca_ataque', fv)
-            fdef_v = getattr(sv, 'forca_defesa', fv)
+            # v10: Forças casa/fora específicas — ataque do mandante EM CASA x defesa do visitante FORA
+            fatk_m = getattr(sm, 'forca_ataque_casa', None) or getattr(sm, 'forca_ataque', fm)
+            fdef_m = getattr(sm, 'forca_defesa_casa', None) or getattr(sm, 'forca_defesa', fm)
+            fatk_v = getattr(sv, 'forca_ataque_fora', None) or getattr(sv, 'forca_ataque', fv)
+            fdef_v = getattr(sv, 'forca_defesa_fora', None) or getattr(sv, 'forca_defesa', fv)
             pm = partida.get("clube_casa_posicao", getattr(sm, 'posicao', 10)) or 10
             pv = partida.get("clube_visitante_posicao", getattr(sv, 'posicao', 10)) or 10
             frm = getattr(sm, 'forma_sequencia', "")

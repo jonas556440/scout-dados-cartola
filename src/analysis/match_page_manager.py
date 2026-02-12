@@ -349,8 +349,12 @@ class MatchPageManager:
             # Tentar encontrar AF IDs para buscar team stats já cacheados
             for cart_id, af_id in CARTOLA_TO_APIFOOTBALL.items():
                 cached = self.enricher._cache_get(
-                    "team_stats", f"{af_id}_71_2024"
+                    "team_stats", f"{af_id}_71_2026"
                 )
+                if not cached:
+                    cached = self.enricher._cache_get(
+                        "team_stats", f"{af_id}_71_2024"
+                    )
                 if not cached:
                     cached = self.enricher._cache_get(
                         "team_stats", f"{af_id}_72_2024"

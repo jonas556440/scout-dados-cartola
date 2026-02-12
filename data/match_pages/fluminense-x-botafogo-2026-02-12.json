@@ -14,22 +14,143 @@
   "arbitro": "",
   "competicao": "Campeonato Brasileiro Série A",
   "status": "TIMED",
-  "posicao_mandante": null,
-  "posicao_visitante": null,
-  "pontos_mandante": null,
-  "pontos_visitante": null,
-  "forma_mandante": null,
-  "forma_visitante": null,
-  "artilheiro_mandante": null,
-  "artilheiro_visitante": null,
-  "h2h": null,
-  "insights": [],
+  "posicao_mandante": 7,
+  "posicao_visitante": 10,
+  "pontos_mandante": 4,
+  "pontos_visitante": 3,
+  "forma_mandante": "D,W",
+  "forma_visitante": "L,W",
+  "artilheiro_mandante": {
+    "jogador": "Nonato",
+    "jogador_id": 61369,
+    "time": "Fluminense",
+    "time_id": 1765,
+    "gols": 1,
+    "assists": 1,
+    "penaltis": null,
+    "jogos": 2,
+    "nacionalidade": "Brazil"
+  },
+  "artilheiro_visitante": {
+    "jogador": "Danilo dos Santos de Oliveira",
+    "jogador_id": 149704,
+    "time": "Botafogo",
+    "time_id": 1770,
+    "gols": 4,
+    "assists": null,
+    "penaltis": null,
+    "jogos": 2,
+    "nacionalidade": "Brazil"
+  },
+  "h2h": {
+    "match_id": 554764,
+    "total_jogos": 10,
+    "vitorias_casa": 0,
+    "empates": 2,
+    "vitorias_fora": 0,
+    "home_team": "Fluminense FC",
+    "away_team": "Botafogo FR",
+    "ultimos": [
+      {
+        "data": "2025-09-28",
+        "mandante": "Fluminense",
+        "visitante": "Botafogo",
+        "gols_m": 2,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2025-04-27",
+        "mandante": "Botafogo",
+        "visitante": "Fluminense",
+        "gols_m": 2,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2024-09-21",
+        "mandante": "Fluminense",
+        "visitante": "Botafogo",
+        "gols_m": 0,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2024-06-11",
+        "mandante": "Botafogo",
+        "visitante": "Fluminense",
+        "gols_m": 1,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2023-10-08",
+        "mandante": "Fluminense",
+        "visitante": "Botafogo",
+        "gols_m": 0,
+        "gols_v": 2,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2023-05-20",
+        "mandante": "Botafogo",
+        "visitante": "Fluminense",
+        "gols_m": 1,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2022-10-23",
+        "mandante": "Fluminense",
+        "visitante": "Botafogo",
+        "gols_m": 2,
+        "gols_v": 2,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2022-06-26",
+        "mandante": "Botafogo",
+        "visitante": "Fluminense",
+        "gols_m": 0,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2021-01-24",
+        "mandante": "Fluminense",
+        "visitante": "Botafogo",
+        "gols_m": 2,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2020-10-04",
+        "mandante": "Botafogo",
+        "visitante": "Fluminense",
+        "gols_m": 1,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      }
+    ],
+    "_cached_at": "2026-02-12T06:30:09.223707"
+  },
+  "insights": [
+    "Fluminense está invicto há 5 jogos.",
+    "Botafogo vem embalado com 3 vitórias consecutivas.",
+    "Botafogo está invicto há 16 jogos.",
+    "Botafogo tem bom desempenho fora de casa: 11 vitórias em 19 jogos como visitante.",
+    "Histórico equilibrado: 0 vitórias do Fluminense, 2 empates e 0 do Botafogo nos últimos 10 jogos.",
+    "Último confronto: Fluminense 2x0 Botafogo (2025-09-28).",
+    "Fluminense tem defesa sólida: 13 jogos sem sofrer gol (34%).",
+    "Botafogo tem defesa sólida: 18 jogos sem sofrer gol (47%).",
+    "Times separados por apenas 1 pontos na tabela (Fluminense 7º x Botafogo 10º)."
+  ],
   "placar_mandante": null,
   "placar_visitante": null,
   "created_at": "2026-02-08T15:29:43.778977-03:00",
-  "updated_at": "2026-02-08T15:29:43.778994-03:00",
-  "last_enrichment": null,
-  "enrichment_level": "base",
+  "updated_at": "2026-02-12T15:30:00.034488-03:00",
+  "last_enrichment": "2026-02-12T15:30:00.034435-03:00",
+  "enrichment_level": "match_day",
   "title": "Fluminense x Botafogo — Brasileirão 2026 Rodada 3",
   "description": "Análise completa de Fluminense x Botafogo pela rodada 3 do Brasileirão 2026. Classificação, confronto direto, artilheiros e mais."
 }

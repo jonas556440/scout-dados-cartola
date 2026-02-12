@@ -35,7 +35,7 @@ from src.database.db_manager import DatabaseManager
 from src.database.history_manager import HistoryManager
 from src.analysis.mpv_calculator import MPVCalculator
 from src.analysis.team_selector import TeamSelector, TeamFormatter
-from src.analysis.stats_analyzer import StatsAnalyzer
+# StatsAnalyzer foi integrado ao MPVCalculator (dead code removido)
 from src.scrapers.scout_collector import ScoutCollector
 from src.utils.helpers import (
     criar_tabela_atletas, print_destaques, 
@@ -66,7 +66,7 @@ class CartolaApp:
         self.history = HistoryManager()
         self.mpv_calc = MPVCalculator()
         self.team_selector = TeamSelector()
-        self.stats = StatsAnalyzer()
+        self.stats = None  # StatsAnalyzer integrado ao MPVCalculator
         self.collector = ScoutCollector(self.api, self.db)
         
         self._cache_mercado = None

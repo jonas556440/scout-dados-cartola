@@ -1,6 +1,6 @@
 {
   "rodada": 2,
-  "timestamp": "2026-02-08T17:09:57.114822",
+  "timestamp": "2026-02-12T18:51:33.240033",
   "resultados": [
     {
       "partida_id": 346255,
@@ -14,10 +14,10 @@
       "data_jogo": "2026-02-04 19:00:00",
       "timestamp": 1770242400,
       "local": "Maracanã",
-      "posicao_mandante": 14,
+      "posicao_mandante": 9,
       "posicao_visitante": 16,
-      "aproveitamento_mandante": ",,,d,e",
-      "aproveitamento_visitante": ",,,d,e"
+      "aproveitamento_mandante": ",,d,e,v",
+      "aproveitamento_visitante": ",,d,e,e"
     },
     {
       "partida_id": 346259,
@@ -31,10 +31,10 @@
       "data_jogo": "2026-02-04 19:00:00",
       "timestamp": 1770242400,
       "local": "Cícero de Souza Marques",
-      "posicao_mandante": 1,
-      "posicao_visitante": 15,
-      "aproveitamento_mandante": ",,,v,v",
-      "aproveitamento_visitante": ",,,e,d"
+      "posicao_mandante": 3,
+      "posicao_visitante": 14,
+      "aproveitamento_mandante": ",,v,v,e",
+      "aproveitamento_visitante": ",,e,d,e"
     },
     {
       "partida_id": 346257,
@@ -49,9 +49,9 @@
       "timestamp": 1770246000,
       "local": "Vila Belmiro",
       "posicao_mandante": 17,
-      "posicao_visitante": 7,
-      "aproveitamento_mandante": ",,,d,e",
-      "aproveitamento_visitante": ",,,v,e"
+      "posicao_visitante": 1,
+      "aproveitamento_mandante": ",,d,e,e",
+      "aproveitamento_visitante": ",,v,e,v"
     },
     {
       "partida_id": 346264,
@@ -65,10 +65,10 @@
       "data_jogo": "2026-02-04 20:00:00",
       "timestamp": 1770246000,
       "local": "Mangueirão",
-      "posicao_mandante": 18,
-      "posicao_visitante": 4,
-      "aproveitamento_mandante": ",,,d,e",
-      "aproveitamento_visitante": ",,,v,e"
+      "posicao_mandante": 15,
+      "posicao_visitante": 5,
+      "aproveitamento_mandante": ",,d,e,e",
+      "aproveitamento_visitante": ",,v,e,e"
     },
     {
       "partida_id": 346258,
@@ -82,10 +82,10 @@
       "data_jogo": "2026-02-04 21:30:00",
       "timestamp": 1770251400,
       "local": "Arena Barueri",
-      "posicao_mandante": 2,
-      "posicao_visitante": 12,
-      "aproveitamento_mandante": ",,,e,v",
-      "aproveitamento_visitante": ",,,v,d"
+      "posicao_mandante": 6,
+      "posicao_visitante": 13,
+      "aproveitamento_mandante": ",,e,v,e",
+      "aproveitamento_visitante": ",,v,d,d"
     },
     {
       "partida_id": 346261,
@@ -99,10 +99,10 @@
       "data_jogo": "2026-02-04 21:30:00",
       "timestamp": 1770251400,
       "local": "Arena do Grêmio",
-      "posicao_mandante": 9,
-      "posicao_visitante": 8,
-      "aproveitamento_mandante": ",,,d,v",
-      "aproveitamento_visitante": ",,,v,d"
+      "posicao_mandante": 12,
+      "posicao_visitante": 10,
+      "aproveitamento_mandante": ",,d,v,d",
+      "aproveitamento_visitante": ",,v,d,e"
     },
     {
       "partida_id": 346263,
@@ -116,10 +116,10 @@
       "data_jogo": "2026-02-05 19:00:00",
       "timestamp": 1770328800,
       "local": "Casa de Apostas Arena Fonte Nova",
-      "posicao_mandante": 6,
-      "posicao_visitante": 5,
-      "aproveitamento_mandante": ",,,v,e",
-      "aproveitamento_visitante": ",,,v,e"
+      "posicao_mandante": 2,
+      "posicao_visitante": 7,
+      "aproveitamento_mandante": ",,v,e,v",
+      "aproveitamento_visitante": ",,v,e,e"
     },
     {
       "partida_id": 346256,
@@ -133,10 +133,10 @@
       "data_jogo": "2026-02-05 20:00:00",
       "timestamp": 1770332400,
       "local": "São Januário",
-      "posicao_mandante": 13,
-      "posicao_visitante": 3,
-      "aproveitamento_mandante": ",,,d,e",
-      "aproveitamento_visitante": ",,,v,e"
+      "posicao_mandante": 18,
+      "posicao_visitante": 4,
+      "aproveitamento_mandante": ",,d,e,d",
+      "aproveitamento_visitante": ",,v,e,e"
     },
     {
       "partida_id": 346260,
@@ -150,10 +150,10 @@
       "data_jogo": "2026-02-05 21:30:00",
       "timestamp": 1770337800,
       "local": "Mineirão",
-      "posicao_mandante": 20,
-      "posicao_visitante": 11,
-      "aproveitamento_mandante": ",,,d,d",
-      "aproveitamento_visitante": ",,,d,v"
+      "posicao_mandante": 19,
+      "posicao_visitante": 8,
+      "aproveitamento_mandante": ",,d,d,e",
+      "aproveitamento_visitante": ",,d,v,e"
     }
   ]
 }

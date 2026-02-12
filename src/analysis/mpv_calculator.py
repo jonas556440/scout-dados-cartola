@@ -37,6 +37,7 @@ import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
+import statistics as stats_lib
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
@@ -63,6 +64,8 @@ class AnaliseJogador:
     jogos_num: int = 0  # NOVO v7: número de jogos disputados
     status_id: int = 7  # NOVO v7: status do jogador (7=Provável, 6=Nulo, etc)
     scouts_historicos: List[Dict] = field(default_factory=list)
+    consistencia: float = 0.0  # 0-100: quanto menor o desvio relativo, mais consistente
+    xg_jogador: float = 0.0   # xG individual estimado a partir de finalizações dos scouts
     
     @property
     def margem_seguranca(self) -> float:
@@ -89,6 +92,8 @@ class AnaliseJogador:
             "margem_seguranca": self.margem_seguranca,
             "custo_beneficio": self.custo_beneficio,
             "risco": self.risco,
+            "consistencia": self.consistencia,
+            "xg_jogador": self.xg_jogador,
         }
 
 
@@ -170,6 +175,98 @@ class MPVCalculator:
     
     def __init__(self):
         self.scouts_peso = settings.SCOUTS
+
+    # ==================== SCOUTS ANALYSIS ====================
+
+    def calcular_pontuacao_scout(self, scout_data: Dict[str, Any]) -> float:
+        """Calcula pontuação a partir dos scouts usando pesos oficiais do Cartola.
+        
+        Usa settings.SCOUTS para aplicar os pesos reais de cada scout.
+        Exemplo: G=8pts, A=5pts, CA=-1pt, etc.
+        
+        Args:
+            scout_data: Dicionário com scouts {"G": 1, "A": 0, "CA": 1, ...}
+        Returns:
+            Pontuação total calculada
+        """
+        pontuacao = 0.0
+        for scout_abrev, peso in self.scouts_peso.items():
+            valor = scout_data.get(scout_abrev, 0) or 0
+            pontuacao += valor * peso
+        return round(pontuacao, 2)
+
+    def calcular_xg_jogador(self, scouts_historicos: List[Dict]) -> float:
+        """Calcula xG individual do jogador baseado em scouts de finalizações.
+        
+        Usa taxa de conversão real (gols / finalizações totais) e volume
+        recente de finalizações para estimar Expected Goals por jogo.
+        
+        Args:
+            scouts_historicos: Lista de scouts das rodadas anteriores
+        Returns:
+            xG estimated per game
+        """
+        if not scouts_historicos:
+            return 0.0
+        
+        total_finalizacoes = 0
+        total_gols = 0
+        
+        for scout in scouts_historicos:
+            total_finalizacoes += (
+                (scout.get("FD", 0) or 0) +
+                (scout.get("FF", 0) or 0) +
+                (scout.get("FT", 0) or 0) +
+                (scout.get("G", 0) or 0)
+            )
+            total_gols += scout.get("G", 0) or 0
+        
+        if total_finalizacoes == 0:
+            return 0.0
+        
+        conversao = total_gols / total_finalizacoes
+        
+        # Média de finalizações por jogo nas últimas rodadas
+        ultimos = scouts_historicos[-5:] if len(scouts_historicos) >= 5 else scouts_historicos
+        fins_recentes = sum(
+            (s.get("FD", 0) or 0) + (s.get("FF", 0) or 0) +
+            (s.get("FT", 0) or 0) + (s.get("G", 0) or 0)
+            for s in ultimos
+        )
+        fins_por_jogo = fins_recentes / max(1, len(ultimos))
+        
+        return round(fins_por_jogo * conversao, 3)
+
+    def calcular_consistencia(self, scouts_historicos: List[Dict]) -> float:
+        """Calcula índice de consistência do jogador (0-100).
+        
+        Baseado no coeficiente de variação (desvio padrão / média).
+        Quanto MENOR o CV, MAIS consistente → score mais alto.
+        
+        100 = perfeitamente consistente
+        0 = extremamente volátil
+        
+        Args:
+            scouts_historicos: Lista de scouts com campo 'pontuacao'
+        Returns:
+            Índice de consistência (0-100)
+        """
+        if not scouts_historicos or len(scouts_historicos) < 2:
+            return 0.0
+        
+        pontuacoes = [s.get("pontuacao", 0) for s in scouts_historicos if s.get("pontuacao") is not None]
+        if len(pontuacoes) < 2:
+            return 0.0
+        
+        media = sum(pontuacoes) / len(pontuacoes)
+        if media <= 0:
+            return 0.0
+        
+        desvio = stats_lib.stdev(pontuacoes)
+        cv = desvio / media  # Coeficiente de variação
+        
+        # Converter para score 0-100 (CV=0 → 100, CV=2 → 0)
+        return round(max(0, min(100, 100 - (cv * 50))), 1)
     
     def calcular_mpv_basico(self, preco: float, media: float) -> float:
         """
@@ -470,6 +567,10 @@ class MPVCalculator:
         
         # Determinar risco (v7: com rodada_atual)
         risco = self.determinar_risco(preco, media, jogos_num, variacao, rodada_atual)
+
+        # Calcular consistência e xG individual a partir de scouts
+        consistencia = self.calcular_consistencia(scouts_historicos) if scouts_historicos else 0.0
+        xg_jogador = self.calcular_xg_jogador(scouts_historicos) if scouts_historicos else 0.0
         
         return AnaliseJogador(
             atleta_id=atleta_id,
@@ -485,9 +586,11 @@ class MPVCalculator:
             pontuacao_esperada=pontuacao_esperada,
             risco=risco,
             variacao=variacao,
-            jogos_num=jogos_num,  # v7: guardar jogos disputados
-            status_id=atleta_data.get("status_id", 7),  # v7: guardar status
-            scouts_historicos=scouts_historicos or []
+            jogos_num=jogos_num,
+            status_id=atleta_data.get("status_id", 7),
+            scouts_historicos=scouts_historicos or [],
+            consistencia=consistencia,
+            xg_jogador=xg_jogador,
         )
     
     def filtrar_valorizadores(

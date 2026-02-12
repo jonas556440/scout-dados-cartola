@@ -14,22 +14,131 @@
   "arbitro": "",
   "competicao": "Campeonato Brasileiro Série A",
   "status": "TIMED",
-  "posicao_mandante": null,
-  "posicao_visitante": null,
-  "pontos_mandante": null,
-  "pontos_visitante": null,
-  "forma_mandante": null,
-  "forma_visitante": null,
+  "posicao_mandante": 16,
+  "posicao_visitante": 6,
+  "pontos_mandante": 1,
+  "pontos_visitante": 4,
+  "forma_mandante": "D,L",
+  "forma_visitante": "W,D",
   "artilheiro_mandante": null,
-  "artilheiro_visitante": null,
-  "h2h": null,
-  "insights": [],
+  "artilheiro_visitante": {
+    "jogador": "José Manuel López",
+    "jogador_id": 170698,
+    "time": "Palmeiras",
+    "time_id": 1769,
+    "gols": 1,
+    "assists": null,
+    "penaltis": null,
+    "jogos": 2,
+    "nacionalidade": "Argentina"
+  },
+  "h2h": {
+    "match_id": 554765,
+    "total_jogos": 10,
+    "vitorias_casa": 0,
+    "empates": 2,
+    "vitorias_fora": 0,
+    "home_team": "SC Internacional",
+    "away_team": "SE Palmeiras",
+    "ultimos": [
+      {
+        "data": "2025-09-13",
+        "mandante": "Palmeiras",
+        "visitante": "Internacional",
+        "gols_m": 4,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2025-04-16",
+        "mandante": "Internacional",
+        "visitante": "Palmeiras",
+        "gols_m": 0,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2024-08-04",
+        "mandante": "Internacional",
+        "visitante": "Palmeiras",
+        "gols_m": 1,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2024-04-17",
+        "mandante": "Palmeiras",
+        "visitante": "Internacional",
+        "gols_m": 0,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2023-11-12",
+        "mandante": "Palmeiras",
+        "visitante": "Internacional",
+        "gols_m": 3,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2023-07-16",
+        "mandante": "Internacional",
+        "visitante": "Palmeiras",
+        "gols_m": 0,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2022-11-13",
+        "mandante": "Internacional",
+        "visitante": "Palmeiras",
+        "gols_m": 3,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2022-07-24",
+        "mandante": "Palmeiras",
+        "visitante": "Internacional",
+        "gols_m": 2,
+        "gols_v": 1,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2021-10-17",
+        "mandante": "Palmeiras",
+        "visitante": "Internacional",
+        "gols_m": 1,
+        "gols_v": 0,
+        "competicao": "Campeonato Brasileiro Série A"
+      },
+      {
+        "data": "2021-06-30",
+        "mandante": "Internacional",
+        "visitante": "Palmeiras",
+        "gols_m": 1,
+        "gols_v": 2,
+        "competicao": "Campeonato Brasileiro Série A"
+      }
+    ],
+    "_cached_at": "2026-02-12T06:30:12.207133"
+  },
+  "insights": [
+    "Internacional vive má fase com 3 derrotas consecutivas.",
+    "Palmeiras tem bom desempenho fora de casa: 10 vitórias em 19 jogos como visitante.",
+    "Histórico equilibrado: 0 vitórias do Internacional, 2 empates e 0 do Palmeiras nos últimos 10 jogos.",
+    "Último confronto: Palmeiras 4x1 Internacional (2025-09-13).",
+    "Internacional tem defesa sólida: 12 jogos sem sofrer gol (32%).",
+    "Palmeiras tem defesa sólida: 16 jogos sem sofrer gol (42%).",
+    "Contraste na tabela: Internacional (16º, parte inferior) x Palmeiras (6º, briga por título/Libertadores)."
+  ],
   "placar_mandante": null,
   "placar_visitante": null,
   "created_at": "2026-02-08T15:29:43.779283-03:00",
-  "updated_at": "2026-02-08T15:29:43.779298-03:00",
-  "last_enrichment": null,
-  "enrichment_level": "base",
+  "updated_at": "2026-02-12T15:30:00.038164-03:00",
+  "last_enrichment": "2026-02-12T15:30:00.038134-03:00",
+  "enrichment_level": "match_day",
   "title": "Internacional x Palmeiras — Brasileirão 2026 Rodada 3",
   "description": "Análise completa de Internacional x Palmeiras pela rodada 3 do Brasileirão 2026. Classificação, confronto direto, artilheiros e mais."
 }

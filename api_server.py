@@ -237,6 +237,80 @@ web_scraper = WebScraper(cache_duration_minutes=60)  # Cache de 1h para notícia
 
 # ============ Helpers ============
 
+def calcular_ajustes_h2h(clube_mandante_id: int, clube_visitante_id: int) -> tuple[float, float]:
+    """
+    Calcula ajustes H2H baseados no histórico de confrontos diretos.
+    
+    Args:
+        clube_mandante_id: ID Cartola do mandante
+        clube_visitante_id: ID Cartola do visitante
+    
+    Returns:
+        (ajuste_mandante, ajuste_visitante): valores entre 0.8 e 1.2
+        - 1.0 = neutro (sem histórico ou equilibrado)
+        - > 1.0 = vantagem histórica
+        - < 1.0 = desvantagem histórica
+    """
+    try:
+        from src.analysis.fixture_collector import CARTOLA_TO_APIFOOTBALL
+        from pathlib import Path
+        import json
+        
+        # Converter IDs Cartola → API-Football
+        af_mandante = CARTOLA_TO_APIFOOTBALL.get(clube_mandante_id)
+        af_visitante = CARTOLA_TO_APIFOOTBALL.get(clube_visitante_id)
+        
+        if not af_mandante or not af_visitante:
+            return (1.0, 1.0)
+        
+        # Cache H2H (salvo pelo scheduler via StatsEnricher)
+        pair = f"{min(af_mandante, af_visitante)}-{max(af_mandante, af_visitante)}"
+        h2h_cache = Path(__file__).parent / "data" / "stats_cache" / "h2h" / f"{pair}.json"
+        
+        if not h2h_cache.exists():
+            return (1.0, 1.0)
+        
+        with open(h2h_cache, "r", encoding="utf-8") as f:
+            h2h_data = json.load(f)
+        
+        stats = h2h_data.get("stats", {})
+        total_jogos = stats.get("team1_wins", 0) + stats.get("team2_wins", 0) + stats.get("draws", 0)
+        
+        if total_jogos < 5:  # Mínimo de histórico para ser relevante
+            return (1.0, 1.0)
+        
+        # Identificar qual é team1 e team2
+        team1_id = h2h_data.get("team1_id")
+        
+        # Calcular % de vitórias
+        if af_mandante == team1_id:
+            vitorias_mandante = stats.get("team1_wins", 0)
+            vitorias_visitante = stats.get("team2_wins", 0)
+        else:
+            vitorias_mandante = stats.get("team2_wins", 0)
+            vitorias_visitante = stats.get("team1_wins", 0)
+        
+        # Ajuste proporcional: para cada 10% de vantagem, +2% de força
+        # Ex: 70% vitórias vs 30% → 40% de diferença → ajuste de 0.08
+        pct_mandante = vitorias_mandante / total_jogos if total_jogos > 0 else 0.5
+        pct_visitante = vitorias_visitante / total_jogos if total_jogos > 0 else 0.5
+        
+        diff = pct_mandante - pct_visitante
+        ajuste_base = diff * 0.2  # 0.2 = sensibilidade (ajustável)
+        
+        # Limitar entre -0.2 e +0.2 (ajustes de 0.8 a 1.2)
+        ajuste_base = max(-0.2, min(0.2, ajuste_base))
+        
+        ajuste_mandante = 1.0 + ajuste_base
+        ajuste_visitante = 1.0 - ajuste_base
+        
+        return (ajuste_mandante, ajuste_visitante)
+        
+    except Exception as e:
+        logger.debug(f"Erro ao calcular H2H: {e}")
+        return (1.0, 1.0)
+
+
 def converter_atleta_para_response(
     atleta: Dict, 
     clubes: Dict,
@@ -283,8 +357,9 @@ def converter_atleta_para_response(
         status=status,
         scouts=atleta.get("scout", {}),
         tendencia=valorizacao_pct,  # Agora é percentual, não C$
-        potencial=atleta.get("preco_num", 0) * 5,  # Estimativa
+        potencial=atleta.get("mpv_score") or atleta.get("preco_num", 0) * 5,
         valorizacao=valorizacao_pct,  # Mesmo valor que tendencia
+        mpv_score=atleta.get("mpv_score"),
         confronto=confronto_info
     )
 
@@ -301,13 +376,25 @@ def converter_partida_para_response(
     mandante_info = clubes.get(str(mandante_id), {})
     visitante_info = clubes.get(str(visitante_id), {})
     
+    # Buscar dados reais do FDO/match_analyzer (força, classificação)
+    stats_mandante = match_analyzer.estatisticas_times.get(mandante_id)
+    stats_visitante = match_analyzer.estatisticas_times.get(visitante_id)
+    
     mandante = ClubResponse(
         id=mandante_id,
         nome=mandante_info.get("nome", ""),
         abrev=mandante_info.get("abreviacao", "???"),
         escudo=mandante_info.get("escudos", {}).get("60x60"),
-        # Adicionar posição real da API
-        posicao=partida.get("clube_casa_posicao"),
+        posicao=partida.get("clube_casa_posicao") or (stats_mandante.posicao if stats_mandante else None),
+        pontos=stats_mandante.pontos if stats_mandante else None,
+        jogos=stats_mandante.jogos if stats_mandante else None,
+        vitorias=stats_mandante.vitorias if stats_mandante else None,
+        empates=stats_mandante.empates if stats_mandante else None,
+        derrotas=stats_mandante.derrotas if stats_mandante else None,
+        golsPro=stats_mandante.gols_pro if stats_mandante else None,
+        golsContra=stats_mandante.gols_contra if stats_mandante else None,
+        forcaCasa=round(stats_mandante.forca_casa, 1) if stats_mandante else None,
+        forcaFora=round(stats_mandante.forca_fora, 1) if stats_mandante else None,
     )
     
     visitante = ClubResponse(
@@ -315,8 +402,16 @@ def converter_partida_para_response(
         nome=visitante_info.get("nome", ""),
         abrev=visitante_info.get("abreviacao", "???"),
         escudo=visitante_info.get("escudos", {}).get("60x60"),
-        # Adicionar posição real da API
-        posicao=partida.get("clube_visitante_posicao"),
+        posicao=partida.get("clube_visitante_posicao") or (stats_visitante.posicao if stats_visitante else None),
+        pontos=stats_visitante.pontos if stats_visitante else None,
+        jogos=stats_visitante.jogos if stats_visitante else None,
+        vitorias=stats_visitante.vitorias if stats_visitante else None,
+        empates=stats_visitante.empates if stats_visitante else None,
+        derrotas=stats_visitante.derrotas if stats_visitante else None,
+        golsPro=stats_visitante.gols_pro if stats_visitante else None,
+        golsContra=stats_visitante.gols_contra if stats_visitante else None,
+        forcaCasa=round(stats_visitante.forca_casa, 1) if stats_visitante else None,
+        forcaFora=round(stats_visitante.forca_fora, 1) if stats_visitante else None,
     )
     
     response = MatchResponse(
@@ -816,7 +911,27 @@ def gerar_escalacao(
         # Filtrar prováveis
         atletas = [a for a in atletas if a.get("status_id") == 7]
         
-        # Analisar cada atleta (v7: com contexto real de mando e dificuldade)
+        # v10: Coletar scouts históricos das rodadas anteriores para alimentar estimativas
+        scouts_por_atleta = {}  # atleta_id -> [{pontuacao, scout}, ...]
+        try:
+            for r in range(max(1, rodada - 3), rodada):
+                pontuados = api.get_atletas_pontuados(r)
+                if pontuados and isinstance(pontuados, dict):
+                    atletas_pont = pontuados.get("atletas", pontuados)
+                    if isinstance(atletas_pont, dict):
+                        for aid_str, dados in atletas_pont.items():
+                            aid = int(aid_str)
+                            if aid not in scouts_por_atleta:
+                                scouts_por_atleta[aid] = []
+                            scouts_por_atleta[aid].append({
+                                "pontuacao": dados.get("pontuacao", 0),
+                                "scout": dados.get("scout", {}),
+                                "rodada": r,
+                            })
+        except Exception as e:
+            logger.debug(f"Erro ao coletar scouts históricos: {e}")
+        
+        # Analisar cada atleta (v10: com contexto real + scouts históricos)
         analisados = []
         for atleta in atletas:
             clube_id = atleta.get("clube_id")
@@ -831,10 +946,15 @@ def gerar_escalacao(
             is_mandante = mando_por_clube.get(clube_id, True)
             dificuldade = dificuldade_por_clube.get(clube_id, "medio")
             
+            # v10: Buscar scouts históricos deste atleta
+            atleta_id = atleta.get("atleta_id", 0)
+            hist = scouts_por_atleta.get(atleta_id)
+            
             analise = mpv_calc.analisar_jogador(
                 atleta,
                 clube_abrev=clube_abrev,
                 posicao_abrev=pos_abrev,
+                scouts_historicos=hist,
                 mandante=is_mandante,
                 dificuldade_adversario=dificuldade,
                 rodada_atual=rodada
@@ -875,12 +995,15 @@ def gerar_escalacao(
                     "clubeEscudo": clube_info.get("escudos", {}).get("60x60"),
                     "preco": j.preco,
                     "media": j.media,
-                    "pontuacao": j.pontos_rodada if hasattr(j, 'pontos_rodada') else 0,  # Pontuação da rodada atual
+                    "pontuacao": j.pontos_rodada if hasattr(j, 'pontos_rodada') else 0,
                     "jogos": j.jogos_num,
                     "status": "provavel",
-                    "tendencia": valorizacao_pct,  # Agora é percentual
-                    "valorizacao": valorizacao_pct,  # Mesmo valor
+                    "tendencia": valorizacao_pct,
+                    "valorizacao": valorizacao_pct,
                     "potencial": j.mpv,
+                    "mpv_score": j.mpv,
+                    "consistencia": getattr(j, 'consistencia', 0),
+                    "xG": getattr(j, 'xg_jogador', 0),
                     "confronto": time.analise_confrontos.get(j.clube_id)
                 }
             
@@ -1492,10 +1615,17 @@ def get_forca_times(rodada: Optional[int] = None):
                 "derrotas": stats.derrotas,
                 "golsPro": stats.gols_pro,
                 "golsContra": stats.gols_contra,
-                "forcaCasa": round(stats.forca_geral, 1),  # Usar força geral para casa
-                "forcaFora": round(stats.forca_geral * 0.85, 1),  # Reduzir 15% para fora
+                "saldoGols": stats.gols_pro - stats.gols_contra,
+                "pontosGanhos": stats.vitorias * 3 + stats.empates,
+                "aproveitamento": round((stats.vitorias * 3 + stats.empates) / max(stats.jogos * 3, 1) * 100, 1),
+                "forcaCasa": round(getattr(stats, 'forca_casa', stats.forca_geral), 1),
+                "forcaFora": round(getattr(stats, 'forca_fora', stats.forca_geral * 0.85), 1),
                 "forcaGeral": round(stats.forca_geral, 1),
-                "forma": stats.forma_sequencia,
+                "forcaAtaque": round(getattr(stats, 'forca_ataque', stats.forca_geral), 1),
+                "forcaDefesa": round(getattr(stats, 'forca_defesa', stats.forca_geral), 1),
+                "mediaGolsPro": round(stats.gols_pro / max(stats.jogos, 1), 2),
+                "mediaGolsContra": round(stats.gols_contra / max(stats.jogos, 1), 2),
+                "formaRecente": stats.forma_sequencia,
                 "escudo": clube_info.get("escudos", {}).get("60x60") if isinstance(clube_info.get("escudos"), dict) else None
             })
         
@@ -1793,6 +1923,13 @@ def get_classificacao():
             })
             forca_times[clube_id] = stats.forca_geral
         
+        # Construir dicts de ataque/defesa para Monte Carlo (V5)
+        forca_ataque_times = {}
+        forca_defesa_times = {}
+        for cid, s in match_analyzer.estatisticas_times.items():
+            forca_ataque_times[cid] = getattr(s, 'forca_ataque', s.forca_geral)
+            forca_defesa_times[cid] = getattr(s, 'forca_defesa', s.forca_geral)
+        
         # Ordenar por pontos > vitórias > saldo > gols
         classificacao.sort(
             key=lambda x: (x["pontos"], x["vitorias"], x["saldo_gols"], x["gols_pro"]),
@@ -1870,7 +2007,10 @@ def get_classificacao():
             
             if jogos_restantes:
                 resultados, pontos_necessarios_mc = mc.simular_campeonato(
-                    classificacao, jogos_restantes, forca_times, xg_cache=xg_cache
+                    classificacao, jogos_restantes, forca_times,
+                    forca_ataque_times=forca_ataque_times,
+                    forca_defesa_times=forca_defesa_times,
+                    xg_cache=xg_cache
                 )
                 simulacao = [
                     {
@@ -1929,6 +2069,7 @@ def get_classificacao():
                 stats_v = match_analyzer.estatisticas_times.get(v_id)
                 if stats_m and stats_v:
                     try:
+                        h2h_mand, h2h_visit = calcular_ajustes_h2h(m_id, v_id)
                         prev = predictor_pj.prever_confronto(
                             mandante=jogo_data["mandante"],
                             visitante=jogo_data["visitante"],
@@ -1938,6 +2079,14 @@ def get_classificacao():
                             forca_visitante=stats_v.forca_geral,
                             posicao_mandante=stats_m.posicao or 10,
                             posicao_visitante=stats_v.posicao or 10,
+                            forma_mandante=getattr(stats_m, 'forma_sequencia', ''),
+                            forma_visitante=getattr(stats_v, 'forma_sequencia', ''),
+                            forca_ataque_mandante=getattr(stats_m, 'forca_ataque_casa', None),
+                            forca_defesa_mandante=getattr(stats_m, 'forca_defesa_casa', None),
+                            forca_ataque_visitante=getattr(stats_v, 'forca_ataque_fora', None),
+                            forca_defesa_visitante=getattr(stats_v, 'forca_defesa_fora', None),
+                            h2h_ajuste_mandante=h2h_mand,
+                            h2h_ajuste_visitante=h2h_visit,
                         )
                         jogo_data["probVitoriaMandante"] = prev.prob_vitoria_casa
                         jogo_data["probEmpate"] = prev.prob_empate
@@ -1985,6 +2134,7 @@ def get_classificacao():
                     stats_v = match_analyzer.estatisticas_times.get(v_id)
                     if stats_m and stats_v:
                         try:
+                            h2h_mand, h2h_visit = calcular_ajustes_h2h(m_id, v_id)
                             prev = predictor_pj.prever_confronto(
                                 mandante=jogo_data["mandante"],
                                 visitante=jogo_data["visitante"],
@@ -1994,6 +2144,14 @@ def get_classificacao():
                                 forca_visitante=stats_v.forca_geral,
                                 posicao_mandante=stats_m.posicao or 10,
                                 posicao_visitante=stats_v.posicao or 10,
+                                forma_mandante=getattr(stats_m, 'forma_sequencia', ''),
+                                forma_visitante=getattr(stats_v, 'forma_sequencia', ''),
+                                forca_ataque_mandante=getattr(stats_m, 'forca_ataque_casa', None),
+                                forca_defesa_mandante=getattr(stats_m, 'forca_defesa_casa', None),
+                                forca_ataque_visitante=getattr(stats_v, 'forca_ataque_fora', None),
+                                forca_defesa_visitante=getattr(stats_v, 'forca_defesa_fora', None),
+                                h2h_ajuste_mandante=h2h_mand,
+                                h2h_ajuste_visitante=h2h_visit,
                             )
                             jogo_data["probVitoriaMandante"] = prev.prob_vitoria_casa
                             jogo_data["probEmpate"] = prev.prob_empate
@@ -2049,6 +2207,12 @@ def get_classificacao():
                                     forca_visitante=stats_v.forca_geral,
                                     posicao_mandante=stats_m.posicao or 10,
                                     posicao_visitante=stats_v.posicao or 10,
+                                    forma_mandante=getattr(stats_m, 'forma_sequencia', ''),
+                                    forma_visitante=getattr(stats_v, 'forma_sequencia', ''),
+                                    forca_ataque_mandante=getattr(stats_m, 'forca_ataque_casa', None),
+                                    forca_defesa_mandante=getattr(stats_m, 'forca_defesa_casa', None),
+                                    forca_ataque_visitante=getattr(stats_v, 'forca_ataque_fora', None),
+                                    forca_defesa_visitante=getattr(stats_v, 'forca_defesa_fora', None),
                                 )
                                 jogo_data["probVitoriaMandante"] = prev.prob_vitoria_casa
                                 jogo_data["probEmpate"] = prev.prob_empate
@@ -2177,6 +2341,7 @@ def get_rodada_detalhada(rodada: int):
             
             if stats_m and stats_v:
                 try:
+                    h2h_mand, h2h_visit = calcular_ajustes_h2h(mandante_id, visitante_id)
                     previsao = predictor.prever_confronto(
                         mandante=jogo["mandante"],
                         visitante=jogo["visitante"],
@@ -2186,6 +2351,14 @@ def get_rodada_detalhada(rodada: int):
                         forca_visitante=stats_v.forca_geral,
                         posicao_mandante=stats_m.posicao or 10,
                         posicao_visitante=stats_v.posicao or 10,
+                        forma_mandante=getattr(stats_m, 'forma_sequencia', ''),
+                        forma_visitante=getattr(stats_v, 'forma_sequencia', ''),
+                        forca_ataque_mandante=getattr(stats_m, 'forca_ataque_casa', None),
+                        forca_defesa_mandante=getattr(stats_m, 'forca_defesa_casa', None),
+                        forca_ataque_visitante=getattr(stats_v, 'forca_ataque_fora', None),
+                        forca_defesa_visitante=getattr(stats_v, 'forca_defesa_fora', None),
+                        h2h_ajuste_mandante=h2h_mand,
+                        h2h_ajuste_visitante=h2h_visit,
                     )
                     previsoes.append({
                         "mandante": jogo["mandante"],
@@ -2352,6 +2525,13 @@ def get_time_detalhado(slug: str):
             })
             forca_times[cid] = s.forca_geral
 
+        # Construir dicts de ataque/defesa para Monte Carlo (V5)
+        forca_ataque_times = {}
+        forca_defesa_times = {}
+        for cid2, s2 in match_analyzer.estatisticas_times.items():
+            forca_ataque_times[cid2] = getattr(s2, 'forca_ataque', s2.forca_geral)
+            forca_defesa_times[cid2] = getattr(s2, 'forca_defesa', s2.forca_geral)
+
         classificacao.sort(
             key=lambda x: (x["pontos"], x["vitorias"],
                            x["gols_pro"] - x["gols_contra"], x["gols_pro"]),
@@ -2376,7 +2556,12 @@ def get_time_detalhado(slug: str):
                     if r % 2 == 0: m, v = v, m
                     jogos_restantes.append({"mandante_id": m, "visitante_id": v, "rodada": r})
             if jogos_restantes:
-                resultados, _ = mc.simular_campeonato(classificacao, jogos_restantes, forca_times, xg_cache={})
+                resultados, _ = mc.simular_campeonato(
+                    classificacao, jogos_restantes, forca_times,
+                    forca_ataque_times=forca_ataque_times,
+                    forca_defesa_times=forca_defesa_times,
+                    xg_cache={}
+                )
                 for res in resultados:
                     if res.time_id == time_id:
                         prob = {
@@ -2412,12 +2597,23 @@ def get_time_detalhado(slug: str):
                     fora = p.get("clube_visitante_id", 0)
                     if time_id in (casa, fora):
                         c_info, f_info = clubes.get(str(casa), {}), clubes.get(str(fora), {})
+                        stats_casa = match_analyzer.estatisticas_times.get(casa)
+                        stats_fora = match_analyzer.estatisticas_times.get(fora)
+                        h2h_mand, h2h_visit = calcular_ajustes_h2h(casa, fora)
                         prev = sp.prever_confronto(
                             mandante=c_info.get("nome", "?"), visitante=f_info.get("nome", "?"),
                             mandante_id=casa, visitante_id=fora,
                             forca_mandante=forca_times.get(casa, 50),
                             forca_visitante=forca_times.get(fora, 50),
                             rodada=r,
+                            forma_mandante=getattr(stats_casa, 'forma_sequencia', '') if stats_casa else '',
+                            forma_visitante=getattr(stats_fora, 'forma_sequencia', '') if stats_fora else '',
+                            forca_ataque_mandante=getattr(stats_casa, 'forca_ataque_casa', None) if stats_casa else None,
+                            forca_defesa_mandante=getattr(stats_casa, 'forca_defesa_casa', None) if stats_casa else None,
+                            forca_ataque_visitante=getattr(stats_fora, 'forca_ataque_fora', None) if stats_fora else None,
+                            forca_defesa_visitante=getattr(stats_fora, 'forca_defesa_fora', None) if stats_fora else None,
+                            h2h_ajuste_mandante=h2h_mand,
+                            h2h_ajuste_visitante=h2h_visit,
                         )
                         eh_casa = casa == time_id
                         proximos.append({
@@ -2463,8 +2659,8 @@ def get_time_detalhado(slug: str):
             "saldoGols": stats.gols_pro - stats.gols_contra,
             "aproveitamento": round((stats.vitorias * 3 + stats.empates) / max(stats.jogos * 3, 1) * 100, 1),
             "forma": getattr(stats, "forma_sequencia", ""),
-            "forcaCasa": getattr(stats, "forca_casa", 50),
-            "forcaFora": getattr(stats, "forca_fora", 50),
+            "forcaCasa": getattr(stats, "forca_casa", getattr(stats, "forca_geral", 50)),
+            "forcaFora": getattr(stats, "forca_fora", round(getattr(stats, "forca_geral", 50) * 0.85, 1)),
             "forcaGeral": stats.forca_geral,
             "probabilidades": prob,
             "proximosJogos": proximos,
@@ -2534,11 +2730,18 @@ def get_jogo_detalhado(partida_id: int):
 
         # Previsão completa
         sp = ScorePredictor()
+        h2h_mand, h2h_visit = calcular_ajustes_h2h(casa_id, fora_id)
         prev = sp.prever_confronto(
             mandante=casa_nome, visitante=fora_nome,
             mandante_id=casa_id, visitante_id=fora_id,
             forca_mandante=forca_casa.forca_geral if forca_casa else 50,
             forca_visitante=forca_fora.forca_geral if forca_fora else 50,
+            forca_ataque_mandante=getattr(forca_casa, 'forca_ataque_casa', None) or (getattr(forca_casa, 'forca_ataque', None) if forca_casa else None),
+            forca_defesa_mandante=getattr(forca_casa, 'forca_defesa_casa', None) or (getattr(forca_casa, 'forca_defesa', None) if forca_casa else None),
+            forca_ataque_visitante=getattr(forca_fora, 'forca_ataque_fora', None) or (getattr(forca_fora, 'forca_ataque', None) if forca_fora else None),
+            forca_defesa_visitante=getattr(forca_fora, 'forca_defesa_fora', None) or (getattr(forca_fora, 'forca_defesa', None) if forca_fora else None),
+            h2h_ajuste_mandante=h2h_mand,
+            h2h_ajuste_visitante=h2h_visit,
             rodada=rodada_partida or rodada_atual,
         )
 
@@ -2560,8 +2763,8 @@ def get_jogo_detalhado(partida_id: int):
                 "derrotas": stats.derrotas,
                 "golsPro": stats.gols_pro,
                 "golsContra": stats.gols_contra,
-                "forcaCasa": getattr(stats, "forca_casa", 50),
-                "forcaFora": getattr(stats, "forca_fora", 50),
+                "forcaCasa": getattr(stats, "forca_casa", getattr(stats, "forca_geral", 50)),
+                "forcaFora": getattr(stats, "forca_fora", round(getattr(stats, "forca_geral", 50) * 0.85, 1)),
             }
 
         # Resultado real (se já jogou)

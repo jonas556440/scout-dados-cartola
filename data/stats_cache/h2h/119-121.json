@@ -1,0 +1,409 @@
+{
+  "pair": "119-121",
+  "team1_id": 119,
+  "team2_id": 121,
+  "team1_name": "Internacional",
+  "team2_name": "Palmeiras",
+  "total": 34,
+  "stats": {
+    "team1_wins": 11,
+    "team2_wins": 13,
+    "draws": 8
+  },
+  "ultimos_5": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-13",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2025-09-13",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 4,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2025-04-16",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2024-08-04",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    }
+  ],
+  "todos": [
+    {
+      "data": "2026-08-09",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-13",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2025-09-13",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 4,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2025-04-16",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2024-08-04",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2024-04-17",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2023-11-12",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 3,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2023-07-16",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2022-11-13",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 3,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2022-07-24",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2021-10-17",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2021-06-30",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2020-12-20",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2020-09-03",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2019-09-29",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2019-07-18",
+      "liga": "Copa Do Brasil",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2019-07-11",
+      "liga": "Copa Do Brasil",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2019-05-04",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2018-08-26",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2018-04-22",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2017-06-01",
+      "liga": "Copa Do Brasil",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2017-05-18",
+      "liga": "Copa Do Brasil",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2016-11-06",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2016-07-17",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2015-09-09",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2015-06-05",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2014-11-29",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 3,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2014-08-30",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2012-10-27",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2012-08-04",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2011-09-11",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 0,
+      "gols_visitante": 3
+    },
+    {
+      "data": "2011-06-12",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2010-09-29",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Internacional",
+      "visitante_id": 119,
+      "gols_mandante": 2,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2010-06-06",
+      "liga": "Serie A",
+      "mandante": "Internacional",
+      "mandante_id": 119,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    }
+  ],
+  "fonte": "api-football",
+  "_cached_at": "2026-02-12T20:01:03.322632"
+}

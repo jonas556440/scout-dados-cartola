@@ -1,0 +1,94 @@
+{
+  "match_id": 554817,
+  "total_jogos": 10,
+  "home_team_id": 1776,
+  "away_team_id": 1769,
+  "vitorias_casa": 0,
+  "empates": 2,
+  "vitorias_fora": 0,
+  "home_team": "São Paulo FC",
+  "away_team": "SE Palmeiras",
+  "ultimos": [
+    {
+      "data": "2025-10-05",
+      "mandante": "São Paulo",
+      "mandante_id": 1776,
+      "visitante": "Palmeiras",
+      "visitante_id": 1769,
+      "gols_m": 2,
+      "gols_v": 3,
+      "competicao": "Campeonato Brasileiro Série A"
+    },
+    {
+      "data": "2025-05-11",
+      "mandante": "Palmeiras",
+      "mandante_id": 1769,
+      "visitante": "São Paulo",
+      "visitante_id": 1776,
+      "gols_m": 1,
+      "gols_v": 0,
+      "competicao": "Campeonato Brasileiro Série A"
+    },
+    {
+      "data": "2024-08-18",
+      "mandante": "Palmeiras",
+      "mandante_id": 1769,
+      "visitante": "São Paulo",
+      "visitante_id": 1776,
+      "gols_m": 2,
+      "gols_v": 1,
+      "competicao": "Campeonato Brasileiro Série A"
+    },
+    {
+      "data": "2024-04-29",
+      "mandante": "São Paulo",
+      "mandante_id": 1776,
+      "visitante": "Palmeiras",
+      "visitante_id": 1769,
+      "gols_m": 0,
+      "gols_v": 0,
+      "competicao": "Campeonato Brasileiro Série A"
+    },
+    {
+      "data": "2023-10-25",
+      "mandante": "Palmeiras",
+      "mandante_id": 1769,
+      "visitante": "São Paulo",
+      "visitante_id": 1776,
+      "gols_m": 5,
+      "gols_v": 0,
+      "competicao": "Campeonato Brasileiro Série A"
+    },
+    {
+      "data": "2023-06-11",
+      "mandante": "São Paulo",
+      "mandante_id": 1776,
+      "visitante": "Palmeiras",
+      "visitante_id": 1769,
+      "gols_m": 0,
+      "gols_v": 2,
+      "competicao": "Campeonato Brasileiro Série A"
+    },
+    {
+      "data": "2022-10-16",
+      "mandante": "Palmeiras",
+      "mandante_id": 1769,
+      "visitante": "São Paulo",
+      "visitante_id": 1776,
+      "gols_m": 0,
+      "gols_v": 0,
+      "competicao": "Campeonato Brasileiro Série A"
+    },
+    {
+      "data": "2022-06-20",
+      "mandante": "São Paulo",
+      "mandante_id": 1776,
+      "visitante": "Palmeiras",
+      "visitante_id": 1769,
+      "gols_m": 1,
+      "gols_v": 2,
+      "competicao": "Campeonato Brasileiro Série A"
+    }
+  ],
+  "_cached_at": "2026-02-12T09:50:56.652874"
+}

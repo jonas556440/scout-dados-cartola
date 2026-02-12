@@ -1,0 +1,529 @@
+{
+  "pair": "121-131",
+  "team1_id": 121,
+  "team2_id": 131,
+  "team1_name": "Palmeiras",
+  "team2_name": "Corinthians",
+  "total": 46,
+  "stats": {
+    "team1_wins": 15,
+    "team2_wins": 13,
+    "draws": 16
+  },
+  "ultimos_5": [
+    {
+      "data": "2026-10-11",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-04-12",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-08",
+      "liga": "Paulista - A1",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2025-08-31",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2025-08-07",
+      "liga": "Copa Do Brasil",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    }
+  ],
+  "todos": [
+    {
+      "data": "2026-10-11",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-04-12",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": null,
+      "gols_visitante": null
+    },
+    {
+      "data": "2026-02-08",
+      "liga": "Paulista - A1",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2025-08-31",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2025-08-07",
+      "liga": "Copa Do Brasil",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2025-07-31",
+      "liga": "Copa Do Brasil",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2025-04-12",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 2,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2025-03-28",
+      "liga": "Paulista - A1",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2025-03-16",
+      "liga": "Paulista - A1",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2025-02-06",
+      "liga": "Paulista - A1",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2024-11-04",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2024-07-01",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 2,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2024-02-18",
+      "liga": "Paulista - A1",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 2,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2023-09-03",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2023-04-29",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2023-02-17",
+      "liga": "Paulista - A1",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2022-08-13",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2022-04-23",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 3,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2022-03-17",
+      "liga": "Paulista - A1",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2021-09-25",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2021-06-12",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2021-05-16",
+      "liga": "Paulista - A1",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2021-03-03",
+      "liga": "Paulista - A1",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2021-01-18",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 4,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2020-09-10",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2020-08-08",
+      "liga": "Paulista - A1",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2020-08-06",
+      "liga": "Paulista - A1",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2020-07-23",
+      "liga": "Paulista - A1",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2019-11-09",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2019-08-04",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2018-09-09",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2018-05-13",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2017-11-05",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 3,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2017-07-13",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2016-09-17",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2016-06-12",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2015-09-06",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 3,
+      "gols_visitante": 3
+    },
+    {
+      "data": "2015-05-31",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2014-10-25",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2014-07-27",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2012-09-16",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 0,
+      "gols_visitante": 2
+    },
+    {
+      "data": "2012-06-24",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2011-12-04",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 0,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2011-08-28",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 2,
+      "gols_visitante": 1
+    },
+    {
+      "data": "2010-10-24",
+      "liga": "Serie A",
+      "mandante": "Corinthians",
+      "mandante_id": 131,
+      "visitante": "Palmeiras",
+      "visitante_id": 121,
+      "gols_mandante": 1,
+      "gols_visitante": 0
+    },
+    {
+      "data": "2010-08-01",
+      "liga": "Serie A",
+      "mandante": "Palmeiras",
+      "mandante_id": 121,
+      "visitante": "Corinthians",
+      "visitante_id": 131,
+      "gols_mandante": 1,
+      "gols_visitante": 1
+    }
+  ],
+  "fonte": "api-football",
+  "_cached_at": "2026-02-12T09:51:17.758441"
+}

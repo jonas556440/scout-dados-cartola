@@ -1,0 +1,13 @@
+{
+  "jogos": 6,
+  "rodadas": "1-38",
+  "log_loss": 3.0698,
+  "brier_score": 0.7493,
+  "acertos_exatos": 1,
+  "taxa_exato_pct": 16.7,
+  "acertos_resultado": 2,
+  "taxa_resultado_pct": 33.3,
+  "nota": "REGULAR",
+  "modelo": "V4_Dixon-Coles",
+  "timestamp": "2026-02-12T20:00:00.131925"
+}

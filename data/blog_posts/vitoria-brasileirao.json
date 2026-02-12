@@ -1,17 +1,18 @@
 {
   "slug": "vitoria-brasileirao",
-  "title": "Vitória no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Vitória na rodada 3 do Brasileirão 2026. Atualmente em 11º lugar com 3 pontos. Probabilidade de título: 0.0%.",
-  "content": "## Vitória — Situação Atual\n\nNa **rodada 3**, o Vitória ocupa a **11ª posição** com **3 pontos** em 2 jogos (1V 0E 1D), na briga por Sul-Americana.\n\n- Gols pró: **3** | Gols contra: **2** | Saldo: **+1**\n- Forma recente: **VD**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.0%** |\n| 🌎 Libertadores (G4) | **2.6%** |\n| 🏅 Sul-Americana | **25.8%** |\n| ⚠️ Rebaixamento | **37.3%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | FLA | Casa | **1x2** | 19.8% | 1.04 |\n| 4 | BOT | Fora | **3x0** | 5.2% | 0.71 |\n| 5 | BAH | Fora | **1x0** | 9.8% | 0.95 |\n| 6 | CAM | Casa | **1x1** | 40.0% | 1.77 |\n| 7 | GRE | Fora | **1x0** | 7.4% | 0.94 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Análise Vitória: probabilidades e próximos jogos",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Vitória na rodada 3 do Brasileirão 2026. Atualmente em 13º lugar com 3 pontos. Probabilidade de título: 0.0%.",
+  "content": "## Vitória — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Vitória ocupa a **13ª posição** com **3 pontos** em 3 jogos (1V 0E 2D), na meio de tabela.\n\n- Gols pró: **4** | Gols contra: **7** | Saldo: **-3**\n- Aproveitamento: **33.3%** | Média de gols: **1.33/jogo**\n- Forma recente: 🟢🔴🔴 (VDD)\n\n## Análise\n\nO Vitória faz campanha regular até aqui, com 1V 0E 2D em 3 jogos. A defesa precisa melhorar: média de 2.33 gols sofridos por partida. Alerta: as simulações apontam **39.2%** de risco de rebaixamento.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.0%** |\n| 🌎 Libertadores (G4) | **0.5%** |\n| 🏅 Sul-Americana | **24.2%** |\n| ⚠️ Rebaixamento | **39.2%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | FLA | Casa | **0x1** | 21.4% | 0.78 |\n| 4 | BOT | Fora | **1x0** | 12.9% | 0.63 |\n| 5 | BAH | Fora | **1x0** | 13.7% | 0.65 |\n| 6 | CAM | Casa | **1x1** | 38.3% | 1.27 |\n| 7 | GRE | Fora | **1x1** | 21.9% | 0.92 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** FLA, BOT, BAH, GRE — probabilidades de vitória abaixo de 35%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Vitória ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Vitória tem **0.0%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **0.5%**.\n\n### Qual a posição atual do Vitória no Brasileirão?\n\nO Vitória está na **13ª posição** com **3 pontos** em 3 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Vitória?\n\nO próximo jogo é contra o **FLA** (Casa) na rodada 3. O placar provável é **0x1** com 21.4% de chance de vitória.\n\n### O Vitória corre risco de rebaixamento?\n\nSim, as simulações indicam **39.2%** de risco de rebaixamento. É preciso atenção.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Vitória",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "meio de tabela"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "vitoria",
-  "geradoEm": "2026-02-08T06:01:29.901972"
+  "geradoEm": "2026-02-12T06:01:13.743628"
 }

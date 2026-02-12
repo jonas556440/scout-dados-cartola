@@ -42,6 +42,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from config.settings import settings
 from src.analysis.mpv_calculator import MPVCalculator, AnaliseJogador
 from src.analysis.match_analyzer import MatchAnalyzer, Confronto
+from src.analysis.score_predictor import ScorePredictor
 
 
 @dataclass
@@ -121,7 +122,7 @@ class TeamSelector:
     }
     
     # Máximo de jogadores por clube (regra oficial Cartola FC)
-    MAX_POR_CLUBE = 5
+    MAX_POR_CLUBE = 3  # v10: máximo 3 por clube — diversifica e reduz risco
     
     # Orçamento padrão
     ORCAMENTO_PADRAO = 100.0
@@ -138,6 +139,10 @@ class TeamSelector:
         self.match_analyzer = MatchAnalyzer()
         self.confrontos_rodada: List[Confronto] = []
         self.clubes: Dict[str, Any] = {}
+        
+        # v10: Previsões de placar (ScorePredictor)
+        self.score_predictor = ScorePredictor()
+        self.previsoes_rodada: Dict[str, Any] = {}  # abrev_mandante -> PrevisaoPlacar
     
     def configurar_confrontos(
         self, 
@@ -167,6 +172,18 @@ class TeamSelector:
         self.confrontos_rodada = self.match_analyzer.analisar_partidas_rodada(
             partidas, clubes
         )
+        
+        # v10: Gerar previsões de placar com ScorePredictor (Poisson + Dixon-Coles)
+        try:
+            previsoes = self.score_predictor.prever_rodada(
+                partidas, self.match_analyzer.estatisticas_times
+            )
+            self.previsoes_rodada = {}
+            for prev in previsoes:
+                self.previsoes_rodada[prev.mandante] = prev
+                self.previsoes_rodada[prev.visitante] = prev
+        except Exception:
+            self.previsoes_rodada = {}
     
     def _verificar_conflito(self, candidato: AnaliseJogador, time_atual: List[AnaliseJogador]) -> bool:
         """
@@ -218,18 +235,19 @@ class TeamSelector:
         """
         Calcula score de potencial para TIME DE PONTUAÇÃO
         
-        VERSÃO v9 — Calibrado com dados reais + estratégia R4+
+        VERSÃO v10 — v9 + potencial de teto para jogadores caros
         
         Fatores (com pesos):
-        1. Projeção − MPV (35 pts) — métrica-chave: só escalar quem supera o MPV
-        2. Qualidade ajustada por preço (25 pts) — custo-benefício real
+        1. Projeção − MPV (35 pts) — v10: atenua margem negativa com poucos jogos
+        2. Qualidade ajustada por preço (25 pts) — v10: penalidade proporcional + bônus teto
         3. Confronto da rodada (25 pts) — adversário, mando, SG
         4. Risco + Histórico (15 pts) — jogos, tendência, status
         
-        REGRAS:
-        - CORTE HARD: media < 1.5 na R2+ com jogos >= 1 → score = 0
-        - Penalidade forte: preco > 10 e media < 4 → -20
-        - Confronto NÃO pode salvar jogador com projeção negativa
+        v10 MUDANÇAS:
+        - Margem negativa atenuada com poucos jogos (2-4 jogos = amostra fraca)
+        - Penalidade proporcional ao deficit (não flat -20)
+        - Atenuantes: amostra, preço/teto, melhor jogo histórico
+        - Bônus potencial para C$10+ (preço = proxy de talento)
         """
         score = 0.0
         
@@ -239,6 +257,19 @@ class TeamSelector:
         # === CORTE HARD: jogador com média < 1.5 na R2+ é lixo para pontuação ===
         if not is_rodada_1 and atleta.jogos_num >= 1 and atleta.media < 1.5:
             return 0  # Excluído completamente
+        
+        # === v10: MÉDIA AJUSTADA para jogadores premium com amostra pequena ===
+        # Com 2-3 jogos, a média NÃO é confiável. O preço do mercado Cartola
+        # reflete o talento/qualidade real do jogador (consenso de mercado).
+        # Blend: quanto menos jogos, mais confia no preço como proxy de qualidade.
+        media_uso = atleta.media
+        if not is_rodada_1 and not jogador_sem_dados and atleta.preco >= 10.0 and atleta.jogos_num <= 4:
+            # Média implícita pelo mercado: C$13.62 → espera-se ~6.8 pts/rodada
+            media_implicita = atleta.preco * 0.5
+            # Peso do mercado diminui conforme acumula jogos:
+            # 1 jogo → 60% mercado, 2 jogos → 45%, 3 jogos → 30%, 4 jogos → 15%
+            peso_mercado = max(0, (5 - atleta.jogos_num) / 7)
+            media_uso = atleta.media * (1 - peso_mercado) + media_implicita * peso_mercado
         
         # === FATOR 1: PROJEÇÃO − MPV (35 pontos máx) ===
         # Métrica-chave R4+: "Score = projeção − MPV"
@@ -252,7 +283,14 @@ class TeamSelector:
             # R2+: nunca jogou = risco altíssimo
             score += max(0, atleta.preco * 0.3 - 3)
         else:
-            margem = atleta.media - mpv_real
+            margem = media_uso - mpv_real
+            
+            # v10: Poucos jogos = média pouco confiável
+            # Atenuar margem negativa — jogador caro pode ter tido 1-2 jogos ruins
+            if margem < 0 and atleta.jogos_num <= 3:
+                margem *= 0.35  # 1-3 jogos = amostra mínima
+            elif margem < 0 and atleta.jogos_num <= 5:
+                margem *= 0.6   # 4-5 jogos = amostra pequena
             
             if margem >= 5.0:
                 score += 35  # Supera MPV com folga enorme
@@ -280,7 +318,8 @@ class TeamSelector:
         elif jogador_sem_dados:
             score += 2  # Mínimo para desconhecidos
         else:
-            custo_beneficio = atleta.media / atleta.preco if atleta.preco > 0 else 0
+            # v10: usar media_uso (blend mercado+real) para CB
+            custo_beneficio = media_uso / atleta.preco if atleta.preco > 0 else 0
             
             if custo_beneficio >= 1.0:
                 score += 25  # Média >= preço (gol, tec barato)
@@ -296,18 +335,47 @@ class TeamSelector:
                 score -= 5   # Péssimo custo-benefício
             
             # Bônus extra: média alta absoluta (>= 5 pts)
-            if atleta.media >= 8.0:
+            if media_uso >= 8.0:
                 score += 8
-            elif atleta.media >= 5.0:
+            elif media_uso >= 5.0:
                 score += 4
             
-            # v9: Penalidade forte para caros que entregam pouco
-            if atleta.preco > 12.0 and atleta.media < 4.0:
-                score -= 20  # Ex: Hulk C$13.6 média 2.4
-            elif atleta.preco > 10.0 and atleta.media < 3.5:
-                score -= 15  # Caro E ruim
-            elif atleta.preco > 8.0 and atleta.media < 2.5:
-                score -= 10  # Moderadamente caro e ruim
+            # v10: Penalidade PROPORCIONAL para caros com média baixa
+            # v9 usava -20 flat; v10 considera potencial + tamanho da amostra
+            # Jogador caro TEM teto alto — pode explodir qualquer rodada
+            if atleta.preco > 8.0 and media_uso < 4.0 and atleta.jogos_num >= 1:
+                deficit = 4.0 - atleta.media  # Quão abaixo do limiar (0 a 4)
+                penalidade = deficit * 4  # Base proporcional: 0 a 16 pts
+                
+                # Atenuante 1: Poucos jogos = amostra pequena
+                if atleta.jogos_num <= 2:
+                    penalidade *= 0.3  # 2 jogos? Pode ser azar
+                elif atleta.jogos_num <= 4:
+                    penalidade *= 0.6  # Amostra ainda pequena
+                
+                # Atenuante 2: Preço alto = potencial explosivo (teto)
+                # C$13+ tipicamente tem teto de 15-25 pts por rodada
+                fator_teto = min(atleta.preco / 15.0, 1.0)
+                penalidade *= (1.0 - fator_teto * 0.4)  # Reduz até 40%
+                
+                # Atenuante 3: Se tem scouts e já mostrou potencial real
+                if atleta.scouts_historicos:
+                    melhor_jogo = max(
+                        (s.get("pontuacao", 0) for s in atleta.scouts_historicos),
+                        default=0
+                    )
+                    if melhor_jogo >= 8.0:
+                        penalidade *= 0.3  # Já provou que pode explodir
+                    elif melhor_jogo >= 5.0:
+                        penalidade *= 0.6  # Mostrou algum potencial
+                
+                score -= penalidade
+            
+            # v10: Bônus potencial de teto para jogadores caros
+            # Preço alto = elenco principal, titular, mais chances de G/A
+            if atleta.preco >= 10.0:
+                bonus_potencial = (atleta.preco - 10.0) * 0.5  # C$13.6 → +1.8
+                score += min(bonus_potencial, 3)  # Cap em +3 pts
         
         # === FATOR 3: CONFRONTO DA RODADA (25 pontos máx) ===
         # v9: peso REDUZIDO de 35→25 — confronto NÃO salva jogador ruim
@@ -357,10 +425,40 @@ class TeamSelector:
                     elif expect_gols < 0.7:
                         score -= 4
                 
-                # Penalidade por time fraco
+                # v10: Usar λ (xG Poisson) do ScorePredictor para ajuste fino
+                stats_time = self.match_analyzer.estatisticas_times.get(atleta.clube_id)
+                abrev_time = getattr(stats_time, 'abreviacao', '') if stats_time else ''
+                prev = self.previsoes_rodada.get(abrev_time)
+                if prev:
+                    # Identificar se é mandante ou visitante
+                    eh_mandante = prev.mandante == abrev_time
+                    lambda_time = prev.xg_mandante if eh_mandante else prev.xg_visitante
+                    lambda_adv = prev.xg_visitante if eh_mandante else prev.xg_mandante
+                    
+                    # Atacantes/Meias: bônus se λ do time é alto (muitos gols esperados)
+                    if atleta.posicao_abrev in ["ATA", "MEI"]:
+                        if lambda_time >= 2.0:
+                            score += 6  # Confronto excelente para gols
+                        elif lambda_time >= 1.5:
+                            score += 3
+                        elif lambda_time < 0.8:
+                            score -= 4  # Espera-se poucos gols
+                    
+                    # Defensores: bônus se λ do adversário é baixo (poucos gols esperados)
+                    if atleta.posicao_abrev in ["GOL", "ZAG", "LAT"]:
+                        if lambda_adv <= 0.7:
+                            score += 6  # Alta chance de SG
+                        elif lambda_adv <= 1.0:
+                            score += 3
+                        elif lambda_adv >= 2.0:
+                            score -= 5  # Adversário vai fazer muitos gols
+                
+                # Penalidade por time fraco (agora usa força casa/fora específica)
                 stats = self.match_analyzer.estatisticas_times.get(atleta.clube_id)
                 if stats:
-                    forca_time = stats.forca_geral
+                    # v10: Usar força casa ou fora conforme o mando de campo
+                    is_casa = resumo.get("local") == "CASA"
+                    forca_time = getattr(stats, 'forca_casa', stats.forca_geral) if is_casa else getattr(stats, 'forca_fora', stats.forca_geral * 0.85)
                     if forca_time < 45:
                         score -= 40  # Time péssimo
                         if resumo.get("local") == "FORA":
@@ -968,8 +1066,12 @@ class TeamSelector:
                 if atleta.atleta_id not in ids_usados:
                     # REGRA DE OURO: Reserva deve ser mais barato que o titular
                     if atleta.preco < preco_titular:
+                        # v10: Reservas TAMBÉM respeitam MAX_POR_CLUBE
+                        if contagem_clubes[atleta.clube_abrev] >= self.MAX_POR_CLUBE:
+                            continue
                         reservas.append(atleta)
                         ids_usados.add(atleta.atleta_id)
+                        contagem_clubes[atleta.clube_abrev] += 1
                         break
         
         # Capitão: jogador com maior SCORE (não maior preço!)
@@ -1101,8 +1203,13 @@ class TeamSelector:
             if atleta.preco >= preco_titular:
                 continue
 
+            # v10: Reservas TAMBÉM respeitam MAX_POR_CLUBE
+            if contagem_clubes[atleta.clube_abrev] >= self.MAX_POR_CLUBE:
+                continue
+
             if pos in posicoes_reserva and pos not in posicoes_reserva_preenchidas:
                 reservas.append(atleta)
+                contagem_clubes[atleta.clube_abrev] += 1
                 posicoes_reserva_preenchidas.add(pos)
         
         # v7: Escolher capitão CORRETAMENTE

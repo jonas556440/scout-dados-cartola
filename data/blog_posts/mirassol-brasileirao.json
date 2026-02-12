@@ -1,17 +1,18 @@
 {
   "slug": "mirassol-brasileirao",
-  "title": "Mirassol no Brasileirão: Probabilidades e Análise",
-  "date": "2026-02-08",
-  "excerpt": "Análise completa do Mirassol na rodada 3 do Brasileirão 2026. Atualmente em 2º lugar com 4 pontos. Probabilidade de título: 0.8%.",
-  "content": "## Mirassol — Situação Atual\n\nNa **rodada 3**, o Mirassol ocupa a **2ª posição** com **4 pontos** em 2 jogos (1V 1E 0D), na zona de classificação para a Libertadores (G4).\n\n- Gols pró: **3** | Gols contra: **1** | Saldo: **+2**\n- Forma recente: **VE**\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.8%** |\n| 🌎 Libertadores (G4) | **6.6%** |\n| 🏅 Sul-Americana | **42.8%** |\n| ⚠️ Rebaixamento | **21.4%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | CRU | Casa | **1x2** | 48.7% | 1.79 |\n| 4 | FLA | Fora | **3x0** | 7.9% | 0.82 |\n| 5 | SAN | Casa | **1x0** | 53.5% | 2.06 |\n| 6 | PAL | Fora | **3x0** | 3.2% | 0.6 |\n| 7 | CFC | Casa | **1x0** | 71.4% | 2.76 |\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson V3 + Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos.*",
+  "title": "Mirassol no Brasileirão 2026 — Em busca da Libertadores",
+  "date": "2026-02-12",
+  "excerpt": "Análise completa do Mirassol na rodada 3 do Brasileirão 2026. Atualmente em 6º lugar com 5 pontos. Probabilidade de título: 0.4%.",
+  "content": "## Mirassol — Situação Atual\n\nNa **rodada 3** do Brasileirão 2026, o Mirassol ocupa a **6ª posição** com **5 pontos** em 3 jogos (1V 2E 0D), na pré-Libertadores.\n\n- Gols pró: **6** | Gols contra: **5** | Saldo: **+1**\n- Aproveitamento: **55.6%** | Média de gols: **2.0/jogo**\n- Forma recente: 🟢🟡🟡 (VEE)\n\n## Análise\n\nO Mirassol vive excelente fase no campeonato, com 1 vitórias em 3 jogos. O ataque é um ponto forte: média de 2.0 gols por jogo. A defesa precisa melhorar: média de 1.67 gols sofridos por partida.\n\n## Probabilidades (Monte Carlo)\n\n| Objetivo | Probabilidade |\n|----------|--------------|\n| 🏆 Título | **0.4%** |\n| 🌎 Libertadores (G4) | **5.1%** |\n| 🏅 Sul-Americana | **57.1%** |\n| ⚠️ Rebaixamento | **10.3%** |\n\n## Próximos Jogos\n\n| Rod. | Adversário | Local | Placar | P(V) | xG |\n|------|-----------|-------|--------|------|-----|\n| 3 | CRU | Casa | **1x0** | 56.2% | 1.64 |\n| 4 | FLA | Fora | **1x0** | 16.0% | 0.62 |\n| 5 | SAN | Casa | **1x0** | 53.2% | 1.55 |\n| 6 | PAL | Fora | **1x0** | 11.5% | 0.46 |\n| 7 | CFC | Casa | **1x0** | 49.7% | 1.43 |\n\n---\n\n⚠️ **Jogos difíceis pela frente:** FLA, PAL — probabilidades de vitória abaixo de 35%.\n\n## Acompanhe no ScoutDados\n\n- 📊 [Classificação completa do Brasileirão 2026](/brasileirao)\n- ⚽ [Confrontos e previsões da rodada](/confrontos)\n- 🏆 [Monte sua escalação no Cartola FC](/escalacao)\n\n## Perguntas Frequentes\n\n### Qual a chance do Mirassol ser campeão em 2026?\n\nSegundo as simulações Monte Carlo do ScoutDados (1.000 cenários), o Mirassol tem **0.4%** de chance de título. A probabilidade de classificação para a Libertadores (G4) é de **5.1%**.\n\n### Qual a posição atual do Mirassol no Brasileirão?\n\nO Mirassol está na **6ª posição** com **5 pontos** em 3 jogos disputados (rodada 3).\n\n### Qual o próximo jogo do Mirassol?\n\nO próximo jogo é contra o **CRU** (Casa) na rodada 3. O placar provável é **1x0** com 56.2% de chance de vitória.\n\n### O Mirassol corre risco de rebaixamento?\n\nSim, as simulações indicam **10.3%** de risco de rebaixamento. É preciso atenção.\n\n---\n\n*Análise gerada pelo modelo estatístico Poisson + Dixon-Coles V4 com Monte Carlo (1.000 simulações) do ScoutDados. As probabilidades são estimativas com fins informativos e educacionais. Dados atualizados na rodada 3.*",
   "tags": [
     "Mirassol",
-    "Brasileirão",
-    "Probabilidades"
+    "Brasileirão 2026",
+    "Probabilidades",
+    "pré-Libertadores"
   ],
-  "readTime": 4,
+  "readTime": 2,
   "rodada": 3,
   "tipo": "analise_time",
   "time": "mirassol",
-  "geradoEm": "2026-02-08T06:01:03.309063"
+  "geradoEm": "2026-02-12T06:00:49.135403"
 }
